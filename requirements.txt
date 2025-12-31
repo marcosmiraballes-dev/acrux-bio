@@ -1,0 +1,17 @@
+# ============================================
+# ACRUX-BIO - Dependencias Python
+# ============================================
+
+# Supabase
+supabase==2.3.0
+
+# Google Sheets API
+gspread==5.12.4
+google-auth==2.25.2
+google-auth-oauthlib==1.2.0
+
+# Data processing
+pandas==2.1.4
+
+# Environment variables
+python-dotenv==1.0.0
