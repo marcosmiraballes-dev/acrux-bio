@@ -65,6 +65,7 @@ const PlazasInfracciones: React.FC = () => {
 
   const handleOpenModal = (plaza?: Plaza) => {
     if (plaza) {
+      console.log('🔍 Plaza a editar:', plaza); // DEBUG
       setEditingPlaza(plaza);
       setFormData({
         nombre: plaza.nombre,
@@ -76,6 +77,11 @@ const PlazasInfracciones: React.FC = () => {
         email: plaza.email || '',
         activo: plaza.activo
       });
+      console.log('📝 FormData cargado:', {
+        nombre: plaza.nombre,
+        ciudad: plaza.ciudad,
+        estado: plaza.estado
+      }); // DEBUG
     } else {
       setEditingPlaza(null);
       setFormData({
@@ -132,7 +138,12 @@ const PlazasInfracciones: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    console.log('📤 Datos antes de validar:', formData); // DEBUG
+
+    if (!validateForm()) {
+      console.log('❌ Validación falló:', errors); // DEBUG
+      return;
+    }
 
     setLoading(true);
     try {
@@ -147,10 +158,14 @@ const PlazasInfracciones: React.FC = () => {
         activo: formData.activo
       };
 
+      console.log('📦 Payload a enviar:', payload); // DEBUG
+
       if (editingPlaza) {
+        console.log('✏️ Actualizando plaza:', editingPlaza.id); // DEBUG
         await api.put(`/plazas/${editingPlaza.id}`, payload);
         alert('Plaza actualizada exitosamente');
       } else {
+        console.log('➕ Creando nueva plaza'); // DEBUG
         await api.post('/plazas', payload);
         alert('Plaza creada exitosamente');
       }
@@ -158,7 +173,8 @@ const PlazasInfracciones: React.FC = () => {
       handleCloseModal();
       loadPlazas();
     } catch (error: any) {
-      console.error('Error al guardar plaza:', error);
+      console.error('❌ Error al guardar plaza:', error);
+      console.error('📋 Respuesta del servidor:', error.response?.data); // DEBUG
       alert(error.response?.data?.error || 'Error al guardar plaza');
     } finally {
       setLoading(false);

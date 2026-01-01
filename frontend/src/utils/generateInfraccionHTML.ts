@@ -58,6 +58,12 @@ const getImageBase64 = async (imagePath: string): Promise<string> => {
   }
 };
 
+// Función para formatear fecha sin bug de zona horaria
+const formatearFecha = (fechaISO: string): string => {
+  const [year, month, day] = fechaISO.split('T')[0].split('-');
+  return `${day}/${month}/${year}`;
+};
+
 export const generateInfraccionHTML = async (data: InfraccionData) => {
   // Obtener historial de infracciones del locatario
   let historial: HistorialAviso[] = [];
@@ -81,13 +87,13 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
   const logoPlazaBase64 = await getImageBase64(`/logos-plazas/${logoPlazaFile}`);
   const logoElefanteBase64 = await getImageBase64('/logo-blanco.png');
 
-  const fechaFormateada = new Date(data.fecha_infraccion).toLocaleDateString('es-MX', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  const fechaCapitalizada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+  // CORREGIDO: Formatear fecha sin conversión de zona horaria
+  const [year, month, day] = data.fecha_infraccion.split('T')[0].split('-');
+  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const fechaObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const diaSemana = dias[fechaObj.getDay()];
+  const fechaCapitalizada = `${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}, ${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
 
   const numeroAviso = parseInt(data.nro_aviso.split('-')[1]);
   let colorBadge = '#991B1B';
@@ -245,13 +251,13 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
           ${historial.map(h => `
           <tr>
             <td><strong>${h.nro_aviso}</strong></td>
-            <td>${new Date(h.fecha_infraccion).toLocaleDateString('es-MX')}</td>
+            <td>${formatearFecha(h.fecha_infraccion)}</td>
             <td>${h.descripcion_falta}</td>
           </tr>
           `).join('')}
           <tr class="current-row">
             <td><strong>${data.nro_aviso}</strong></td>
-            <td>${new Date(data.fecha_infraccion).toLocaleDateString('es-MX')}</td>
+            <td>${formatearFecha(data.fecha_infraccion)}</td>
             <td>${data.descripcion_falta}${data.notas ? ' NOTAS: ' + data.notas : ''}</td>
           </tr>
         </tbody>
