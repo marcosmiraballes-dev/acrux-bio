@@ -36,7 +36,7 @@ const EMOJI_RESIDUOS: { [key: string]: string } = {
   'Orgánico': '🍃',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🫙',
+  'Vidrio': '🍷', // ✅ CORREGIDO
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
@@ -95,6 +95,7 @@ const GraficasResiduoCliente: React.FC = () => {
   const [statsByTipo, setStatsByTipo] = useState<StatsByTipo[]>([]);
   const [materialSeleccionado, setMaterialSeleccionado] = useState<StatsByTipo | null>(null);
   const [topLocales, setTopLocales] = useState<TopLocal[]>([]);
+  const [datosGraficaMeses, setDatosGraficaMeses] = useState<any[]>([]); // ✅ NUEVO
   
   const [plazas, setPlazas] = useState<Plaza[]>([]);
   const [locales, setLocales] = useState<Local[]>([]);
@@ -128,6 +129,13 @@ const GraficasResiduoCliente: React.FC = () => {
       loadAllData();
     }
   }, [plazas]);
+
+  // ✅ NUEVO: useEffect para cargar datos de la gráfica cuando cambia el material
+  useEffect(() => {
+    if (materialSeleccionado) {
+      loadDatosGraficaMeses();
+    }
+  }, [materialSeleccionado, plazaId, localId, fechaDesde, fechaHasta]);
 
   const loadPlazasYLocales = async () => {
     try {
@@ -172,6 +180,39 @@ const GraficasResiduoCliente: React.FC = () => {
     }
   };
 
+  // ✅ NUEVO: Cargar datos de tendencia mensual para la gráfica
+  const loadDatosGraficaMeses = async () => {
+    if (!materialSeleccionado) return;
+
+    try {
+      // ✅ USAR SNAKE_CASE como espera el controller
+      const filters: any = { tipo_residuo_id: materialSeleccionado.tipo_residuo_id };
+      if (plazaId) filters.plaza_id = plazaId;
+      if (localId) filters.local_id = localId;
+      if (fechaDesde) filters.fecha_desde = fechaDesde;
+      if (fechaHasta) filters.fecha_hasta = fechaHasta;
+
+      // Llamar al endpoint de tendencia mensual
+      const tendenciaRes = await api.get('/recolecciones/stats/tendencia-mensual', { params: filters });
+      const datosMeses = tendenciaRes.data.data || [];
+
+      // Formatear datos para Recharts
+      const datosFormateados = datosMeses
+        .map((item: any) => ({
+          mes: new Date(item.mes + '-01').toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }),
+          mesOriginal: item.mes,
+          kilos: parseFloat(item.total_kilos) || 0
+        }))
+        .sort((a: any, b: any) => b.mesOriginal.localeCompare(a.mesOriginal))
+        .slice(0, 5);
+
+      setDatosGraficaMeses(datosFormateados);
+    } catch (err) {
+      console.error('Error cargando tendencia mensual:', err);
+      setDatosGraficaMeses([]);
+    }
+  };
+
   const handleAplicarFiltros = () => {
     loadAllData();
   };
@@ -193,10 +234,11 @@ const GraficasResiduoCliente: React.FC = () => {
 
     // Cargar top locales para el material seleccionado
     try {
-      const filters: any = { tipo_residuo_id: materialSeleccionado.tipo_residuo_id };
-      if (plazaId) filters.plaza_id = plazaId;
-      if (fechaDesde) filters.fecha_desde = fechaDesde;
-      if (fechaHasta) filters.fecha_hasta = fechaHasta;
+      // ✅ CORREGIDO: Usar camelCase
+      const filters: any = { tipoResiduoId: materialSeleccionado.tipo_residuo_id };
+      if (plazaId) filters.plazaId = plazaId;
+      if (fechaDesde) filters.fechaDesde = fechaDesde;
+      if (fechaHasta) filters.fechaHasta = fechaHasta;
 
       const topRes = await api.get('/recolecciones/stats/top-locales', { params: filters });
       const topData = topRes.data.data || [];
@@ -222,6 +264,27 @@ const GraficasResiduoCliente: React.FC = () => {
     }
   };
 
+  // ✅ NUEVO: Custom Tooltip formateado
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const kilos = payload[0].value;
+      return (
+        <div style={{
+          backgroundColor: 'white',
+          padding: '10px 15px',
+          border: '2px solid #10B981',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 'bold', color: '#047857', fontSize: '16px' }}>
+            {kilos.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Obtener nombre de plaza/local seleccionado
   const plazaSeleccionada = plazas.find(p => p.id === plazaId);
   const localSeleccionado = locales.find(l => l.id === localId);
@@ -234,15 +297,6 @@ const GraficasResiduoCliente: React.FC = () => {
   const colorMaterial = COLORES_MATERIALES[materialSeleccionado?.tipo_residuo_nombre || ''] || 'from-gray-50 to-gray-100 border-gray-200';
   const emojiMaterial = EMOJI_RESIDUOS[materialSeleccionado?.tipo_residuo_nombre || ''] || '♻️';
   const tipsMaterial = TIPS_RECICLAJE[materialSeleccionado?.tipo_residuo_nombre || ''] || TIPS_RECICLAJE['Orgánico'];
-
-  // Preparar datos para gráfica (simulados por ahora)
-  const datosGrafica = [
-    { mes: 'Diciembre', kilos: Math.random() * 100 + 50 },
-    { mes: 'Noviembre', kilos: Math.random() * 100 + 50 },
-    { mes: 'Octubre', kilos: Math.random() * 100 + 50 },
-    { mes: 'Septiembre', kilos: Math.random() * 100 + 50 },
-    { mes: 'Agosto', kilos: Math.random() * 100 + 50 }
-  ].sort((a, b) => b.kilos - a.kilos);
 
   if (loading && plazas.length === 0) {
     return (
@@ -420,18 +474,24 @@ const GraficasResiduoCliente: React.FC = () => {
               </div>
             </div>
 
-            {/* Gráfica */}
+            {/* ✅ GRÁFICA CORREGIDA - Ahora usa datos REALES */}
             <div className="bg-white rounded-xl p-6 shadow-lg">
               <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">📊 Top 5 Meses</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={datosGrafica}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <Tooltip formatter={(value: any) => `${Number(value).toFixed(0)} kg`} />
-                  <Bar dataKey="kilos" fill="#10B981" />
-                </BarChart>
-              </ResponsiveContainer>
+              {datosGraficaMeses.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={datosGraficaMeses}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
+                    <YAxis />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="kilos" fill="#10B981" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[280px] text-gray-400">
+                  <p>No hay datos disponibles para este material</p>
+                </div>
+              )}
             </div>
 
           </div>
