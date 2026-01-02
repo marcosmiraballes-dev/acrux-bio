@@ -80,7 +80,7 @@ export class UsuarioService {
       .from('usuarios')
       .insert({
         ...input,
-        password_hash: hashedPassword  // ✅ Cambiado a password_hash
+        password_hash: hashedPassword
       })
       .select()
       .single();
@@ -109,7 +109,7 @@ export class UsuarioService {
 
     // Si se está actualizando el password, hashearlo
     if (input.password) {
-      updateData.password_hash = await bcrypt.hash(input.password, 10);  // ✅ Cambiado a password_hash
+      updateData.password_hash = await bcrypt.hash(input.password, 10);
       delete updateData.password; // Eliminar password del objeto
     }
 
@@ -134,28 +134,33 @@ export class UsuarioService {
   }
 
   /**
-   * Eliminar un usuario FÍSICAMENTE de la base de datos
+   * DESACTIVAR un usuario (soft delete)
+   * Cambia activo = false en vez de eliminar físicamente
+   * Preserva datos históricos y recolecciones
    */
   async delete(id: string): Promise<boolean> {
-    // Verificar que no tenga recolecciones asociadas como capturador
-    const { data: recolecciones } = await supabase
-      .from('recolecciones')
-      .select('id')
-      .eq('usuario_id', id)
-      .limit(1);
+    // Verificar que el usuario existe
+    const { data: usuario, error: fetchError } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (recolecciones && recolecciones.length > 0) {
-      throw new Error('No se puede eliminar un usuario que tiene recolecciones registradas. Desactívalo en su lugar.');
+    if (fetchError || !usuario) {
+      throw new Error('Usuario no encontrado');
     }
 
-    // ELIMINACIÓN FÍSICA - Borrar completamente de la BD
-    const { error } = await supabase
+    // DESACTIVAR en vez de eliminar - preserva datos históricos
+    const { error: updateError } = await supabase
       .from('usuarios')
-      .delete()
+      .update({ 
+        activo: false,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id);
 
-    if (error) {
-      throw new Error(`Error eliminando usuario: ${error.message}`);
+    if (updateError) {
+      throw new Error(`Error al desactivar usuario: ${updateError.message}`);
     }
 
     return true;
@@ -171,7 +176,7 @@ export class UsuarioService {
       return null;
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);  // ✅ Cambiado a password_hash
+    const isValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isValid) {
       return null;
