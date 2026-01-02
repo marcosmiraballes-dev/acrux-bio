@@ -19,7 +19,7 @@ const EMOJI_MAP: { [key: string]: string } = {
   'Orgánico': '🍌',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🍾',
+  'Vidrio': '🍷',
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
@@ -456,36 +456,39 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
 
     <div class="cover-info">
       <p>📅 ${fechaGeneracion}</p>
-      ${data.plazaSeleccionada ? `<p>📍 ${data.plazaSeleccionada}</p>` : ''}
+      ${data.plazaSeleccionada ? '<p>📍 ' + data.plazaSeleccionada + '</p>' : ''}
     </div>
   </div>
 
   <!-- PÁGINA 1: MÉTRICAS Y RANKING -->
   <div class="content-page page-break">
-    <h1 class="page-title">
-      <span class="emoji">${emoji}</span>
-      <span>Métricas de ${data.materialSeleccionado.nombre}</span>
-    </h1>
-    <p class="page-subtitle">Resultados de tu esfuerzo en este material</p>
-
+    
     <!-- KPIs del Material -->
-    <div class="kpis-material no-break">
-      <div class="kpi-material-card">
-        <div class="kpi-material-label">Total Reciclado</div>
-        <div class="kpi-material-value">${data.materialSeleccionado.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
-        <div class="kpi-material-unit">kilogramos</div>
-      </div>
+    <div class="no-break">
+      <h1 class="page-title">
+        <span class="emoji">${emoji}</span>
+        <span>Métricas de ${data.materialSeleccionado.nombre}</span>
+      </h1>
+      <p class="page-subtitle">Resultados de tu esfuerzo en este material</p>
 
-      <div class="kpi-material-card">
-        <div class="kpi-material-label">CO2 Evitado</div>
-        <div class="kpi-material-value">${co2Toneladas.toFixed(2)}</div>
-        <div class="kpi-material-unit">toneladas</div>
-      </div>
+      <div class="kpis-material">
+        <div class="kpi-material-card">
+          <div class="kpi-material-label">Total Reciclado</div>
+          <div class="kpi-material-value">${data.materialSeleccionado.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
+          <div class="kpi-material-unit">kilogramos</div>
+        </div>
 
-      <div class="kpi-material-card">
-        <div class="kpi-material-label">Recolecciones</div>
-        <div class="kpi-material-value">${data.materialSeleccionado.recolecciones.toLocaleString('es-MX')}</div>
-        <div class="kpi-material-unit">visitas</div>
+        <div class="kpi-material-card">
+          <div class="kpi-material-label">CO2 Evitado</div>
+          <div class="kpi-material-value">${co2Toneladas.toFixed(2)}</div>
+          <div class="kpi-material-unit">toneladas</div>
+        </div>
+
+        <div class="kpi-material-card">
+          <div class="kpi-material-label">Recolecciones</div>
+          <div class="kpi-material-value">${data.materialSeleccionado.recolecciones.toLocaleString('es-MX')}</div>
+          <div class="kpi-material-unit">visitas</div>
+        </div>
       </div>
     </div>
 
@@ -493,20 +496,14 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
     <div class="ranking-section no-break">
       <h2 class="ranking-title">🏆 Top 10 Locales en ${data.materialSeleccionado.nombre}</h2>
       
-      ${data.topLocales.slice(0, 10).map((local, index) => `
-        <div class="ranking-item ${index < 3 ? 'top-3' : ''}">
-          <div class="ranking-position">
-            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '#' + (index + 1)}
-          </div>
-          <div class="ranking-name">
-            <div class="ranking-local">${local.local_nombre}</div>
-            <div class="ranking-plaza">${local.plaza_nombre}</div>
-          </div>
-          <div class="ranking-value">
-            ${local.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg
-          </div>
-        </div>
-      `).join('')}
+      ${data.topLocales.slice(0, 10).map((local, index) => 
+        '<div class="ranking-item ' + (index < 3 ? 'top-3' : '') + '"><div class="ranking-position">' +
+        (index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '#' + (index + 1)) +
+        '</div><div class="ranking-name"><div class="ranking-local">' + local.local_nombre + 
+        '</div><div class="ranking-plaza">' + local.plaza_nombre + 
+        '</div></div><div class="ranking-value">' + 
+        local.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>'
+      ).join('')}
     </div>
 
     <div class="page-footer">
@@ -516,35 +513,38 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
 
   <!-- PÁGINA 2: TIPS DE RECICLAJE -->
   <div class="content-page page-break">
-    <h1 class="page-title">
-      <span class="emoji">💡</span>
-      <span>Tips de Reciclaje</span>
-    </h1>
-    <p class="page-subtitle">Aprende a reciclar ${data.materialSeleccionado.nombre} correctamente</p>
+    
+    <div class="no-break">
+      <h1 class="page-title">
+        <span class="emoji">💡</span>
+        <span>Tips de Reciclaje</span>
+      </h1>
+      <p class="page-subtitle">Aprende a reciclar ${data.materialSeleccionado.nombre} correctamente</p>
 
-    <!-- Tips -->
-    <div class="tips-section no-break">
-      <h2 class="tips-title">Guía de Reciclaje de ${data.materialSeleccionado.nombre}</h2>
-      
-      <div class="tips-grid">
-        <div class="tips-card si">
-          <h3>✓ SÍ reciclar:</h3>
-          <ul>
-            ${tips.si.map(item => `<li>${item}</li>`).join('')}
-          </ul>
+      <!-- Tips -->
+      <div class="tips-section">
+        <h2 class="tips-title">Guía de Reciclaje de ${data.materialSeleccionado.nombre}</h2>
+        
+        <div class="tips-grid">
+          <div class="tips-card si">
+            <h3>✓ SÍ reciclar:</h3>
+            <ul>
+              ${tips.si.map(item => '<li>' + item + '</li>').join('')}
+            </ul>
+          </div>
+
+          <div class="tips-card no">
+            <h3>✗ NO reciclar:</h3>
+            <ul>
+              ${tips.no.map(item => '<li>' + item + '</li>').join('')}
+            </ul>
+          </div>
         </div>
 
-        <div class="tips-card no">
-          <h3>✗ NO reciclar:</h3>
-          <ul>
-            ${tips.no.map(item => `<li>${item}</li>`).join('')}
-          </ul>
+        <div class="tips-dato">
+          <div class="tips-dato-label">💡 Sabías que...</div>
+          <div class="tips-dato-text">${tips.dato}</div>
         </div>
-      </div>
-
-      <div class="tips-dato">
-        <div class="tips-dato-label">💡 Sabías que...</div>
-        <div class="tips-dato-text">${tips.dato}</div>
       </div>
     </div>
 

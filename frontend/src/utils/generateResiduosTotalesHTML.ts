@@ -19,7 +19,7 @@ const EMOJI_MAP: { [key: string]: string } = {
   'Orgánico': '🍌',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🍾',
+  'Vidrio': '🍷',
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
@@ -56,7 +56,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
   }));
 
   const lugarTexto = data.localSeleccionado 
-    ? `${data.plazaSeleccionada} - ${data.localSeleccionado}`
+    ? data.plazaSeleccionada + ' - ' + data.localSeleccionado
     : data.plazaSeleccionada || 'Tu Negocio';
 
   const html = `
@@ -202,7 +202,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       margin-bottom: 30px;
     }
 
-    /* KPIs GRANDES */
+    /* KPIs GRANDES - VALORES REDUCIDOS */
     .kpis-hero {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -211,7 +211,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
     }
 
     .kpi-hero-card {
-      padding: 25px 20px;
+      padding: 20px 15px;
       border-radius: 15px;
       text-align: center;
       border: 3px solid;
@@ -225,7 +225,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       top: 0;
       left: 0;
       right: 0;
-      height: 6px;
+      height: 5px;
       background: var(--color);
     }
 
@@ -254,23 +254,23 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
     }
 
     .kpi-emoji {
-      font-size: 40px;
-      margin-bottom: 10px;
+      font-size: 32px;
+      margin-bottom: 8px;
     }
 
     .kpi-label {
-      font-size: 11px;
+      font-size: 10px;
       color: #6b7280;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
       font-weight: 700;
     }
 
     .kpi-value {
-      font-size: 36px;
+      font-size: 26px;
       font-weight: bold;
-      line-height: 1;
+      line-height: 1.1;
       margin-bottom: 5px;
     }
 
@@ -291,7 +291,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
     }
 
     .kpi-unit {
-      font-size: 12px;
+      font-size: 11px;
       color: #6b7280;
       font-weight: 600;
     }
@@ -467,59 +467,57 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
 
   <!-- PÁGINA 1: TU IMPACTO EN NÚMEROS -->
   <div class="content-page page-break">
-    <h1 class="page-title">🌍 Tu Impacto en Números</h1>
-    <p class="page-subtitle">Estas son las cifras de tu contribución ambiental</p>
-
+    
     <!-- KPIs Principales -->
-    <div class="kpis-hero no-break">
-      <div class="kpi-hero-card verde">
-        <div class="kpi-emoji">⚖️</div>
-        <div class="kpi-label">Total Reciclado</div>
-        <div class="kpi-value">${data.stats.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
-        <div class="kpi-unit">kilogramos</div>
-      </div>
+    <div class="no-break">
+      <h1 class="page-title">🌍 Tu Impacto en Números</h1>
+      <p class="page-subtitle">Estas son las cifras de tu contribución ambiental</p>
 
-      <div class="kpi-hero-card azul">
-        <div class="kpi-emoji">🌫️</div>
-        <div class="kpi-label">CO2 Evitado</div>
-        <div class="kpi-value">${co2Toneladas.toFixed(2)}</div>
-        <div class="kpi-unit">toneladas</div>
-      </div>
+      <div class="kpis-hero">
+        <div class="kpi-hero-card verde">
+          <div class="kpi-emoji">⚖️</div>
+          <div class="kpi-label">Total Reciclado</div>
+          <div class="kpi-value">${data.stats.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
+          <div class="kpi-unit">kilogramos</div>
+        </div>
 
-      <div class="kpi-hero-card amarillo">
-        <div class="kpi-emoji">🌳</div>
-        <div class="kpi-label">Árboles</div>
-        <div class="kpi-value">${arbolesEquivalentes.toLocaleString('es-MX')}</div>
-        <div class="kpi-unit">equivalentes</div>
-      </div>
+        <div class="kpi-hero-card azul">
+          <div class="kpi-emoji">🌫️</div>
+          <div class="kpi-label">CO2 Evitado</div>
+          <div class="kpi-value">${co2Toneladas.toFixed(2)}</div>
+          <div class="kpi-unit">toneladas</div>
+        </div>
 
-      <div class="kpi-hero-card morado">
-        <div class="kpi-emoji">📋</div>
-        <div class="kpi-label">Recolecciones</div>
-        <div class="kpi-value">${data.stats.total_recolecciones.toLocaleString('es-MX')}</div>
-        <div class="kpi-unit">visitas</div>
+        <div class="kpi-hero-card amarillo">
+          <div class="kpi-emoji">🌳</div>
+          <div class="kpi-label">Árboles</div>
+          <div class="kpi-value">${arbolesEquivalentes.toLocaleString('es-MX')}</div>
+          <div class="kpi-unit">equivalentes</div>
+        </div>
+
+        <div class="kpi-hero-card morado">
+          <div class="kpi-emoji">📋</div>
+          <div class="kpi-label">Recolecciones</div>
+          <div class="kpi-value">${data.stats.total_recolecciones.toLocaleString('es-MX')}</div>
+          <div class="kpi-unit">visitas</div>
+        </div>
       </div>
     </div>
 
     <!-- Grid de Materiales -->
-    <h2 style="color: #047857; font-size: 24px; font-weight: bold; margin: 30px 0 20px; text-align: center;">
-      ♻️ Distribución por Material
-    </h2>
+    <div class="no-break">
+      <h2 style="color: #047857; font-size: 24px; font-weight: bold; margin: 30px 0 20px; text-align: center;">
+        ♻️ Distribución por Material
+      </h2>
 
-    <div class="materials-grid no-break">
-      ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
-        const color = COLORS_CHART[index % COLORS_CHART.length];
-        const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
-        
-        return `
-        <div class="material-card" style="--color: ${color};">
-          <div class="material-icon">${emoji}</div>
-          <div class="material-name">${material.tipo_residuo_nombre}</div>
-          <div class="material-percentage">${material.porcentaje}%</div>
-          <div class="material-kilos">${material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</div>
-        </div>
-        `;
-      }).join('')}
+      <div class="materials-grid">
+        ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
+          const color = COLORS_CHART[index % COLORS_CHART.length];
+          const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+          
+          return '<div class="material-card" style="--color: ' + color + ';"><div class="material-icon">' + emoji + '</div><div class="material-name">' + material.tipo_residuo_nombre + '</div><div class="material-percentage">' + material.porcentaje + '%</div><div class="material-kilos">' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>';
+        }).join('')}
+      </div>
     </div>
 
     <div class="page-footer">
@@ -529,29 +527,32 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
 
   <!-- PÁGINA 2: EQUIVALENCIAS Y MENSAJE -->
   <div class="content-page page-break">
-    <h1 class="page-title">✨ Equivalencias Ambientales</h1>
-    <p class="page-subtitle">Tu esfuerzo traducido en impacto real</p>
+    
+    <div class="no-break">
+      <h1 class="page-title">✨ Equivalencias Ambientales</h1>
+      <p class="page-subtitle">Tu esfuerzo traducido en impacto real</p>
 
-    <div class="equivalencias-section no-break">
-      <h2 class="equivalencias-title">Tu reciclaje equivale a:</h2>
-      
-      <div class="equivalencias-grid">
-        <div class="equiv-card">
-          <div class="equiv-emoji">🌳</div>
-          <div class="equiv-value">${arbolesEquivalentes.toLocaleString('es-MX')}</div>
-          <div class="equiv-label">Árboles Plantados</div>
-        </div>
+      <div class="equivalencias-section">
+        <h2 class="equivalencias-title">Tu reciclaje equivale a:</h2>
+        
+        <div class="equivalencias-grid">
+          <div class="equiv-card">
+            <div class="equiv-emoji">🌳</div>
+            <div class="equiv-value">${arbolesEquivalentes.toLocaleString('es-MX')}</div>
+            <div class="equiv-label">Árboles Plantados</div>
+          </div>
 
-        <div class="equiv-card">
-          <div class="equiv-emoji">💡</div>
-          <div class="equiv-value">${kwhAhorrados.toLocaleString('es-MX')}</div>
-          <div class="equiv-label">kWh Ahorrados</div>
-        </div>
+          <div class="equiv-card">
+            <div class="equiv-emoji">💡</div>
+            <div class="equiv-value">${kwhAhorrados.toLocaleString('es-MX')}</div>
+            <div class="equiv-label">kWh Ahorrados</div>
+          </div>
 
-        <div class="equiv-card">
-          <div class="equiv-emoji">🚗</div>
-          <div class="equiv-value">${kmAutoEvitados.toLocaleString('es-MX')}</div>
-          <div class="equiv-label">km de Auto Evitados</div>
+          <div class="equiv-card">
+            <div class="equiv-emoji">🚗</div>
+            <div class="equiv-value">${kmAutoEvitados.toLocaleString('es-MX')}</div>
+            <div class="equiv-label">km de Auto Evitados</div>
+          </div>
         </div>
       </div>
     </div>

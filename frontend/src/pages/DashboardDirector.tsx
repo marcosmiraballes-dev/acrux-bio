@@ -70,16 +70,16 @@ interface Plaza {
   nombre: string;
 }
 
-// Mapeo de emojis
+// ✅ CORREGIDO: Mapeo de emojis con Vidrio y Tetra Pak correctos
 const EMOJI_MAP: { [key: string]: string } = {
   'Orgánico': '🍌',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🍾',
+  'Vidrio': '🍷',
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
-  'Tetra Pak': '📦',
+  'Tetra Pak': '🧃',
   'Aluminio': '🥫',
   'Chatarra': '🔩',
   'Archivo': '📄'
@@ -365,11 +365,11 @@ const DashboardDirector: React.FC = () => {
               </div>
             </div>
 
-            {/* Grid de Materiales */}
+            {/* ✅ CORREGIDO: Grid de Materiales - AHORA MUESTRA LOS 11 COMPLETOS */}
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">♻️ Materiales Recolectados</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {statsByTipo.slice(0, 6).map((tipo) => (
+                {statsByTipo.slice(0, 11).map((tipo) => (
                   <div key={tipo.tipo_residuo_nombre} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-3xl">{EMOJI_MAP[tipo.tipo_residuo_nombre] || '♻️'}</span>
@@ -401,60 +401,32 @@ const DashboardDirector: React.FC = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* Comparativa por Plaza - CARDS */}
+              {/* Comparativa por Plaza - PIE CHART */}
               <div className="card" style={{ pageBreakInside: 'avoid' }}>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">🏢 Por Plaza</h2>
-                <div className="space-y-3">
-                  {comparativaPlazas
-                    .sort((a, b) => (b.total_kilos || 0) - (a.total_kilos || 0))
-                    .map((plaza, index) => {
-                      const maxKilos = Math.max(...comparativaPlazas.map(p => p.total_kilos || 0));
-                      const porcentaje = ((plaza.total_kilos || 0) / maxKilos) * 100;
-                      
-                      return (
-                        <div key={plaza.plaza_nombre} className={`p-4 rounded-lg ${index === 0 ? 'bg-gradient-to-r from-primary-50 to-primary-100 border-2 border-primary-200' : 'bg-gray-50'}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-3">
-                              <span className={`text-2xl font-bold ${index === 0 ? 'text-primary-600' : 'text-gray-400'}`}>
-                                #{index + 1}
-                              </span>
-                              <div>
-                                <span className={`font-semibold ${index === 0 ? 'text-primary-700' : 'text-gray-700'}`}>
-                                  {plaza.plaza_nombre}
-                                </span>
-                                <p className="text-xs text-gray-500">{(plaza.total_recolecciones || 0).toLocaleString('es-MX')} recolecciones</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-2xl font-bold ${index === 0 ? 'text-primary-600' : 'text-gray-700'}`}>
-                                {(plaza.total_kilos || 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })}
-                              </p>
-                              <p className="text-xs text-gray-500">kg</p>
-                            </div>
-                          </div>
-                          {/* Barra de progreso */}
-                          <div className="w-full bg-gray-200 rounded-full h-4">
-                            <div 
-                              className={`h-4 rounded-full transition-all ${
-                                index === 0 
-                                  ? 'bg-gradient-to-r from-primary-500 to-primary-600' 
-                                  : 'bg-gradient-to-r from-gray-400 to-gray-500'
-                              }`}
-                              style={{ width: `${porcentaje}%` }}
-                            ></div>
-                          </div>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-gray-500">
-                              {porcentaje.toFixed(0)}% del máximo
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              CO₂: {(plaza.co2_evitado || 0).toLocaleString('es-MX', { maximumFractionDigits: 1 })} kg
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">🏢 Distribución por Plaza</h2>
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      data={comparativaPlazas.sort((a, b) => (b.total_kilos || 0) - (a.total_kilos || 0))}
+                      dataKey="total_kilos"
+                      nameKey="plaza_nombre"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={120}
+                      label={({ plaza_nombre, total_kilos }) => 
+                        `${plaza_nombre}: ${(total_kilos || 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg`
+                      }
+                    >
+                      {comparativaPlazas.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS_CHART[index % COLORS_CHART.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any) => `${Number(value).toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg`}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
 

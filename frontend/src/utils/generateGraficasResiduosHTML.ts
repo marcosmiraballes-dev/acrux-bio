@@ -18,7 +18,7 @@ const EMOJI_MAP: { [key: string]: string } = {
   'Orgánico': '🍌',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🍾',
+  'Vidrio': '🍷',
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
@@ -54,10 +54,10 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
 
   // Generar SVG del pie chart
   const generatePieChartSVG = () => {
-    const cx = 200; // centro x
-    const cy = 200; // centro y
+    const cx = 200;
+    const cy = 200;
     const radius = 150;
-    let currentAngle = -90; // empezar desde arriba
+    let currentAngle = -90;
     const slices: string[] = [];
 
     materialesConPorcentaje.forEach((material, index) => {
@@ -65,39 +65,25 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       const sliceAngle = (porcentaje / 100) * 360;
       const endAngle = currentAngle + sliceAngle;
 
-      // Convertir ángulos a radianes
       const startRad = (currentAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
 
-      // Calcular puntos del arco
       const x1 = cx + radius * Math.cos(startRad);
       const y1 = cy + radius * Math.sin(startRad);
       const x2 = cx + radius * Math.cos(endRad);
       const y2 = cy + radius * Math.sin(endRad);
 
-      // Usar large arc flag si el ángulo es mayor a 180°
       const largeArcFlag = sliceAngle > 180 ? 1 : 0;
-
       const color = COLORS_CHART[index % COLORS_CHART.length];
 
-      // Path del slice
-      const pathData = `
-        M ${cx} ${cy}
-        L ${x1} ${y1}
-        A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
-        Z
-      `;
+      const pathData = 'M ' + cx + ' ' + cy + ' L ' + x1 + ' ' + y1 + ' A ' + radius + ' ' + radius + ' 0 ' + largeArcFlag + ' 1 ' + x2 + ' ' + y2 + ' Z';
 
-      slices.push(`<path d="${pathData}" fill="${color}" stroke="white" stroke-width="2"/>`);
+      slices.push('<path d="' + pathData + '" fill="' + color + '" stroke="white" stroke-width="2"/>');
 
       currentAngle = endAngle;
     });
 
-    return `
-      <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        ${slices.join('')}
-      </svg>
-    `;
+    return '<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">' + slices.join('') + '</svg>';
   };
 
   const html = `
@@ -375,7 +361,7 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
     /* GRID DE MATERIALES */
     .materials-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 15px;
       margin-bottom: 30px;
     }
@@ -476,7 +462,7 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
 
     <div class="cover-info">
       <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-      ${data.userName ? `<p><strong>Generado por:</strong> ${data.userName}</p>` : ''}
+      ${data.userName ? '<p><strong>Generado por:</strong> ' + data.userName + '</p>' : ''}
     </div>
 
     <div class="cover-footer">
@@ -489,58 +475,41 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
   <div class="content-page page-break">
     <h1 class="page-title">📊 DISTRIBUCIÓN POR TIPO DE MATERIAL</h1>
 
-    <div class="pie-chart-section no-break">
-      
-      <!-- Pie Chart -->
-      <div class="pie-chart-container">
-        <div>
-          ${generatePieChartSVG()}
-          <div class="legend">
-            ${materialesConPorcentaje.slice(0, 8).map((material, index) => `
-              <div class="legend-item">
-                <div class="legend-color" style="background: ${COLORS_CHART[index % COLORS_CHART.length]};"></div>
-                <span>${material.tipo_residuo_nombre} (${material.porcentaje}%)</span>
-              </div>
-            `).join('')}
+    <div class="no-break">
+      <div class="pie-chart-section">
+        
+        <!-- Pie Chart -->
+        <div class="pie-chart-container">
+          <div>
+            ${generatePieChartSVG()}
+            <div class="legend">
+              ${materialesConPorcentaje.slice(0, 8).map((material, index) => 
+                '<div class="legend-item"><div class="legend-color" style="background: ' + COLORS_CHART[index % COLORS_CHART.length] + ';"></div><span>' + material.tipo_residuo_nombre + ' (' + material.porcentaje + '%)</span></div>'
+              ).join('')}
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Tabla -->
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Material</th>
-              <th class="text-right">Kilos</th>
-              <th class="text-right">%</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${materialesConPorcentaje.map((material, index) => `
+        <!-- Tabla -->
+        <div class="table-container">
+          <table>
+            <thead>
               <tr>
-                <td>
-                  <span class="color-indicator" style="background: ${COLORS_CHART[index % COLORS_CHART.length]};"></span>
-                </td>
-                <td>
-                  <div class="material-name">
-                    <span class="material-emoji">${EMOJI_MAP[material.tipo_residuo_nombre] || '♻️'}</span>
-                    <span><strong>${material.tipo_residuo_nombre}</strong></span>
-                  </div>
-                </td>
-                <td class="text-right">
-                  <strong>${material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</strong>
-                </td>
-                <td class="text-right">
-                  <span class="percentage-badge">${material.porcentaje}%</span>
-                </td>
+                <th>#</th>
+                <th>Material</th>
+                <th class="text-right">Kilos</th>
+                <th class="text-right">%</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              ${materialesConPorcentaje.map((material, index) => 
+                '<tr><td><span class="color-indicator" style="background: ' + COLORS_CHART[index % COLORS_CHART.length] + ';"></span></td><td><div class="material-name"><span class="material-emoji">' + (EMOJI_MAP[material.tipo_residuo_nombre] || '♻️') + '</span><span><strong>' + material.tipo_residuo_nombre + '</strong></span></div></td><td class="text-right"><strong>' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + '</strong></td><td class="text-right"><span class="percentage-badge">' + material.porcentaje + '%</span></td></tr>'
+              ).join('')}
+            </tbody>
+          </table>
+        </div>
 
+      </div>
     </div>
 
     <div class="page-footer">
@@ -553,42 +522,39 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
     <h1 class="page-title">🌍 IMPACTO AMBIENTAL Y DETALLE</h1>
 
     <!-- KPIs -->
-    <div class="kpis-grid no-break">
-      <div class="kpi-card blue">
-        <div class="kpi-label">CO2 Evitado Total</div>
-        <div class="kpi-value">${co2Toneladas.toFixed(2)}</div>
-        <div class="kpi-unit">toneladas</div>
-      </div>
+    <div class="no-break">
+      <div class="kpis-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-label">CO2 Evitado Total</div>
+          <div class="kpi-value">${co2Toneladas.toFixed(2)}</div>
+          <div class="kpi-unit">toneladas</div>
+        </div>
 
-      <div class="kpi-card">
-        <div class="kpi-label">Total Kilos</div>
-        <div class="kpi-value">${data.stats.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
-        <div class="kpi-unit">kilogramos</div>
-      </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Kilos</div>
+          <div class="kpi-value">${data.stats.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</div>
+          <div class="kpi-unit">kilogramos</div>
+        </div>
 
-      <div class="kpi-card purple">
-        <div class="kpi-label">Total Recolecciones</div>
-        <div class="kpi-value">${data.stats.total_recolecciones.toLocaleString('es-MX')}</div>
-        <div class="kpi-unit">visitas</div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Total Recolecciones</div>
+          <div class="kpi-value">${data.stats.total_recolecciones.toLocaleString('es-MX')}</div>
+          <div class="kpi-unit">visitas</div>
+        </div>
       </div>
     </div>
 
     <!-- Grid de Materiales -->
-    <h2 class="section-title">♻️ Detalle por Material</h2>
-    <div class="materials-grid no-break">
-      ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
-        const color = COLORS_CHART[index % COLORS_CHART.length];
-        const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
-        
-        return `
-        <div class="material-card" style="--color: ${color};">
-          <div class="material-icon">${emoji}</div>
-          <div class="material-card-name">${material.tipo_residuo_nombre}</div>
-          <div class="material-percentage">${material.porcentaje}%</div>
-          <div class="material-kilos">${material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</div>
-        </div>
-        `;
-      }).join('')}
+    <div class="no-break">
+      <h2 class="section-title">♻️ Detalle por Material (Top 11)</h2>
+      <div class="materials-grid">
+        ${materialesConPorcentaje.slice(0, 11).map((material, index) => {
+          const color = COLORS_CHART[index % COLORS_CHART.length];
+          const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+          
+          return '<div class="material-card" style="--color: ' + color + ';"><div class="material-icon">' + emoji + '</div><div class="material-card-name">' + material.tipo_residuo_nombre + '</div><div class="material-percentage">' + material.porcentaje + '%</div><div class="material-kilos">' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>';
+        }).join('')}
+      </div>
     </div>
 
     <div class="page-footer">

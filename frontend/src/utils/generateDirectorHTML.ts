@@ -33,12 +33,12 @@ interface DirectorHTMLData {
   userName?: string;
 }
 
-// Mapeo de emojis
+// ✅ CORREGIDO: Mapeo de emojis con Vidrio correcto
 const EMOJI_MAP: { [key: string]: string } = {
   'Orgánico': '🍌',
   'Inorgánico': '🗑️',
   'Cartón': '📦',
-  'Vidrio': '🍾',
+  'Vidrio': '🍷',
   'PET': '🧴',
   'Plástico Duro': '🥤',
   'Playo': '🛍️',
@@ -59,10 +59,10 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
   const co2Toneladas = data.stats.co2_evitado / 1000;
   const arbolesEquivalentes = Math.round(co2Toneladas * 45);
 
-  // Ordenar materiales por kilos
+  // ✅ CORREGIDO: Ordenar materiales por kilos - MOSTRAR LOS 11 COMPLETOS
   const materialesOrdenados = [...data.statsByTipo]
     .sort((a, b) => b.total_kilos - a.total_kilos)
-    .slice(0, 9); // Top 9 para el grid
+    .slice(0, 11); // Top 11 para mostrar TODOS
 
   // Calcular porcentajes
   const totalKilos = data.stats.total_kilos;
@@ -259,11 +259,11 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
       margin-top: 5px;
     }
 
-    /* GRID DE MATERIALES */
+    /* ✅ ACTUALIZADO: GRID DE MATERIALES - 4 columnas para 11 items */
     .materials-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
       margin-bottom: 30px;
     }
 
@@ -271,7 +271,7 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
       background: white;
       border: 2px solid #e5e7eb;
       border-radius: 12px;
-      padding: 18px;
+      padding: 15px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -288,39 +288,39 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
     }
 
     .material-icon {
-      font-size: 42px;
-      margin-bottom: 8px;
+      font-size: 38px;
+      margin-bottom: 6px;
     }
 
     .material-name {
-      font-size: 12px;
+      font-size: 10px;
       color: #6b7280;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .material-percentage {
-      font-size: 36px;
+      font-size: 30px;
       font-weight: bold;
       color: var(--color);
       line-height: 1;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .material-kilos {
-      font-size: 14px;
+      font-size: 12px;
       color: #6b7280;
       font-weight: 600;
     }
 
     .material-bar {
       width: 100%;
-      height: 6px;
+      height: 5px;
       background: #e5e7eb;
       border-radius: 3px;
-      margin-top: 12px;
+      margin-top: 10px;
       overflow: hidden;
     }
 
@@ -331,6 +331,22 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
     }
 
     /* TENDENCIA Y PLAZAS */
+    .bar-chart-container {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .pie-chart-container {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
     .ranking-list {
       background: #f9fafb;
       border-radius: 10px;
@@ -570,11 +586,11 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
       </div>
     </div>
 
-    <!-- Grid de Materiales -->
-    <h2 class="section-title">♻️ Materiales Recolectados</h2>
+    <!-- ✅ ACTUALIZADO: Grid de Materiales - TODOS LOS 11 -->
+    <h2 class="section-title">♻️ Materiales Recolectados (Top 11)</h2>
     <div class="materials-grid no-break">
       ${materialesConPorcentaje.map((material, index) => {
-        const colors = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'];
+        const colors = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#6366f1'];
         const color = colors[index % colors.length];
         const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
         const maxPorcentaje = parseFloat(materialesConPorcentaje[0].porcentaje);
@@ -594,24 +610,50 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
       }).join('')}
     </div>
 
-    <!-- Tendencia Mensual -->
-    <h2 class="section-title">📈 Tendencia Mensual (Últimos 6 meses)</h2>
-    <div class="ranking-list no-break">
-      ${data.tendencia.slice(0, 6).map((mes, index) => {
-        const maxKilos = Math.max(...data.tendencia.slice(0, 6).map(m => m.total_kilos));
-        const porcentaje = (mes.total_kilos / maxKilos) * 100;
-        
-        return `
-        <div class="ranking-item ${index === 0 ? 'first' : ''}">
-          <span class="ranking-number">#${index + 1}</span>
-          <span class="ranking-name">${mes.mes}</span>
-          <div class="ranking-bar-container">
-            <div class="ranking-bar" style="width: ${porcentaje}%;"></div>
-          </div>
-          <span class="ranking-value">${mes.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</span>
-        </div>
-        `;
-      }).join('')}
+    <!-- Tendencia Mensual - GRÁFICO DE BARRAS -->
+    <div class="no-break">
+      <h2 class="section-title">📈 Tendencia Mensual (Últimos 6 meses)</h2>
+      <div class="bar-chart-container">
+        <svg viewBox="0 0 600 250" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;">
+          ${(() => {
+            const meses = data.tendencia.slice(0, 6).reverse();
+            const maxKilos = Math.max(...meses.map(m => m.total_kilos));
+            
+            // Configuración del gráfico
+            const chartWidth = 500;
+            const chartHeight = 180;
+            const barWidth = 60;
+            const barSpacing = 20;
+            const startX = 50;
+            const startY = 200;
+            
+            // Generar barras
+            const bars = meses.map((mes, index) => {
+              const barHeight = (mes.total_kilos / maxKilos) * chartHeight;
+              const x = startX + (index * (barWidth + barSpacing));
+              const y = startY - barHeight;
+              
+              // Barra
+              const bar = '<rect x="' + x + '" y="' + y + '" width="' + barWidth + '" height="' + barHeight + '" fill="#10B981" rx="4"/>';
+              
+              // Valor encima de la barra
+              const value = '<text x="' + (x + barWidth/2) + '" y="' + (y - 5) + '" font-size="11" fill="#047857" font-weight="bold" text-anchor="middle">' + 
+                           mes.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + '</text>';
+              
+              // Label del mes
+              const label = '<text x="' + (x + barWidth/2) + '" y="' + (startY + 20) + '" font-size="11" fill="#6b7280" text-anchor="middle">' + 
+                           mes.mes + '</text>';
+              
+              return bar + value + label;
+            }).join('');
+            
+            // Línea base
+            const baseline = '<line x1="40" y1="' + startY + '" x2="' + (startX + (meses.length * (barWidth + barSpacing))) + '" y2="' + startY + '" stroke="#e5e7eb" stroke-width="2"/>';
+            
+            return baseline + bars;
+          })()}
+        </svg>
+      </div>
     </div>
 
     <div class="page-footer">
@@ -621,31 +663,79 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
 
   <!-- PÁGINA 2: PLAZAS Y TOP LOCALES -->
   <div class="content-page page-break">
-    <h1 class="page-title">🏢 Por Plaza y Locales</h1>
+    <h1 class="page-title">🏢 Distribución por Plaza</h1>
 
-    <!-- Por Plaza -->
-    <h2 class="section-title">Comparativa por Plaza</h2>
-    <div class="ranking-list no-break">
-      ${plazasOrdenadas.map((plaza, index) => {
-        const maxKilos = plazasOrdenadas[0].total_kilos;
-        const porcentaje = (plaza.total_kilos / maxKilos) * 100;
-        
-        return `
-        <div class="ranking-item ${index === 0 ? 'first' : ''}">
-          <span class="ranking-number">#${index + 1}</span>
-          <span class="ranking-name">${plaza.plaza_nombre}</span>
-          <div class="ranking-bar-container">
-            <div class="ranking-bar" style="width: ${porcentaje}%;"></div>
-          </div>
-          <span class="ranking-value">${plaza.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</span>
-        </div>
-        `;
-      }).join('')}
+    <!-- Por Plaza - PIE CHART SVG -->
+    <div class="no-break">
+      <h2 class="section-title">Distribución por Plaza</h2>
+      <div class="pie-chart-container">
+        <svg viewBox="0 0 400 300" style="width: 100%; max-width: 600px; margin: 0 auto; display: block;">
+          ${(() => {
+            // Calcular total de kilos
+            const totalKilos = plazasOrdenadas.reduce((sum, p) => sum + p.total_kilos, 0);
+            let currentAngle = -90; // Empezar desde arriba
+            
+            // Colores para las plazas
+            const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'];
+            
+            // Generar los slices del pie
+            const slices = plazasOrdenadas.map((plaza, index) => {
+              const percentage = (plaza.total_kilos / totalKilos) * 100;
+              const angleSize = (percentage / 100) * 360;
+              const endAngle = currentAngle + angleSize;
+              
+              // Convertir ángulos a radianes
+              const startRad = (currentAngle * Math.PI) / 180;
+              const endRad = (endAngle * Math.PI) / 180;
+              
+              // Centro del círculo
+              const cx = 200;
+              const cy = 120;
+              const radius = 80;
+              
+              // Calcular puntos del slice
+              const x1 = cx + radius * Math.cos(startRad);
+              const y1 = cy + radius * Math.sin(startRad);
+              const x2 = cx + radius * Math.cos(endRad);
+              const y2 = cy + radius * Math.sin(endRad);
+              
+              // Flag para arcos grandes (>180 grados)
+              const largeArcFlag = angleSize > 180 ? 1 : 0;
+              
+              // Path del slice
+              const pathData = 'M ' + cx + ' ' + cy + ' L ' + x1 + ' ' + y1 + ' A ' + radius + ' ' + radius + ' 0 ' + largeArcFlag + ' 1 ' + x2 + ' ' + y2 + ' Z';
+              
+              currentAngle = endAngle;
+              
+              return '<path d="' + pathData + '" fill="' + colors[index] + '" stroke="white" stroke-width="2"/>';
+            }).join('');
+            
+            // Generar leyenda
+            const legend = plazasOrdenadas.map((plaza, index) => {
+              const percentage = ((plaza.total_kilos / totalKilos) * 100).toFixed(1);
+              const y = 220 + (index * 18);
+              
+              return '<rect x="50" y="' + y + '" width="12" height="12" fill="' + colors[index] + '" rx="2"/>' +
+                     '<text x="68" y="' + (y + 10) + '" font-size="11" fill="#374151" font-weight="600">' +
+                     plaza.plaza_nombre + ': ' + plaza.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg (' + percentage + '%)</text>';
+            }).join('');
+            
+            return slices + legend;
+          })()}
+        </svg>
+      </div>
     </div>
 
-    <!-- Top 10 Locales -->
-    <h2 class="section-title">🏆 Top 10 Locales Más Productivos</h2>
-    <div class="table-container no-break">
+    <div class="page-footer">
+      Página 2 de 3
+    </div>
+  </div>
+
+  <!-- PÁGINA 3: TOP 10 LOCALES -->
+  <div class="content-page page-break">
+    <h1 class="page-title">🏆 Top 10 Locales Más Productivos</h1>
+
+    <div class="table-container">
       <table>
         <thead>
           <tr>
@@ -676,11 +766,11 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
     </div>
 
     <div class="page-footer">
-      Página 2 de 3
+      Página 3 de 4
     </div>
   </div>
 
-  <!-- PÁGINA 3: COMPARATIVAS -->
+  <!-- PÁGINA 4: COMPARATIVAS -->
   <div class="content-page page-break">
     <h1 class="page-title">📈 Comparativas Temporales</h1>
 
@@ -762,7 +852,7 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
     </div>
 
     <div class="page-footer">
-      Página 3 de 3
+      Página 4 de 4
     </div>
   </div>
 
