@@ -130,12 +130,12 @@ const GraficasResiduoCliente: React.FC = () => {
     }
   }, [plazas]);
 
-  // ✅ NUEVO: useEffect para cargar datos de la gráfica cuando cambia el material
+  // ✅ NUEVO: useEffect para cargar datos de la gráfica cuando cambia el material O los filtros
   useEffect(() => {
     if (materialSeleccionado) {
       loadDatosGraficaMeses();
     }
-  }, [materialSeleccionado, plazaId, localId, fechaDesde, fechaHasta]);
+  }, [materialSeleccionado?.tipo_residuo_id, plazaId, localId, fechaDesde, fechaHasta]);
 
   const loadPlazasYLocales = async () => {
     try {
@@ -167,8 +167,16 @@ const GraficasResiduoCliente: React.FC = () => {
       
       setStatsByTipo(datos);
       
-      // Seleccionar el primer material por defecto
-      if (datos.length > 0 && !materialSeleccionado) {
+      // ✅ ACTUALIZAR material seleccionado con datos frescos
+      if (materialSeleccionado) {
+        const materialActualizado = datos.find(
+          (d: StatsByTipo) => d.tipo_residuo_id === materialSeleccionado.tipo_residuo_id
+        );
+        if (materialActualizado) {
+          setMaterialSeleccionado(materialActualizado);
+        }
+      } else if (datos.length > 0) {
+        // Seleccionar el primer material si no hay ninguno seleccionado
         setMaterialSeleccionado(datos[0]);
       }
 
@@ -204,7 +212,8 @@ const GraficasResiduoCliente: React.FC = () => {
           kilos: parseFloat(item.total_kilos) || 0
         }))
         .sort((a: any, b: any) => b.mesOriginal.localeCompare(a.mesOriginal))
-        .slice(0, 5);
+        .slice(0, 5)
+        .reverse(); // ✅ Invertir orden: más antiguo a la izquierda
 
       setDatosGraficaMeses(datosFormateados);
     } catch (err) {
@@ -232,19 +241,36 @@ const GraficasResiduoCliente: React.FC = () => {
   const handleExportarPDF = async () => {
     if (!materialSeleccionado) return;
 
-    // Cargar top locales para el material seleccionado
     try {
-      // ✅ CORREGIDO: Usar camelCase
-      const filters: any = { tipoResiduoId: materialSeleccionado.tipo_residuo_id };
-      if (plazaId) filters.plazaId = plazaId;
-      if (fechaDesde) filters.fechaDesde = fechaDesde;
-      if (fechaHasta) filters.fechaHasta = fechaHasta;
+      // Filtros comunes
+      const filters: any = { tipo_residuo_id: materialSeleccionado.tipo_residuo_id };
+      if (plazaId) filters.plaza_id = plazaId;
+      if (localId) filters.local_id = localId;
+      if (fechaDesde) filters.fecha_desde = fechaDesde;
+      if (fechaHasta) filters.fecha_hasta = fechaHasta;
 
+      // 1️⃣ Cargar top 10 locales
       const topRes = await api.get('/recolecciones/stats/top-locales', { params: filters });
       const topData = topRes.data.data || [];
 
+      // 2️⃣ Cargar datos de tendencia mensual (gráfica)
+      const tendenciaRes = await api.get('/recolecciones/stats/tendencia-mensual', { params: filters });
+      const datosMeses = tendenciaRes.data.data || [];
+
+      // Formatear datos de la gráfica
+      const datosGraficaFormateados = datosMeses
+        .map((item: any) => ({
+          mes: new Date(item.mes + '-01').toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }),
+          mesOriginal: item.mes,
+          kilos: parseFloat(item.total_kilos) || 0
+        }))
+        .sort((a: any, b: any) => b.mesOriginal.localeCompare(a.mesOriginal))
+        .slice(0, 5)
+        .reverse(); // Más antiguo a la izquierda
+
       const plazaSeleccionada = plazas.find(p => p.id === plazaId);
 
+      // 3️⃣ Generar PDF con TODOS los datos
       generateGraficasResiduoClienteHTML({
         materialSeleccionado: {
           nombre: materialSeleccionado.tipo_residuo_nombre,
@@ -257,10 +283,11 @@ const GraficasResiduoCliente: React.FC = () => {
           plaza_nombre: item.plaza_nombre,
           total_kilos: item.total_kilos
         })),
+        datosGrafica: datosGraficaFormateados, // ✅ Datos frescos de la gráfica
         plazaSeleccionada: plazaSeleccionada?.nombre
       });
     } catch (err) {
-      console.error('Error cargando top locales:', err);
+      console.error('Error generando PDF:', err);
     }
   };
 

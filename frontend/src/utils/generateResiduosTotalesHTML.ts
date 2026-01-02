@@ -55,6 +55,38 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
     porcentaje: ((m.total_kilos / totalKilos) * 100).toFixed(1)
   }));
 
+  // Top 8 materiales para Pie Chart
+  const top8Materiales = materialesConPorcentaje.slice(0, 8);
+  
+  // Función para generar el SVG del Pie Chart
+  const generarPieChart = () => {
+    let currentAngle = -90; // Empezar desde arriba
+    
+    const paths = top8Materiales.map((material, index) => {
+      const porcentaje = parseFloat(material.porcentaje);
+      const angle = (porcentaje / 100) * 360;
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      
+      // Calcular puntos del arco
+      const startAngle = currentAngle * (Math.PI / 180);
+      const endAngle = (currentAngle + angle) * (Math.PI / 180);
+      
+      const x1 = 100 + 90 * Math.cos(startAngle);
+      const y1 = 100 + 90 * Math.sin(startAngle);
+      const x2 = 100 + 90 * Math.cos(endAngle);
+      const y2 = 100 + 90 * Math.sin(endAngle);
+      
+      currentAngle += angle;
+      
+      const path = `M 100 100 L ${x1} ${y1} A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+      const color = COLORS_CHART[index % COLORS_CHART.length];
+      
+      return `<path d="${path}" fill="${color}" stroke="white" stroke-width="2"/>`;
+    }).join('');
+    
+    return `<svg width="200" height="200" viewBox="0 0 200 200">${paths}</svg>`;
+  };
+
   const lugarTexto = data.localSeleccionado 
     ? data.plazaSeleccionada + ' - ' + data.localSeleccionado
     : data.plazaSeleccionada || 'Tu Negocio';
@@ -296,6 +328,57 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       font-weight: 600;
     }
 
+    /* PIE CHART */
+    .pie-chart-section {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 25px;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      border: 3px solid #10b981;
+    }
+
+    .pie-chart-container {
+      flex-shrink: 0;
+    }
+
+    .pie-legend {
+      flex: 1;
+    }
+
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 6px;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+
+    .pie-legend-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .pie-legend-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .pie-legend-value {
+      font-size: 13px;
+      font-weight: bold;
+      color: #047857;
+      margin-left: 8px;
+    }
+
     /* GRID DE MATERIALES */
     .materials-grid {
       display: grid;
@@ -504,18 +587,46 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       </div>
     </div>
 
-    <!-- Grid de Materiales -->
+    <!-- Pie Chart + Grid de Materiales -->
     <div class="no-break">
       <h2 style="color: #047857; font-size: 24px; font-weight: bold; margin: 30px 0 20px; text-align: center;">
         ♻️ Distribución por Material
       </h2>
+
+      <!-- Pie Chart con Leyenda -->
+      <div class="pie-chart-section">
+        <div class="pie-chart-container">
+          ${generarPieChart()}
+        </div>
+        <div class="pie-legend">
+          ${top8Materiales.map((material, index) => {
+            const color = COLORS_CHART[index % COLORS_CHART.length];
+            const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+            
+            return `
+              <div class="pie-legend-item">
+                <div class="pie-legend-color" style="background: ${color};"></div>
+                <span class="pie-legend-name">${emoji} ${material.tipo_residuo_nombre}</span>
+                <span class="pie-legend-value">${material.porcentaje}%</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
 
       <div class="materials-grid">
         ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
           const color = COLORS_CHART[index % COLORS_CHART.length];
           const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
           
-          return '<div class="material-card" style="--color: ' + color + ';"><div class="material-icon">' + emoji + '</div><div class="material-name">' + material.tipo_residuo_nombre + '</div><div class="material-percentage">' + material.porcentaje + '%</div><div class="material-kilos">' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>';
+          return `
+            <div class="material-card" style="--color: ${color};">
+              <div class="material-icon">${emoji}</div>
+              <div class="material-name">${material.tipo_residuo_nombre}</div>
+              <div class="material-percentage">${material.porcentaje}%</div>
+              <div class="material-kilos">${material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</div>
+            </div>
+          `;
         }).join('')}
       </div>
     </div>

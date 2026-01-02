@@ -10,6 +10,10 @@ interface GraficasResiduoClienteHTMLData {
     plaza_nombre: string;
     total_kilos: number;
   }>;
+  datosGrafica?: Array<{
+    mes: string;
+    kilos: number;
+  }>;
   plazaSeleccionada?: string;
   userName?: string;
 }
@@ -240,6 +244,71 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
       font-size: 14px;
       color: #6b7280;
       font-weight: 600;
+    }
+
+    /* GRÁFICA DE BARRAS */
+    .chart-section {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      border: 2px solid #10b981;
+    }
+
+    .chart-title {
+      font-size: 20px;
+      color: #047857;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 200px;
+      padding: 10px;
+      border-bottom: 2px solid #d1d5db;
+      position: relative;
+    }
+
+    .chart-bar {
+      flex: 1;
+      max-width: 80px;
+      background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+      border-radius: 8px 8px 0 0;
+      margin: 0 8px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .chart-bar-value {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: bold;
+      color: #047857;
+      white-space: nowrap;
+    }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      padding: 0 10px;
+    }
+
+    .chart-label {
+      flex: 1;
+      max-width: 80px;
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 600;
+      margin: 0 8px;
     }
 
     /* RANKING */
@@ -492,6 +561,29 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
       </div>
     </div>
 
+    <!-- Gráfica Top 5 Meses -->
+    ${data.datosGrafica && data.datosGrafica.length > 0 ? `
+    <div class="chart-section no-break">
+      <h2 class="chart-title">📊 Top 5 Meses - ${data.materialSeleccionado.nombre}</h2>
+      <div class="chart-container">
+        ${(() => {
+          const maxKilos = Math.max(...data.datosGrafica.map(d => d.kilos));
+          return data.datosGrafica.map(item => {
+            const altura = (item.kilos / maxKilos) * 180; // 180px = altura máxima
+            return `
+              <div class="chart-bar" style="height: ${altura}px;">
+                <div class="chart-bar-value">${item.kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg</div>
+              </div>
+            `;
+          }).join('');
+        })()}
+      </div>
+      <div class="chart-labels">
+        ${data.datosGrafica.map(item => `<div class="chart-label">${item.mes}</div>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Ranking de Locales -->
     <div class="ranking-section no-break">
       <h2 class="ranking-title">🏆 Top 10 Locales en ${data.materialSeleccionado.nombre}</h2>
@@ -514,6 +606,7 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
   <!-- PÁGINA 2: TIPS DE RECICLAJE -->
   <div class="content-page page-break">
     
+    <!-- Tips envueltos en no-break -->
     <div class="no-break">
       <h1 class="page-title">
         <span class="emoji">💡</span>
@@ -521,7 +614,6 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
       </h1>
       <p class="page-subtitle">Aprende a reciclar ${data.materialSeleccionado.nombre} correctamente</p>
 
-      <!-- Tips -->
       <div class="tips-section">
         <h2 class="tips-title">Guía de Reciclaje de ${data.materialSeleccionado.nombre}</h2>
         
