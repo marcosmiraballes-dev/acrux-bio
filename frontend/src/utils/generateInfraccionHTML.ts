@@ -95,11 +95,31 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
   const diaSemana = dias[fechaObj.getDay()];
   const fechaCapitalizada = `${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}, ${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
 
+  // ✅ CORRECCIÓN: Extraer el número del nro_aviso (AV-004 → 4)
   const numeroAviso = parseInt(data.nro_aviso.split('-')[1]);
+  
+  // Determinar color basado en el número de aviso
   let colorBadge = '#991B1B';
   if (numeroAviso === 1) colorBadge = '#10B981';
   else if (numeroAviso === 2) colorBadge = '#F59E0B';
   else if (numeroAviso === 3) colorBadge = '#EF4444';
+  
+  // ✅ NUEVO: Generar texto del aviso basado en el número real
+  const getTextoAviso = (num: number): string => {
+    if (num === 1) return '1er aviso';
+    if (num === 2) return '2do aviso';
+    if (num === 3) return '3er aviso';
+    if (num === 4) return '4to aviso';
+    if (num === 5) return '5to aviso';
+    if (num === 6) return '6to aviso';
+    if (num === 7) return '7mo aviso';
+    if (num === 8) return '8vo aviso';
+    if (num === 9) return '9no aviso';
+    if (num === 10) return '10mo aviso';
+    return `${num}° aviso`;
+  };
+  
+  const textoAviso = getTextoAviso(numeroAviso);
 
   const html = `
 <!DOCTYPE html>
@@ -110,62 +130,62 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
   <title>Aviso ${data.nro_aviso} - ${data.locatario.nombre_comercial}</title>
   <style>
     @media print {
-      @page { size: A4; margin: 15mm; }
+      @page { size: A4; margin: 12mm; }
       body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; font-size: 13px; line-height: 1.5; color: #333; background: white; padding: 15px; }
+    body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; background: white; padding: 12px; }
     .container { max-width: 800px; margin: 0 auto; }
     
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 3px solid #047857; }
-    .logo-box { width: 110px; height: 75px; display: flex; align-items: center; justify-content: center; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 3px solid #047857; }
+    .logo-box { width: 100px; height: 65px; display: flex; align-items: center; justify-content: center; }
     .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
     
-    .title { text-align: center; margin: 20px 0; }
-    .title h1 { color: #DC2626; font-size: 24px; font-weight: bold; text-decoration: underline; }
+    .title { text-align: center; margin: 12px 0; }
+    .title h1 { color: #DC2626; font-size: 22px; font-weight: bold; text-decoration: underline; }
     
-    .green-bar { width: 100%; height: 3px; background: #047857; margin: 15px 0; }
+    .green-bar { width: 100%; height: 3px; background: #047857; margin: 10px 0; }
     
-    .info-section { margin: 18px 0; }
-    .info-row { display: flex; margin-bottom: 10px; font-size: 13px; }
-    .info-label { font-weight: bold; min-width: 160px; color: #1f2937; }
+    .info-section { margin: 10px 0; }
+    .info-row { display: flex; margin-bottom: 6px; font-size: 12px; }
+    .info-label { font-weight: bold; min-width: 150px; color: #1f2937; }
     .info-value { color: #374151; }
     
-    .greeting { margin: 18px 0; font-size: 13px; font-weight: bold; }
+    .greeting { margin: 10px 0; font-size: 12px; font-weight: bold; }
     
-    .regulation-text { margin: 18px 0; padding: 12px; background: #f9fafb; border-left: 4px solid #047857; font-size: 12px; line-height: 1.6; }
+    .regulation-text { margin: 10px 0; padding: 8px; background: #f9fafb; border-left: 4px solid #047857; font-size: 11px; line-height: 1.5; }
     .regulation-text strong { color: #047857; }
     .regulation-text p { display: inline; }
     
-    .fault-description { margin: 18px 0; font-size: 13px; }
+    .fault-description { margin: 10px 0; font-size: 12px; }
     .fault-description strong { color: #DC2626; }
     
-    .aviso-line { margin: 20px 0; text-align: center; font-size: 14px; }
-    .aviso-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; background: ${colorBadge}; color: white; margin-left: 8px; font-size: 14px; }
+    .aviso-line { margin: 12px 0; text-align: center; font-size: 13px; }
+    .aviso-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-weight: bold; background: ${colorBadge}; color: white; margin-left: 6px; font-size: 13px; }
     
-    .multa-alert { margin: 20px 0; padding: 12px 15px; background: #FEF2F2; border: 2px solid #DC2626; border-radius: 8px; text-align: center; }
-    .multa-alert p { color: #DC2626; font-size: 14px; font-weight: bold; line-height: 1.4; }
+    .multa-alert { margin: 12px 0; padding: 8px 12px; background: #FEF2F2; border: 2px solid #DC2626; border-radius: 6px; text-align: center; }
+    .multa-alert p { color: #DC2626; font-size: 13px; font-weight: bold; line-height: 1.3; }
     
-    .notas-section { margin: 18px 0; padding: 12px; background: #fffbeb; border-left: 4px solid #f59e0b; font-size: 12px; }
+    .notas-section { margin: 10px 0; padding: 8px; background: #fffbeb; border-left: 4px solid #f59e0b; font-size: 11px; }
     .notas-section strong { color: #d97706; }
     
-    .historial-section { margin: 22px 0; }
-    .historial-section h2 { font-size: 16px; color: #1f2937; margin-bottom: 12px; border-bottom: 2px solid #047857; padding-bottom: 6px; }
+    .historial-section { margin: 12px 0; }
+    .historial-section h2 { font-size: 14px; color: #1f2937; margin-bottom: 8px; border-bottom: 2px solid #047857; padding-bottom: 4px; }
     
-    .historial-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+    .historial-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 6px; }
     .historial-table thead { background: #047857; color: white; }
-    .historial-table th { padding: 8px 10px; text-align: left; font-weight: bold; }
-    .historial-table td { padding: 7px 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    .historial-table th { padding: 5px 6px; text-align: left; font-weight: bold; font-size: 10px; }
+    .historial-table td { padding: 4px 6px; border-bottom: 1px solid #e5e7eb; vertical-align: top; font-size: 10px; line-height: 1.3; }
     .historial-table tbody tr:nth-child(even) { background: #f3f4f6; }
     .historial-table .current-row { background: #fef2f2 !important; font-weight: 500; }
     
-    .no-historial { padding: 15px; text-align: center; color: #6b7280; font-style: italic; font-size: 12px; }
+    .no-historial { padding: 12px; text-align: center; color: #6b7280; font-style: italic; font-size: 11px; }
     
-    .signature-section { margin-top: 40px; display: flex; justify-content: space-around; }
-    .signature-box { text-align: center; width: 200px; }
-    .signature-line { border-top: 2px solid #333; margin-top: 50px; padding-top: 6px; font-size: 12px; color: #374151; }
+    .signature-section { margin-top: 25px; display: flex; justify-content: space-around; }
+    .signature-box { text-align: center; width: 180px; }
+    .signature-line { border-top: 2px solid #333; margin-top: 35px; padding-top: 5px; font-size: 11px; color: #374151; }
     
-    .footer { margin-top: 30px; padding-top: 12px; border-top: 2px solid #047857; text-align: center; font-size: 11px; color: #6b7280; line-height: 1.5; }
+    .footer { margin-top: 20px; padding-top: 8px; border-top: 2px solid #047857; text-align: center; font-size: 10px; color: #6b7280; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -224,10 +244,10 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
       <p style="margin-top: 8px; padding-left: 15px;">${data.descripcion_falta}${data.notas ? ' NOTAS: ' + data.notas : ''}</p>
     </div>
 
-    <!-- Badge de tipo de aviso -->
+    <!-- Badge de tipo de aviso - ✅ AHORA USA textoAviso CALCULADO -->
     <div class="aviso-line">
       <span>Le informamos que este es el</span>
-      <span class="aviso-badge">${data.tipo_aviso.tipo}</span>
+      <span class="aviso-badge">${textoAviso}</span>
     </div>
 
     <!-- Alerta de multa -->
