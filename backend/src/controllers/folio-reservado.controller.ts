@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { FolioReservadoService } from '../services/folio-reservado.service';
-import { createFolioReservadoSchema, updateFolioReservadoSchema } from '../schemas/Folio reservado.schema';
+import { createFolioReservadoSchema, updateFolioReservadoSchema } from '../schemas/folio-reservado.schema';
 import { createClient } from '@supabase/supabase-js';
 
 // Crear instancia de Supabase

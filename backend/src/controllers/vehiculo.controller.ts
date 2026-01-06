@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { VehiculoService } from '../services/vehiculo.service';
-import { createVehiculoSchema, updateVehiculoSchema } from '../schemas/Vehiculo.schema';
+import { createVehiculoSchema, updateVehiculoSchema } from '../schemas/vehiculo.schema';
 import { createClient } from '@supabase/supabase-js';
 
 // Crear instancia de Supabase
