@@ -1,7 +1,7 @@
 // backend/src/services/Folio reservado.service.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateFolioReservadoInput, UpdateFolioReservadoInput } from '../schemas/Folio reservado.schema';
+import { CreateFolioReservadoInput, UpdateFolioReservadoInput } from '../schemas/folio-reservado.schema';
 
 export class FolioReservadoService {
   private supabase: SupabaseClient;
