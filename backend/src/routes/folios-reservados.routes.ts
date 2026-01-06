@@ -1,7 +1,7 @@
 // backend/src/routes/folios-reservados.routes.ts
 
 import { Router } from 'express';
-import { folioReservadoController } from '../controllers/Folio reservado.controller';
+import { folioReservadoController } from '../controllers/folio-reservado.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();

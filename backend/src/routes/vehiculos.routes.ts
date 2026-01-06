@@ -1,7 +1,7 @@
 // backend/src/routes/vehiculos.routes.ts
 
 import { Router } from 'express';
-import { vehiculoController } from '../controllers/Vehiculo.controller';
+import { vehiculoController } from '../controllers/vehiculo.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();

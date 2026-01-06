@@ -1,7 +1,7 @@
 // backend/src/routes/destinos-finales.routes.ts
 
 import { Router } from 'express';
-import { destinoFinalController } from '../controllers/Destino final.controller';
+import { destinoFinalController } from '../controllers/destino-final.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
