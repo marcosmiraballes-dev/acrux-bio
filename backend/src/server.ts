@@ -17,6 +17,12 @@ import infraccionesRoutes from './routes/infracciones.routes';
 import reglamentosRoutes from './routes/reglamentos.routes';
 import tiposAvisoRoutes from './routes/tipos-aviso.routes';
 import faltasPredefinidas from './routes/faltas-predefinidas.routes';
+import manifiestosRoutes from './routes/manifiestos.routes';
+import recolectoresRoutes from './routes/recolectores.routes';
+import vehiculosRoutes from './routes/vehiculos.routes';
+import destinosFinalesRoutes from './routes/destinos-finales.routes';
+import foliosReservadosRoutes from './routes/folios-reservados.routes';
+
 
 dotenv.config();
 
@@ -57,7 +63,12 @@ app.get('/', (req, res) => {
       locatarios_infracciones: '/api/locatarios-infracciones',
       reglamentos: '/api/reglamentos',
       tipos_aviso: '/api/tipos-aviso',
-      faltas_predefinidas: '/api/faltas-predefinidas'
+      faltas_predefinidas: '/api/faltas-predefinidas',
+      manifiestos: '/api/manifiestos',
+      recolectores: '/api/recolectores',
+      vehiculos: '/api/vehiculos',
+      destinos_finales: '/api/destinos-finales',
+      folios_reservados: '/api/folios-reservados'
     }
   });
 });
@@ -79,6 +90,11 @@ app.use('/api/infracciones', infraccionesRoutes);
 app.use('/api/reglamentos', reglamentosRoutes);
 app.use('/api/tipos-aviso', tiposAvisoRoutes);
 app.use('/api/faltas-predefinidas', faltasPredefinidas);
+app.use('/api/manifiestos', manifiestosRoutes); 
+app.use('/api/recolectores', recolectoresRoutes);
+app.use('/api/vehiculos', vehiculosRoutes);
+app.use('/api/destinos-finales', destinosFinalesRoutes);
+app.use('/api/folios-reservados', foliosReservadosRoutes);
 
 
 // Iniciar servidor

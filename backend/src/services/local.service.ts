@@ -3,10 +3,10 @@ import { supabase } from '../config/supabase';
 export class LocalService {
   
   /**
-   * Obtener todos los locales
+   * Obtener todos los locales (opcionalmente filtrado por plaza)
    */
-  async getAll(): Promise<any[]> {
-    const { data, error } = await supabase
+  async getAll(plazaId?: string): Promise<any[]> {
+    let query = supabase
       .from('locales')
       .select(`
         *,
@@ -18,9 +18,21 @@ export class LocalService {
       .eq('activo', true)
       .order('nombre', { ascending: true });
 
+    // ⭐ FILTRO POR PLAZA (OPCIONAL)
+    if (plazaId) {
+      console.log('🔍 FILTRANDO LOCALES POR PLAZA:', plazaId);
+      query = query.eq('plaza_id', plazaId);
+    } else {
+      console.log('🔍 OBTENIENDO TODOS LOS LOCALES (sin filtro)');
+    }
+
+    const { data, error } = await query;
+
     if (error) {
       throw new Error(`Error obteniendo locales: ${error.message}`);
     }
+
+    console.log('📦 LOCALES ENCONTRADOS:', data?.length || 0);
 
     return data || [];
   }
@@ -134,6 +146,30 @@ export class LocalService {
 
     if (error) {
       throw new Error(`Error obteniendo locales por plaza: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Obtener locales por plaza CON estadísticas
+   */
+  async getByPlazaWithStats(plazaId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('locales')
+      .select(`
+        *,
+        plazas (
+          id,
+          nombre
+        )
+      `)
+      .eq('plaza_id', plazaId)
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
+
+    if (error) {
+      throw new Error(`Error obteniendo locales con stats: ${error.message}`);
     }
 
     return data || [];

@@ -45,7 +45,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {
             title: 'GESTIÓN',
             items: [
-              { path: '/infracciones', label: 'Infracciones', icon: '⚠️' }
+              { path: '/infracciones', label: 'Infracciones', icon: '⚠️' },
+              { path: '/manifiestos', label: 'Manifiestos', icon: '📄' }
             ]
           },
           {
@@ -56,6 +57,14 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               { path: '/reglamentos-infracciones', label: 'Reglamentos', icon: '📋' },
               { path: '/tipos-aviso-infracciones', label: 'Tipos de Aviso', icon: '⚠️' },
               { path: '/faltas-predefinidas', label: 'Faltas Predefinidas', icon: '❌' }
+            ]
+          },
+          {
+            title: 'CATÁLOGOS MANIFIESTOS',
+            items: [
+              { path: '/vehiculos', label: 'Vehículos', icon: '🚗' },
+              { path: '/destinos-finales', label: 'Destinos Finales', icon: '🏭' },
+              { path: '/folios-reservados', label: 'Folios Reservados', icon: '📑' }
             ]
           }
         ];
@@ -80,7 +89,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {
             title: 'GESTIÓN',
             items: [
-              { path: '/infracciones', label: 'Infracciones', icon: '⚠️' }
+              { path: '/infracciones', label: 'Infracciones', icon: '⚠️' },
+              { path: '/manifiestos', label: 'Manifiestos', icon: '📄' }
             ]
           },
           {
@@ -102,7 +112,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       case 'CAPTURADOR':
         return [
           { path: '/panel-capturador', label: 'Recolecciones', icon: '📋' },
-          { path: '/reportes-capturador', label: 'Bitácoras', icon: '📊' } // ✅ AGREGADO
+          { path: '/reportes-capturador', label: 'Bitácoras', icon: '📊' }
         ];
 
       default:

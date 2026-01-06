@@ -17,6 +17,8 @@ export class LocalController {
       const plazaId = req.query.plaza_id as string | undefined;
       const includeStats = req.query.stats === 'true';
 
+      console.log('🔍 FILTRO RECIBIDO - plaza_id:', plazaId || 'NINGUNO'); // ⭐ DEBUG
+
       let locales;
       
       if (includeStats && plazaId) {
@@ -24,6 +26,8 @@ export class LocalController {
       } else {
         locales = await localService.getAll(plazaId);
       }
+
+      console.log('📦 LOCALES RETORNADOS:', locales.length); // ⭐ DEBUG
 
       res.json({
         success: true,

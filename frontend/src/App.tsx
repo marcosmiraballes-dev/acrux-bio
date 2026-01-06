@@ -26,6 +26,11 @@ import LocatariosInfracciones from './pages/LocatariosInfracciones';
 import ReglamentosInfracciones from './pages/ReglamentosInfracciones';
 import TiposAvisoInfracciones from './pages/TiposAvisoInfracciones';
 import FaltasPredefinidas from './pages/FaltasPredefinidas';
+import ListaManifiestos from './pages/ListaManifiestos';
+import Vehiculos from './pages/Vehiculos';
+import DestinosFinales from './pages/DestinosFinales';
+import FoliosReservados from './pages/FoliosReservados';
+
 
 function App() {
   return (
@@ -101,6 +106,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/vehiculos" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <MainLayout><Vehiculos /></MainLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/destinos-finales" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <MainLayout><DestinosFinales /></MainLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/folios-reservados" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'DIRECTOR']}>
+              <MainLayout><FoliosReservados /></MainLayout>
+            </ProtectedRoute>
+          } />
 
           {/* Rutas protegidas - DIRECTOR */}
           <Route
@@ -182,6 +205,13 @@ function App() {
           <Route path="/infracciones" element={
             <ProtectedRoute allowedRoles={['COORDINADOR', 'DIRECTOR', 'ADMIN']}>
               <MainLayout><ListaInfracciones /></MainLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* NUEVA RUTA - MANIFIESTOS (Director + Admin) */}
+          <Route path="/manifiestos" element={
+            <ProtectedRoute allowedRoles={['DIRECTOR', 'ADMIN']}>
+              <MainLayout><ListaManifiestos /></MainLayout>
             </ProtectedRoute>
           } />
 

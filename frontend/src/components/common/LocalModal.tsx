@@ -26,10 +26,33 @@ const LocalModal: React.FC<LocalModalProps> = ({
     contacto: '',
     telefono: '',
     email: '',
-    direccion: '', // ✅ CAMBIADO: 'notas' → 'direccion'
+    direccion: '',
+    // ========================================
+    // CAMPOS NUEVOS PARA MANIFIESTOS
+    // ========================================
+    razon_social: '',
+    rfc: '',
+    ciudad: '',
+    estado: '',
+    codigo_postal: '',
+    encargado_entrega: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  // ========================================
+  // ESTADO DE ACORDEONES (secciones colapsables)
+  // ========================================
+  const [acordeon, setAcordeon] = useState({
+    legal: false,      // Información Legal
+    ubicacion: false,  // Ubicación
+    contacto: false,   // Contacto
+    recoleccion: false // Recolección
+  });
+
+  const toggleAcordeon = (seccion: keyof typeof acordeon) => {
+    setAcordeon({ ...acordeon, [seccion]: !acordeon[seccion] });
+  };
 
   // Cargar plazas al abrir el modal
   useEffect(() => {
@@ -49,7 +72,14 @@ const LocalModal: React.FC<LocalModalProps> = ({
         contacto: local.contacto || '',
         telefono: local.telefono || '',
         email: local.email || '',
-        direccion: local.direccion || '', // ✅ CAMBIADO: 'notas' → 'direccion'
+        direccion: local.direccion || '',
+        // Campos nuevos
+        razon_social: (local as any).razon_social || '',
+        rfc: (local as any).rfc || '',
+        ciudad: (local as any).ciudad || '',
+        estado: (local as any).estado || '',
+        codigo_postal: (local as any).codigo_postal || '',
+        encargado_entrega: (local as any).encargado_entrega || '',
       });
     } else {
       // Reset form
@@ -61,7 +91,13 @@ const LocalModal: React.FC<LocalModalProps> = ({
         contacto: '',
         telefono: '',
         email: '',
-        direccion: '', // ✅ CAMBIADO: 'notas' → 'direccion'
+        direccion: '',
+        razon_social: '',
+        rfc: '',
+        ciudad: '',
+        estado: '',
+        codigo_postal: '',
+        encargado_entrega: '',
       });
     }
     setErrors({});
@@ -97,6 +133,20 @@ const LocalModal: React.FC<LocalModalProps> = ({
       newErrors.email = 'Email inválido';
     }
 
+    // ========================================
+    // VALIDACIONES NUEVAS PARA MANIFIESTOS
+    // ========================================
+    
+    // RFC - solo si se proporciona
+    if (formData.rfc && !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(formData.rfc.toUpperCase())) {
+      newErrors.rfc = 'RFC inválido. Debe tener 13 caracteres (ej: ABC123456XYZ)';
+    }
+
+    // Código Postal - solo si se proporciona
+    if (formData.codigo_postal && !/^\d{5}$/.test(formData.codigo_postal)) {
+      newErrors.codigo_postal = 'Código postal debe tener 5 dígitos';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -115,8 +165,15 @@ const LocalModal: React.FC<LocalModalProps> = ({
         contacto: formData.contacto.trim() || undefined,
         telefono: formData.telefono.trim() || undefined,
         email: formData.email.trim() || undefined,
-        direccion: formData.direccion.trim() || undefined, // ✅ CAMBIADO: 'notas' → 'direccion'
-      });
+        direccion: formData.direccion.trim() || undefined,
+        // Campos nuevos
+        razon_social: formData.razon_social.trim() || undefined,
+        rfc: formData.rfc.trim().toUpperCase() || undefined,
+        ciudad: formData.ciudad.trim() || undefined,
+        estado: formData.estado.trim() || undefined,
+        codigo_postal: formData.codigo_postal.trim() || undefined,
+        encargado_entrega: formData.encargado_entrega.trim() || undefined,
+      } as any);
       onClose();
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -144,12 +201,17 @@ const LocalModal: React.FC<LocalModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl z-10">
           <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          
+          {/* ========================================
+              SECCIÓN 1: INFORMACIÓN BÁSICA (Siempre visible)
+              ======================================== */}
+          
           {/* Nombre */}
           <div>
             <label className="label">
@@ -228,78 +290,259 @@ const LocalModal: React.FC<LocalModalProps> = ({
             />
           </div>
 
-          {/* Dirección */}
-          <div>
-            <label className="label">
-              📍 Dirección del Local
-            </label>
-            <textarea
-              value={formData.direccion}
-              onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-              className="input"
-              placeholder="Ej: Av. Constituyentes 123, Col. Centro, Playa del Carmen"
-              rows={2}
+          {/* ========================================
+              SECCIÓN 2: INFORMACIÓN LEGAL (Acordeón)
+              ======================================== */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('legal')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
               disabled={loading}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Esta dirección se utilizará en reportes y bitácoras
-            </p>
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📄</span>
+                <span className="font-semibold text-gray-700">Información Legal</span>
+                <span className="text-xs text-gray-500">(Opcional - Para manifiestos)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.legal ? '▼' : '▶'}</span>
+            </button>
+            
+            {acordeon.legal && (
+              <div className="p-4 bg-white space-y-4">
+                {/* Razón Social */}
+                <div>
+                  <label className="label">Razón Social / Nombre Legal</label>
+                  <input
+                    type="text"
+                    value={formData.razon_social}
+                    onChange={(e) => setFormData({ ...formData, razon_social: e.target.value })}
+                    className="input"
+                    placeholder="Ej: Restaurante El Sabor S.A. de C.V."
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Nombre legal o fiscal del local (para manifiestos oficiales)
+                  </p>
+                </div>
+
+                {/* RFC */}
+                <div>
+                  <label className="label">RFC</label>
+                  <input
+                    type="text"
+                    value={formData.rfc}
+                    onChange={(e) => setFormData({ ...formData, rfc: e.target.value.toUpperCase() })}
+                    className={`input ${errors.rfc ? 'border-red-500' : ''}`}
+                    placeholder="ABC123456XYZ"
+                    maxLength={13}
+                    disabled={loading}
+                  />
+                  {errors.rfc && (
+                    <p className="text-red-500 text-sm mt-1">{errors.rfc}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Registro Federal de Contribuyentes (13 caracteres)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Datos de contacto */}
-          <div className="border-t border-gray-200 pt-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Datos de Contacto (Opcional)
-            </h3>
+          {/* ========================================
+              SECCIÓN 3: UBICACIÓN (Acordeón)
+              ======================================== */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('ubicacion')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              disabled={loading}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📍</span>
+                <span className="font-semibold text-gray-700">Ubicación</span>
+                <span className="text-xs text-gray-500">(Opcional - Para manifiestos)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.ubicacion ? '▼' : '▶'}</span>
+            </button>
+            
+            {acordeon.ubicacion && (
+              <div className="p-4 bg-white space-y-4">
+                {/* Dirección */}
+                <div>
+                  <label className="label">Dirección</label>
+                  <textarea
+                    value={formData.direccion}
+                    onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                    className="input"
+                    placeholder="Ej: Av. Constituyentes 123, Col. Centro"
+                    rows={2}
+                    disabled={loading}
+                  />
+                </div>
 
-            {/* Nombre de contacto */}
-            <div className="mb-4">
-              <label className="label">Nombre del Contacto</label>
-              <input
-                type="text"
-                value={formData.contacto}
-                onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
-                className="input"
-                placeholder="Ej: María González"
-                disabled={loading}
-              />
-            </div>
+                {/* Ciudad y Estado en grid 2 columnas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Ciudad */}
+                  <div>
+                    <label className="label">Ciudad</label>
+                    <input
+                      type="text"
+                      value={formData.ciudad}
+                      onChange={(e) => setFormData({ ...formData, ciudad: e.target.value })}
+                      className="input"
+                      placeholder="Ej: Playa del Carmen"
+                      disabled={loading}
+                    />
+                  </div>
 
-            {/* Teléfono */}
-            <div className="mb-4">
-              <label className="label">Teléfono</label>
-              <input
-                type="tel"
-                value={formData.telefono}
-                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                className={`input ${errors.telefono ? 'border-red-500' : ''}`}
-                placeholder="9841234567"
-                disabled={loading}
-              />
-              {errors.telefono && (
-                <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>
-              )}
-            </div>
+                  {/* Estado */}
+                  <div>
+                    <label className="label">Estado</label>
+                    <input
+                      type="text"
+                      value={formData.estado}
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                      className="input"
+                      placeholder="Ej: Quintana Roo"
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
 
-            {/* Email */}
-            <div>
-              <label className="label">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`input ${errors.email ? 'border-red-500' : ''}`}
-                placeholder="contacto@local.com"
-                disabled={loading}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
-            </div>
+                {/* Código Postal */}
+                <div>
+                  <label className="label">Código Postal</label>
+                  <input
+                    type="text"
+                    value={formData.codigo_postal}
+                    onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value.replace(/\D/g, '') })}
+                    className={`input ${errors.codigo_postal ? 'border-red-500' : ''}`}
+                    placeholder="77710"
+                    maxLength={5}
+                    disabled={loading}
+                  />
+                  {errors.codigo_postal && (
+                    <p className="text-red-500 text-sm mt-1">{errors.codigo_postal}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    5 dígitos numéricos
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================
+              SECCIÓN 4: CONTACTO (Acordeón)
+              ======================================== */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('contacto')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              disabled={loading}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📞</span>
+                <span className="font-semibold text-gray-700">Contacto</span>
+                <span className="text-xs text-gray-500">(Opcional)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.contacto ? '▼' : '▶'}</span>
+            </button>
+            
+            {acordeon.contacto && (
+              <div className="p-4 bg-white space-y-4">
+                {/* Nombre de contacto */}
+                <div>
+                  <label className="label">Nombre del Contacto</label>
+                  <input
+                    type="text"
+                    value={formData.contacto}
+                    onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
+                    className="input"
+                    placeholder="Ej: María González"
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Teléfono */}
+                <div>
+                  <label className="label">Teléfono</label>
+                  <input
+                    type="tel"
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    className={`input ${errors.telefono ? 'border-red-500' : ''}`}
+                    placeholder="9841234567"
+                    disabled={loading}
+                  />
+                  {errors.telefono && (
+                    <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="label">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className={`input ${errors.email ? 'border-red-500' : ''}`}
+                    placeholder="contacto@local.com"
+                    disabled={loading}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================
+              SECCIÓN 5: RECOLECCIÓN (Acordeón)
+              ======================================== */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('recoleccion')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              disabled={loading}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📦</span>
+                <span className="font-semibold text-gray-700">Recolección</span>
+                <span className="text-xs text-gray-500">(Opcional - Para manifiestos)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.recoleccion ? '▼' : '▶'}</span>
+            </button>
+            
+            {acordeon.recoleccion && (
+              <div className="p-4 bg-white">
+                {/* Encargado de Entrega */}
+                <div>
+                  <label className="label">Encargado de Entrega de Residuos</label>
+                  <input
+                    type="text"
+                    value={formData.encargado_entrega}
+                    onChange={(e) => setFormData({ ...formData, encargado_entrega: e.target.value })}
+                    className="input"
+                    placeholder="Ej: Juan Pérez"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Nombre de la persona que entrega los residuos reciclables (aparecerá en manifiestos)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Botones */}
-          <div className="flex space-x-3 pt-4">
+          <div className="flex space-x-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
