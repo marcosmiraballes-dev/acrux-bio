@@ -1,7 +1,7 @@
 // backend/src/controllers/Vehiculo.controller.ts
 
 import { Request, Response } from 'express';
-import { VehiculoService } from '../services/Vehiculo.service';
+import { VehiculoService } from '../services/vehiculo.service';
 import { createVehiculoSchema, updateVehiculoSchema } from '../schemas/Vehiculo.schema';
 import { createClient } from '@supabase/supabase-js';
 

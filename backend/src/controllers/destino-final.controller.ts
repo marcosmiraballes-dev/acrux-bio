@@ -1,7 +1,7 @@
 // backend/src/controllers/Destino final.controller.ts
 
 import { Request, Response } from 'express';
-import { DestinoFinalService } from '../services/Destino final.service';
+import { DestinoFinalService } from '../services/destino-final.service';
 import { createDestinoFinalSchema, updateDestinoFinalSchema } from '../schemas/Destino final.schema';
 import { createClient } from '@supabase/supabase-js';
 
