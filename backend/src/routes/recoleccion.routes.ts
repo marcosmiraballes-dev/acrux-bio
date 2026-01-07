@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { RecoleccionController } from '../controllers/recoleccion.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { auditMiddleware } from '../middleware/audit.middleware';
 
 const router = Router();
 const recoleccionController = new RecoleccionController();
@@ -79,21 +80,36 @@ router.get('/stats/tipo', (req, res) => recoleccionController.getStatsByTipo(req
  * Crear una nueva recolección
  * Requiere autenticación - Solo ADMIN y CAPTURADOR
  */
-router.post('/', authenticate, authorize('ADMIN', 'CAPTURADOR'), (req, res) => recoleccionController.create(req, res));
+router.post('/', 
+  authenticate, 
+  authorize('ADMIN', 'CAPTURADOR'), 
+  auditMiddleware('recolecciones', 'CREATE'),
+  (req, res) => recoleccionController.create(req, res)
+);
 
 /**
  * PUT /api/recolecciones/:id
  * Actualizar una recolección
  * Requiere autenticación - Solo ADMIN y CAPTURADOR
  */
-router.put('/:id', authenticate, authorize('ADMIN', 'CAPTURADOR'), (req, res) => recoleccionController.update(req, res));
+router.put('/:id', 
+  authenticate, 
+  authorize('ADMIN', 'CAPTURADOR'), 
+  auditMiddleware('recolecciones', 'UPDATE'),
+  (req, res) => recoleccionController.update(req, res)
+);
 
 /**
  * DELETE /api/recolecciones/:id
  * Eliminar una recolección
  * Requiere autenticación - Solo ADMIN
  */
-router.delete('/:id', authenticate, authorize('ADMIN'), (req, res) => recoleccionController.delete(req, res));
+router.delete('/:id', 
+  authenticate, 
+  authorize('ADMIN'), 
+  auditMiddleware('recolecciones', 'DELETE'),
+  (req, res) => recoleccionController.delete(req, res)
+);
 
 /**
  * GET /api/recolecciones
