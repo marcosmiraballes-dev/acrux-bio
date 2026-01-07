@@ -22,6 +22,8 @@ import recolectoresRoutes from './routes/recolectores.routes';
 import vehiculosRoutes from './routes/vehiculos.routes';
 import destinosFinalesRoutes from './routes/destinos-finales.routes';
 import foliosReservadosRoutes from './routes/folios-reservados.routes';
+import logsAuditoriaRoutes from './routes/logs-auditoria.routes';
+
 
 
 dotenv.config();
@@ -68,7 +70,10 @@ app.get('/', (req, res) => {
       recolectores: '/api/recolectores',
       vehiculos: '/api/vehiculos',
       destinos_finales: '/api/destinos-finales',
-      folios_reservados: '/api/folios-reservados'
+      folios_reservados: '/api/folios-reservados',
+      logs_auditoria: '/api/logs-auditoria',
+      logs_auditoria_stats: '/api/logs-auditoria/stats',
+      logs_auditoria_limpiar: '/api/logs-auditoria/limpiar'
     }
   });
 });
@@ -95,6 +100,8 @@ app.use('/api/recolectores', recolectoresRoutes);
 app.use('/api/vehiculos', vehiculosRoutes);
 app.use('/api/destinos-finales', destinosFinalesRoutes);
 app.use('/api/folios-reservados', foliosReservadosRoutes);
+app.use('/api/logs-auditoria', logsAuditoriaRoutes);
+
 
 
 // Iniciar servidor

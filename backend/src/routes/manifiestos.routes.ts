@@ -3,6 +3,7 @@
 import { Router } from 'express';
 import { manifiestoController } from '../controllers/manifiesto.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { auditMiddleware } from '../middleware/audit.middleware'; // ⭐ AGREGADO
 
 const router = Router();
 
@@ -78,10 +79,12 @@ router.get(
  * POST /api/manifiestos
  * Crear nuevo manifiesto
  * Acceso: ADMIN, DIRECTOR
+ * ⭐ CON AUDITORÍA
  */
 router.post(
   '/',
   authorize('ADMIN', 'DIRECTOR'),
+  auditMiddleware('manifiestos', 'CREATE'), // ⭐ AGREGADO
   manifiestoController.create.bind(manifiestoController)
 );
 
@@ -93,10 +96,12 @@ router.post(
  * PATCH /api/manifiestos/:id
  * Actualizar manifiesto (solo PDF path)
  * Acceso: ADMIN, DIRECTOR
+ * ⭐ CON AUDITORÍA
  */
 router.patch(
   '/:id',
   authorize('ADMIN', 'DIRECTOR'),
+  auditMiddleware('manifiestos', 'UPDATE'), // ⭐ AGREGADO
   manifiestoController.update.bind(manifiestoController)
 );
 
@@ -108,10 +113,12 @@ router.patch(
  * DELETE /api/manifiestos/:id
  * Eliminar manifiesto
  * Acceso: SOLO ADMIN
+ * ⭐ CON AUDITORÍA
  */
 router.delete(
   '/:id',
   authorize('ADMIN'),
+  auditMiddleware('manifiestos', 'DELETE'), // ⭐ AGREGADO
   manifiestoController.delete.bind(manifiestoController)
 );
 

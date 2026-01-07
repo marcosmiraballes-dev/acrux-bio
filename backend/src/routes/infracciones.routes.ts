@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { infraccionController } from '../controllers/infraccion.controller';
 import { authenticate } from '../middleware/auth.middleware';
+import { auditMiddleware } from '../middleware/audit.middleware'; // ⭐ AGREGADO
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.get('/:id', infraccionController.getById);
 
 // POST /api/infracciones - Crear
 // Solo COORDINADOR y DIRECTOR pueden crear
+// ⭐ CON AUDITORÍA
 router.post('/', 
   authenticate, 
   (req, res, next) => {
@@ -41,10 +43,12 @@ router.post('/',
     }
     next();
   },
+  auditMiddleware('infracciones', 'CREATE'), // ⭐ AGREGADO
   infraccionController.create
 );
 
 // PUT /api/infracciones/:id - Actualizar
+// ⭐ CON AUDITORÍA
 router.put('/:id',
   authenticate,
   (req, res, next) => {
@@ -56,10 +60,12 @@ router.put('/:id',
     }
     next();
   },
+  auditMiddleware('infracciones', 'UPDATE'), // ⭐ AGREGADO
   infraccionController.update
 );
 
 // PATCH /api/infracciones/:id/resolver - Marcar como resuelta
+// ⭐ CON AUDITORÍA
 router.patch('/:id/resolver',
   authenticate,
   (req, res, next) => {
@@ -71,10 +77,12 @@ router.patch('/:id/resolver',
     }
     next();
   },
+  auditMiddleware('infracciones', 'UPDATE'), // ⭐ AGREGADO
   infraccionController.resolver
 );
 
 // PATCH /api/infracciones/:id/cancelar - Cancelar infracción
+// ⭐ CON AUDITORÍA
 router.patch('/:id/cancelar',
   authenticate,
   (req, res, next) => {
@@ -86,10 +94,12 @@ router.patch('/:id/cancelar',
     }
     next();
   },
+  auditMiddleware('infracciones', 'UPDATE'), // ⭐ AGREGADO
   infraccionController.cancelar
 );
 
 // DELETE /api/infracciones/:id - Eliminar
+// ⭐ CON AUDITORÍA
 router.delete('/:id',
   authenticate,
   (req, res, next) => {
@@ -101,6 +111,7 @@ router.delete('/:id',
     }
     next();
   },
+  auditMiddleware('infracciones', 'DELETE'), // ⭐ AGREGADO
   infraccionController.delete
 );
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UsuarioController } from '../controllers/usuario.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { auditMiddleware } from '../middleware/audit.middleware'; // ⭐ AGREGADO
 
 const router = Router();
 const usuarioController = new UsuarioController();
@@ -16,22 +17,25 @@ router.get('/', authenticate, authorize('ADMIN'), (req, res) => usuarioControlle
  * POST /api/usuarios
  * Crear un nuevo usuario
  * Requiere autenticación - Solo ADMIN
+ * ⭐ CON AUDITORÍA
  */
-router.post('/', authenticate, authorize('ADMIN'), (req, res) => usuarioController.create(req, res));
+router.post('/', authenticate, authorize('ADMIN'), auditMiddleware('usuarios', 'CREATE'), (req, res) => usuarioController.create(req, res));
 
 /**
  * PUT /api/usuarios/:id
  * Actualizar un usuario
  * Requiere autenticación - Solo ADMIN
+ * ⭐ CON AUDITORÍA
  */
-router.put('/:id', authenticate, authorize('ADMIN'), (req, res) => usuarioController.update(req, res));
+router.put('/:id', authenticate, authorize('ADMIN'), auditMiddleware('usuarios', 'UPDATE'), (req, res) => usuarioController.update(req, res));
 
 /**
  * DELETE /api/usuarios/:id
  * Eliminar un usuario
  * Requiere autenticación - Solo ADMIN
+ * ⭐ CON AUDITORÍA
  */
-router.delete('/:id', authenticate, authorize('ADMIN'), (req, res) => usuarioController.delete(req, res));
+router.delete('/:id', authenticate, authorize('ADMIN'), auditMiddleware('usuarios', 'DELETE'), (req, res) => usuarioController.delete(req, res));
 
 /**
  * GET /api/usuarios/:id

@@ -1,3 +1,5 @@
+// frontend/src/components/layout/MainLayout.tsx
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -65,6 +67,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               { path: '/vehiculos', label: 'Vehículos', icon: '🚗' },
               { path: '/destinos-finales', label: 'Destinos Finales', icon: '🏭' },
               { path: '/folios-reservados', label: 'Folios Reservados', icon: '📑' }
+            ]
+          },
+          {
+            title: 'SISTEMA', // ⭐ NUEVA SECCIÓN
+            items: [
+              { path: '/logs-auditoria', label: 'Logs de Auditoría', icon: '📋' } // ⭐ NUEVO
             ]
           }
         ];

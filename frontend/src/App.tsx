@@ -30,6 +30,8 @@ import ListaManifiestos from './pages/ListaManifiestos';
 import Vehiculos from './pages/Vehiculos';
 import DestinosFinales from './pages/DestinosFinales';
 import FoliosReservados from './pages/FoliosReservados';
+import LogsAuditoria from './pages/LogsAuditoria';
+
 
 
 function App() {
@@ -50,6 +52,17 @@ function App() {
                 </MainLayout>
               </ProtectedRoute>
             }
+          />
+
+          <Route 
+            path="/logs-auditoria" 
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <MainLayout>
+                  <LogsAuditoria />
+                </MainLayout>
+              </ProtectedRoute>
+            } 
           />
 
           <Route

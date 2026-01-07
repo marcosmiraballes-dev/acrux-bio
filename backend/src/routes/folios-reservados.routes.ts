@@ -3,6 +3,7 @@
 import { Router } from 'express';
 import { folioReservadoController } from '../controllers/folio-reservado.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { auditMiddleware } from '../middleware/audit.middleware'; // ⭐ AGREGADO
 
 const router = Router();
 
@@ -45,23 +46,29 @@ router.get(
 );
 
 // POST /api/folios-reservados - ADMIN y DIRECTOR (máx 10 por mes)
+// ⭐ CON AUDITORÍA
 router.post(
   '/',
   authorize('ADMIN', 'DIRECTOR'),
+  auditMiddleware('folios_reservados', 'CREATE'), // ⭐ AGREGADO
   folioReservadoController.create.bind(folioReservadoController)
 );
 
 // PUT /api/folios-reservados/:id - ADMIN y DIRECTOR
+// ⭐ CON AUDITORÍA
 router.put(
   '/:id',
   authorize('ADMIN', 'DIRECTOR'),
+  auditMiddleware('folios_reservados', 'UPDATE'), // ⭐ AGREGADO
   folioReservadoController.update.bind(folioReservadoController)
 );
 
 // DELETE /api/folios-reservados/:id - Solo ADMIN
+// ⭐ CON AUDITORÍA
 router.delete(
   '/:id',
   authorize('ADMIN'),
+  auditMiddleware('folios_reservados', 'DELETE'), // ⭐ AGREGADO
   folioReservadoController.delete.bind(folioReservadoController)
 );
 
