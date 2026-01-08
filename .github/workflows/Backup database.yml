@@ -13,19 +13,6 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # Instalación manual de Supabase CLI
-      - name: 🔧 Instalar Supabase CLI
-        run: |
-          # Descargar última versión
-          VERSION="1.187.10"
-          wget -q "https://github.com/supabase/cli/releases/download/v${VERSION}/supabase_${VERSION}_linux_amd64.tar.gz"
-          tar -xzf "supabase_${VERSION}_linux_amd64.tar.gz"
-          sudo mv supabase /usr/local/bin/
-          sudo chmod +x /usr/local/bin/supabase
-          rm "supabase_${VERSION}_linux_amd64.tar.gz"
-          # Verificar que existe
-          ls -la /usr/local/bin/supabase
-
       - name: 📁 Crear carpeta backups
         run: mkdir -p backups
 
@@ -34,32 +21,25 @@ jobs:
           echo "BACKUP_DATE=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
           echo "BACKUP_DATE_SIMPLE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
-      - name: 👥 Backup de Roles
-        run: |
-          supabase db dump \
-            --db-url "${{ secrets.SUPABASE_DB_URL }}" \
-            -f backups/roles_${{ env.BACKUP_DATE }}.sql \
-            --role-only
-        continue-on-error: true
-
       - name: 🏗️ Backup de Schema
         run: |
-          supabase db dump \
-            --db-url "${{ secrets.SUPABASE_DB_URL }}" \
-            -f backups/schema_${{ env.BACKUP_DATE }}.sql \
-            --schema public
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
+            --schema-only \
+            --no-owner \
+            --no-acl \
+            -f backups/schema_${{ env.BACKUP_DATE }}.sql
 
       - name: 💾 Backup de Datos
         run: |
-          supabase db dump \
-            --db-url "${{ secrets.SUPABASE_DB_URL }}" \
-            -f backups/data_${{ env.BACKUP_DATE }}.sql \
-            --use-copy \
-            --data-only
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
+            --data-only \
+            --no-owner \
+            --no-acl \
+            -f backups/data_${{ env.BACKUP_DATE }}.sql
 
       - name: 📝 Crear README del backup
         run: |
-          cat > backups/README_${{ env.BACKUP_DATE }}.md << 'EOFMARKER'
+          cat > backups/README_${{ env.BACKUP_DATE }}.md << 'EOF'
           # 🔄 Backup Acrux-Bio - ${{ env.BACKUP_DATE_SIMPLE }}
 
           ## 📊 Información del Backup
@@ -67,52 +47,41 @@ jobs:
           - **Fecha:** ${{ env.BACKUP_DATE }}
           - **Sistema:** Acrux-Bio
           - **Cliente:** Elefante Verde
-          - **Triggered by:** ${{ github.event_name }}
 
           ## 📦 Archivos Incluidos
 
-          1. `roles_${{ env.BACKUP_DATE }}.sql` - Roles y permisos
-          2. `schema_${{ env.BACKUP_DATE }}.sql` - Estructura de tablas
-          3. `data_${{ env.BACKUP_DATE }}.sql` - Todos los datos
+          1. `schema_${{ env.BACKUP_DATE }}.sql` - Estructura de tablas
+          2. `data_${{ env.BACKUP_DATE }}.sql` - Todos los datos
 
           ## 🔄 Cómo Restaurar
 
-          ### Desde Supabase CLI:
           ```bash
-          supabase db execute --db-url "$SUPABASE_DB_URL" -f schema_${{ env.BACKUP_DATE }}.sql
-          supabase db execute --db-url "$SUPABASE_DB_URL" -f data_${{ env.BACKUP_DATE }}.sql
-          ```
-
-          ### Desde psql:
-          ```bash
+          # Restaurar schema
           psql "$SUPABASE_DB_URL" < schema_${{ env.BACKUP_DATE }}.sql
+          
+          # Restaurar datos
           psql "$SUPABASE_DB_URL" < data_${{ env.BACKUP_DATE }}.sql
           ```
 
           ## ⚠️ Importante
 
-          - Backup completo del sistema Acrux-Bio
-          - 40,508+ recolecciones
-          - 463 locales, 4 plazas, 11 tipos de residuos
-          - Logs de auditoría incluidos
-
+          - Backup completo del sistema
+          - 40,508+ recolecciones incluidas
+          
           ---
-          *Backup generado automáticamente por GitHub Actions*
-          EOFMARKER
+          *Backup generado por GitHub Actions*
+          EOF
 
       - name: 🗜️ Comprimir backups
         run: |
           cd backups
-          tar -czf backup_${{ env.BACKUP_DATE }}.tar.gz *.sql README_${{ env.BACKUP_DATE }}.md
-          rm *.sql
+          tar -czf backup_${{ env.BACKUP_DATE }}.tar.gz *.sql *.md
+          rm *.sql *.md
           cd ..
 
       - name: 🧹 Limpiar backups antiguos
         run: |
-          cd backups
-          find . -name "backup_*.tar.gz" -mtime +30 -delete
-          find . -name "README_*.md" -mtime +30 -delete
-          cd ..
+          find backups -name "backup_*.tar.gz" -mtime +30 -delete
 
       - name: 💾 Guardar backup en GitHub
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -121,17 +90,13 @@ jobs:
           file_pattern: 'backups/*'
           commit_user_name: "Acrux-Bio Backup Bot"
           commit_user_email: "backup@acrux-bio.com"
-          commit_author: "Acrux-Bio <backup@acrux-bio.com>"
 
       - name: ✅ Backup completado
         if: success()
         run: |
-          echo "✅ Backup completado exitosamente"
-          echo "📁 Archivo: backup_${{ env.BACKUP_DATE }}.tar.gz"
+          echo "✅ Backup completado"
           ls -lh backups/
 
       - name: ❌ Error en backup
         if: failure()
-        run: |
-          echo "❌ Error durante el backup"
-          echo "Revisa los logs arriba para más detalles"
+        run: echo "❌ Error en backup"
