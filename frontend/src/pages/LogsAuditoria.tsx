@@ -1,76 +1,82 @@
-// frontend/src/pages/LogsAuditoria.tsx
-
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 
-interface Log {
+interface LogAuditoria {
   id: string;
-  usuario_nombre: string;
-  usuario_email: string;
-  usuario_rol: string;
+  usuario_id: string | null;
+  usuario_nombre: string | null;
+  usuario_email: string | null;
+  usuario_rol: string | null;
   accion: string;
   modulo: string;
-  descripcion: string;
-  ip_address: string;
+  registro_id: string | null;
+  tabla: string | null;
+  datos_anteriores: any;
+  datos_nuevos: any;
+  descripcion: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  endpoint: string | null;
+  metodo: string | null;
   created_at: string;
 }
 
-interface Stats {
-  total_logs: string;
-  logs_hoy: string;
-  logs_mes: string;
-  accion_mas_comun: string;
-  modulo_mas_usado: string;
-  usuario_mas_activo: string;
+interface LogEstadisticas {
+  total_logs: number;
+  logs_hoy: number;
+  logs_mes: number;
+  accion_mas_comun: string | null;
+  modulo_mas_usado: string | null;
+  usuario_mas_activo: string | null;
 }
 
 const LogsAuditoria: React.FC = () => {
-  const [logs, setLogs] = useState<Log[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
+  const [logs, setLogs] = useState<LogAuditoria[]>([]);
+  const [estadisticas, setEstadisticas] = useState<LogEstadisticas | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pagina, setPagina] = useState(1);
+  const [totalRegistros, setTotalRegistros] = useState(0);
+  const registrosPorPagina = 100;
+
   const [filtros, setFiltros] = useState({
     accion: '',
     modulo: '',
     fecha_desde: '',
     fecha_hasta: ''
   });
-  const [offset, setOffset] = useState(0);
-  const limit = 50;
 
-  // Cargar estadísticas al montar
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtros);
+
   useEffect(() => {
-    fetchStats();
-  }, []);
+    cargarEstadisticas();
+    cargarLogs();
+  }, [pagina, filtrosAplicados]);
 
-  // Cargar logs cuando cambian filtros u offset
-  useEffect(() => {
-    fetchLogs();
-  }, [offset]);
-
-  const fetchStats = async () => {
+  const cargarEstadisticas = async () => {
     try {
       const response = await api.get('/logs-auditoria/stats');
-      setStats(response.data.data);
+      setEstadisticas(response.data.data);
     } catch (error) {
       console.error('Error cargando estadísticas:', error);
     }
   };
 
-  const fetchLogs = async () => {
+  const cargarLogs = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filtros.accion) params.append('accion', filtros.accion);
-      if (filtros.modulo) params.append('modulo', filtros.modulo);
-      if (filtros.fecha_desde) params.append('fecha_desde', filtros.fecha_desde);
-      if (filtros.fecha_hasta) params.append('fecha_hasta', filtros.fecha_hasta);
-      params.append('limit', limit.toString());
-      params.append('offset', offset.toString());
+      const params: any = {
+        limit: registrosPorPagina,
+        offset: (pagina - 1) * registrosPorPagina
+      };
 
-      const response = await api.get(`/logs-auditoria?${params}`);
+      if (filtrosAplicados.accion) params.accion = filtrosAplicados.accion;
+      if (filtrosAplicados.modulo) params.modulo = filtrosAplicados.modulo;
+      if (filtrosAplicados.fecha_desde) params.fecha_desde = filtrosAplicados.fecha_desde;
+      if (filtrosAplicados.fecha_hasta) params.fecha_hasta = filtrosAplicados.fecha_hasta;
+
+      const response = await api.get('/logs-auditoria', { params });
       setLogs(response.data.data);
-      setTotal(response.data.pagination.total);
+      setTotalRegistros(response.data.pagination.total);
     } catch (error) {
       console.error('Error cargando logs:', error);
     } finally {
@@ -78,261 +84,368 @@ const LogsAuditoria: React.FC = () => {
     }
   };
 
-  const handleAplicarFiltros = () => {
-    setOffset(0); // Reset a primera página
-    fetchLogs();
+  const aplicarFiltros = () => {
+    setFiltrosAplicados(filtros);
+    setPagina(1);
   };
 
-  const handleLimpiarFiltros = () => {
-    setFiltros({ accion: '', modulo: '', fecha_desde: '', fecha_hasta: '' });
-    setOffset(0);
-    setTimeout(() => fetchLogs(), 100);
+  const limpiarFiltros = () => {
+    const filtrosVacios = { accion: '', modulo: '', fecha_desde: '', fecha_hasta: '' };
+    setFiltros(filtrosVacios);
+    setFiltrosAplicados(filtrosVacios);
+    setPagina(1);
   };
 
-  const handleLimpiarLogsAntiguos = async () => {
-    if (!window.confirm('¿Estás seguro de eliminar logs con más de 1 año de antigüedad?')) {
-      return;
+  const handleImprimir = () => {
+    window.print();
+  };
+
+  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+
+  const getAccionBgColor = (accion: string): string => {
+    switch (accion) {
+      case 'CREATE': return '#e8f5e9';
+      case 'UPDATE': return '#e3f2fd';
+      case 'DELETE': return '#ffebee';
+      case 'LOGIN': return '#f3e5f5';
+      case 'LOGOUT': return '#f5f5f5';
+      default: return '#ffffff';
     }
-
-    try {
-      const response = await api.post('/logs-auditoria/limpiar');
-      alert(response.data.message);
-      fetchLogs();
-      fetchStats();
-    } catch (error: any) {
-      console.error('Error limpiando logs:', error);
-      alert('Error limpiando logs antiguos');
-    }
   };
 
-  const getAccionBadge = (accion: string) => {
-    const colors: Record<string, string> = {
-      CREATE: 'bg-green-100 text-green-800',
-      UPDATE: 'bg-blue-100 text-blue-800',
-      DELETE: 'bg-red-100 text-red-800',
-      LOGIN: 'bg-purple-100 text-purple-800',
-      LOGOUT: 'bg-gray-100 text-gray-800',
-      VIEW: 'bg-yellow-100 text-yellow-800'
-    };
-    return colors[accion] || 'bg-gray-100 text-gray-800';
+  const truncateText = (text: string | null, maxLength: number = 50): string => {
+    if (!text) return '-';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  const formatFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleString('es-MX', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
+  if (loading && logs.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-gray-600">Cargando logs de auditoría...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">📋 Logs de Auditoría</h1>
-        <button
-          onClick={handleLimpiarLogsAntiguos}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-        >
-          🧹 Limpiar Logs Antiguos
-        </button>
-      </div>
+      {/* Estilos para impresión - MEJORADOS */}
+      <style>{`
+        @media print {
+          @page {
+            size: landscape;
+            margin: 10mm;
+          }
+          
+          body * {
+            visibility: hidden;
+          }
+          
+          .print-area, .print-area * {
+            visibility: visible;
+          }
+          
+          .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          
+          .no-print {
+            display: none !important;
+          }
+          
+          .print-header {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+          }
+          
+          .print-header h1 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0;
+          }
+          
+          .print-header p {
+            font-size: 9pt;
+            margin: 2px 0;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 10px;
+          }
+          
+          th {
+            background-color: #047857 !important;
+            color: white !important;
+            font-weight: bold;
+            padding: 6px 4px;
+            text-align: left;
+            border: 1px solid #000;
+          }
+          
+          td {
+            padding: 4px;
+            border: 1px solid #ccc;
+            vertical-align: top;
+          }
+          
+          tr:nth-child(even) {
+            background-color: #f9f9f9 !important;
+          }
+          
+          .descripcion-cell {
+            max-width: 250px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 7pt;
+            line-height: 1.2;
+          }
+          
+          .fecha-cell {
+            white-space: nowrap;
+            font-size: 7pt;
+          }
+          
+          .accion-cell {
+            text-align: center;
+            font-weight: bold;
+          }
+          
+          .page-break {
+            page-break-after: always;
+          }
+          
+          /* Ocultar la barra de scroll en impresión */
+          .overflow-x-auto {
+            overflow: visible !important;
+          }
+        }
+      `}</style>
 
-      {/* Estadísticas */}
-      {stats && (
+      {/* Header - NO IMPRIMIR */}
+      <div className="mb-6 no-print">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">📋 Logs de Auditoría</h1>
+          <button
+            onClick={handleImprimir}
+            className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-2"
+          >
+            🖨️ Imprimir
+          </button>
+        </div>
+
+        {/* Estadísticas compactas */}
         <div className="grid grid-cols-6 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Total Logs</div>
-            <div className="text-2xl font-bold text-emerald-700">{stats.total_logs}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-lg font-bold">{estadisticas?.total_logs || 0}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Hoy</div>
-            <div className="text-2xl font-bold text-blue-700">{stats.logs_hoy}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Hoy</p>
+            <p className="text-lg font-bold text-green-600">{estadisticas?.logs_hoy || 0}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Este Mes</div>
-            <div className="text-2xl font-bold text-purple-700">{stats.logs_mes}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Este Mes</p>
+            <p className="text-lg font-bold text-purple-600">{estadisticas?.logs_mes || 0}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Acción + Común</div>
-            <div className="text-lg font-bold text-gray-800">{stats.accion_mas_comun}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Acción +Común</p>
+            <p className="text-sm font-bold">{estadisticas?.accion_mas_comun || 'N/A'}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Módulo + Usado</div>
-            <div className="text-lg font-bold text-gray-800">{stats.modulo_mas_usado}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Módulo +Usado</p>
+            <p className="text-sm font-bold">{estadisticas?.modulo_mas_usado || 'N/A'}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Usuario + Activo</div>
-            <div className="text-lg font-bold text-gray-800">{stats.usuario_mas_activo}</div>
+          <div className="bg-white border p-3 text-center">
+            <p className="text-xs text-gray-500">Usuario +Activo</p>
+            <p className="text-sm font-bold">{estadisticas?.usuario_mas_activo || 'N/A'}</p>
           </div>
         </div>
-      )}
 
-      {/* Filtros */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">Acción</label>
+        {/* Filtros compactos */}
+        <div className="bg-white border p-4 mb-4">
+          <h3 className="text-sm font-semibold mb-3">Filtros</h3>
+          <div className="grid grid-cols-4 gap-3 mb-3">
             <select
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               value={filtros.accion}
-              onChange={(e) => setFiltros({ ...filtros, accion: e.target.value })}
+              onChange={(e) => setFiltros({...filtros, accion: e.target.value})}
+              className="border rounded px-2 py-1 text-sm"
             >
-              <option value="">Todas</option>
+              <option value="">Todas las acciones</option>
               <option value="CREATE">CREATE</option>
               <option value="UPDATE">UPDATE</option>
               <option value="DELETE">DELETE</option>
               <option value="LOGIN">LOGIN</option>
               <option value="LOGOUT">LOGOUT</option>
-              <option value="VIEW">VIEW</option>
             </select>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">Módulo</label>
             <select
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               value={filtros.modulo}
-              onChange={(e) => setFiltros({ ...filtros, modulo: e.target.value })}
+              onChange={(e) => setFiltros({...filtros, modulo: e.target.value})}
+              className="border rounded px-2 py-1 text-sm"
             >
-              <option value="">Todos</option>
-              <option value="auth">Autenticación</option>
-              <option value="usuarios">Usuarios</option>
-              <option value="recolecciones">Recolecciones</option>
-              <option value="manifiestos">Manifiestos</option>
-              <option value="infracciones">Infracciones</option>
-              <option value="plazas">Plazas</option>
-              <option value="locales">Locales</option>
+              <option value="">Todos los módulos</option>
+              <option value="auth">auth</option>
+              <option value="usuarios">usuarios</option>
+              <option value="manifiestos">manifiestos</option>
+              <option value="infracciones">infracciones</option>
+              <option value="recolecciones">recolecciones</option>
+              <option value="plazas">plazas</option>
+              <option value="locales">locales</option>
+              <option value="tipos_residuos">tipos_residuos</option>
+              <option value="vehiculos">vehiculos</option>
+              <option value="destinos_finales">destinos_finales</option>
+              <option value="folios_reservados">folios_reservados</option>
             </select>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">Desde</label>
             <input
               type="date"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               value={filtros.fecha_desde}
-              onChange={(e) => setFiltros({ ...filtros, fecha_desde: e.target.value })}
+              onChange={(e) => setFiltros({...filtros, fecha_desde: e.target.value})}
+              className="border rounded px-2 py-1 text-sm"
+              placeholder="Desde"
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">Hasta</label>
             <input
               type="date"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               value={filtros.fecha_hasta}
-              onChange={(e) => setFiltros({ ...filtros, fecha_hasta: e.target.value })}
+              onChange={(e) => setFiltros({...filtros, fecha_hasta: e.target.value})}
+              className="border rounded px-2 py-1 text-sm"
+              placeholder="Hasta"
             />
           </div>
-        </div>
 
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={handleAplicarFiltros}
-            className="bg-emerald-700 text-white px-6 py-2 rounded-lg hover:bg-emerald-800 font-medium"
-          >
-            Aplicar Filtros
-          </button>
-          <button
-            onClick={handleLimpiarFiltros}
-            className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 font-medium"
-          >
-            Limpiar
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={aplicarFiltros}
+              className="bg-emerald-700 text-white px-4 py-1 rounded hover:bg-emerald-800 text-sm"
+            >
+              Aplicar
+            </button>
+            <button
+              onClick={limpiarFiltros}
+              className="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 text-sm"
+            >
+              Limpiar
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tabla de logs */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700 mx-auto mb-4"></div>
-            Cargando logs...
-          </div>
-        ) : logs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No se encontraron logs con los filtros seleccionados
-          </div>
-        ) : (
-          <>
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha/Hora
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Usuario
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acción
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Módulo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descripción
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    IP
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatFecha(log.created_at)}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="font-medium text-gray-900">{log.usuario_nombre}</div>
-                      <div className="text-gray-500 text-xs">{log.usuario_email}</div>
-                      <div className="text-gray-400 text-xs">{log.usuario_rol}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getAccionBadge(log.accion)}`}>
-                        {log.accion}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                      {log.modulo}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{log.descripcion}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                      {log.ip_address}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Tabla - ÁREA DE IMPRESIÓN MEJORADA */}
+      <div className="print-area">
+        {/* Header para impresión - MEJORADO */}
+        <div className="print-header" style={{ display: 'none' }}>
+          <h1>LOGS DE AUDITORÍA - SISTEMA ACRUX-BIO</h1>
+          <p>Elefante Verde - Estrategias Ambientales</p>
+          <p>Generado: {new Date().toLocaleString('es-MX', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+          <p>Página {pagina} de {totalPaginas} | Total registros: {totalRegistros}</p>
+          {filtrosAplicados.accion && <p>Filtro Acción: {filtrosAplicados.accion}</p>}
+          {filtrosAplicados.modulo && <p>Filtro Módulo: {filtrosAplicados.modulo}</p>}
+        </div>
 
-            {/* Paginación */}
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                Mostrando {offset + 1} - {Math.min(offset + limit, total)} de {total} registros
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setOffset(Math.max(0, offset - limit))}
-                  disabled={offset === 0}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Tabla mejorada para impresión */}
+        <div className="overflow-x-auto overflow-y-auto bg-white border" style={{ maxHeight: '600px' }}>
+          <table className="min-w-full text-xs">
+            <thead className="sticky top-0 z-10 bg-gray-100">
+              <tr>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">#</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Fecha/Hora</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Usuario</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Rol</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Acción</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Módulo</th>
+                <th className="border px-2 py-2 text-left font-semibold bg-emerald-700 text-white">Descripción Detallada</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log, index) => (
+                <tr 
+                  key={log.id}
+                  style={{ backgroundColor: getAccionBgColor(log.accion) }}
+                  className="hover:bg-gray-50"
                 >
-                  ← Anterior
-                </button>
-                <button
-                  onClick={() => setOffset(offset + limit)}
-                  disabled={offset + limit >= total}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Siguiente →
-                </button>
-              </div>
-            </div>
-          </>
+                  <td className="border px-2 py-2 text-center">
+                    {(pagina - 1) * registrosPorPagina + index + 1}
+                  </td>
+                  <td className="border px-2 py-2 whitespace-nowrap font-mono fecha-cell">
+                    {new Date(log.created_at).toLocaleString('es-MX', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
+                  </td>
+                  <td className="border px-2 py-2">
+                    <div>
+                      <p className="font-semibold">{log.usuario_nombre || '-'}</p>
+                      <p className="text-xs text-gray-600 font-mono">{log.usuario_email || '-'}</p>
+                    </div>
+                  </td>
+                  <td className="border px-2 py-2 text-center">
+                    <span className="font-semibold text-xs">{log.usuario_rol || '-'}</span>
+                  </td>
+                  <td className="border px-2 py-2 text-center accion-cell">
+                    <span className="font-bold text-xs">{log.accion}</span>
+                  </td>
+                  <td className="border px-2 py-2">
+                    <span className="text-xs">{log.modulo}</span>
+                  </td>
+                  <td className="border px-2 py-2 descripcion-cell">
+                    <div style={{ whiteSpace: 'pre-wrap', fontSize: '10px', lineHeight: '1.3' }}>
+                      {log.descripcion || '-'}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {logs.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No se encontraron registros con los filtros aplicados.
+          </div>
         )}
+      </div>
+
+      {/* Paginación - NO IMPRIMIR */}
+      <div className="flex justify-between items-center mt-4 no-print">
+        <p className="text-sm text-gray-600">
+          Mostrando {((pagina - 1) * registrosPorPagina) + 1} - {Math.min(pagina * registrosPorPagina, totalRegistros)} de {totalRegistros} registros
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPagina(p => Math.max(1, p - 1))}
+            disabled={pagina === 1}
+            className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            ← Anterior
+          </button>
+          <span className="px-4 py-2 border rounded bg-gray-50">
+            Página {pagina} de {totalPaginas}
+          </span>
+          <button
+            onClick={() => setPagina(p => p + 1)}
+            disabled={pagina >= totalPaginas}
+            className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Siguiente →
+          </button>
+        </div>
       </div>
     </div>
   );
