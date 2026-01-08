@@ -20,11 +20,11 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Instalar Supabase CLI
+      # 2. Instalar Supabase CLI (CORREGIDO)
       - name: 🔧 Instalar Supabase CLI
         run: |
-          curl -fsSL https://github.com/supabase/cli/releases/download/v1.123.4/supabase_1.123.4_linux_amd64.tar.gz | tar -xz
-          sudo mv supabase /usr/local/bin/
+          curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # 3. Crear carpeta de backups si no existe
       - name: 📁 Crear carpeta backups
@@ -84,6 +84,7 @@ jobs:
           ## 🔄 Cómo Restaurar
 
           ### Desde Supabase CLI:
+
           \`\`\`bash
           # 1. Restaurar schema
           supabase db execute --db-url "\$SUPABASE_DB_URL" -f schema_${{ env.BACKUP_DATE }}.sql
@@ -93,6 +94,7 @@ jobs:
           \`\`\`
 
           ### Desde psql:
+
           \`\`\`bash
           # Restaurar todo de una vez
           psql "\$SUPABASE_DB_URL" < schema_${{ env.BACKUP_DATE }}.sql
