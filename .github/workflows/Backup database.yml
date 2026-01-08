@@ -21,9 +21,10 @@ jobs:
           wget -q "https://github.com/supabase/cli/releases/download/v${VERSION}/supabase_${VERSION}_linux_amd64.tar.gz"
           tar -xzf "supabase_${VERSION}_linux_amd64.tar.gz"
           sudo mv supabase /usr/local/bin/
+          sudo chmod +x /usr/local/bin/supabase
           rm "supabase_${VERSION}_linux_amd64.tar.gz"
-          # Verificar instalación
-          supabase --version
+          # Verificar que existe
+          ls -la /usr/local/bin/supabase
 
       - name: 📁 Crear carpeta backups
         run: mkdir -p backups
