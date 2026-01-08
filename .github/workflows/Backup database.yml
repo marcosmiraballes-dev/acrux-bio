@@ -23,19 +23,27 @@ jobs:
 
       - name: 🏗️ Backup de Schema
         run: |
+          export PGCONNECT_TIMEOUT=30
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
             --schema-only \
             --no-owner \
             --no-acl \
+            --verbose \
             -f backups/schema_${{ env.BACKUP_DATE }}.sql
+        env:
+          PGSSLMODE: require
 
       - name: 💾 Backup de Datos
         run: |
+          export PGCONNECT_TIMEOUT=30
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
             --data-only \
             --no-owner \
             --no-acl \
+            --verbose \
             -f backups/data_${{ env.BACKUP_DATE }}.sql
+        env:
+          PGSSLMODE: require
 
       - name: 📝 Crear README del backup
         run: |
