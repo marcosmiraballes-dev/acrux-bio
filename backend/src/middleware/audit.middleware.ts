@@ -28,8 +28,14 @@ const generarDescripcionDetallada = (
           const residuos = datos_nuevos.detalle_recolecciones
             .filter((d: any) => (d.kilos || 0) > 0)
             .map((d: any) => {
-              const tipo = d.tipos_residuos?.tipo || d.tipo_residuo || 'Residuo';
-              return `${tipo}: ${d.kilos}kg`;
+              // ✅ CORREGIDO: El campo es 'nombre' no 'tipo'
+              const tipo = d.tipos_residuos?.nombre ||      // ✅ Campo correcto
+                          d.tipo_residuo_nombre ||           
+                          d.tipos_residuos?.tipo ||          // Por si cambia en el futuro
+                          d.tipo ||                          
+                          'Residuo desconocido';             
+              
+              return `${tipo}: ${parseFloat(d.kilos).toFixed(1)}kg`;
             })
             .join(', ');
           
