@@ -20,11 +20,14 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Instalar Supabase CLI (CORREGIDO)
+      # 2. Instalar Supabase CLI (CORREGIDO v2)
       - name: 🔧 Instalar Supabase CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
+          export PATH="$HOME/.local/bin:$PATH"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          # Verificar instalación
+          $HOME/.local/bin/supabase --version
 
       # 3. Crear carpeta de backups si no existe
       - name: 📁 Crear carpeta backups
@@ -39,7 +42,7 @@ jobs:
       # 5. Backup: Roles (usuarios de PostgreSQL)
       - name: 👥 Backup de Roles
         run: |
-          supabase db dump \
+          $HOME/.local/bin/supabase db dump \
             --db-url "${{ secrets.SUPABASE_DB_URL }}" \
             -f backups/roles_${{ env.BACKUP_DATE }}.sql \
             --role-only
@@ -48,7 +51,7 @@ jobs:
       # 6. Backup: Schema (estructura de tablas)
       - name: 🏗️ Backup de Schema
         run: |
-          supabase db dump \
+          $HOME/.local/bin/supabase db dump \
             --db-url "${{ secrets.SUPABASE_DB_URL }}" \
             -f backups/schema_${{ env.BACKUP_DATE }}.sql \
             --schema public
@@ -56,7 +59,7 @@ jobs:
       # 7. Backup: Data (todos los datos)
       - name: 💾 Backup de Datos
         run: |
-          supabase db dump \
+          $HOME/.local/bin/supabase db dump \
             --db-url "${{ secrets.SUPABASE_DB_URL }}" \
             -f backups/data_${{ env.BACKUP_DATE }}.sql \
             --use-copy \
