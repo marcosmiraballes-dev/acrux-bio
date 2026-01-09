@@ -148,7 +148,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <h1 className="font-bold text-base leading-tight truncate">Elefante Verde</h1>
+                <h1 className="font-bold text-base leading-tight truncate">Elefantes Verdes</h1>
                 <p className="text-xs text-primary-200 leading-tight">Acrux-Bio - Sistema de trazabilidad</p>
               </div>
             )}
