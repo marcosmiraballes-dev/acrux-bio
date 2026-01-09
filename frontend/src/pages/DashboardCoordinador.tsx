@@ -186,11 +186,20 @@ const DashboardCoordinador: React.FC = () => {
 
   return (
     <div className="pb-8">
-      {/* Header */}
-      <div className="mb-6">
+    {/* Header */}
+    <div className="mb-6">
+      {/* Desktop - Header grande */}
+      <div className="hidden sm:block">
         <h1 className="text-3xl font-bold text-gray-800">📊 Dashboard Coordinador</h1>
         <p className="text-gray-600 mt-1">Bienvenido, {user?.nombre} - Panel de Control Operativo</p>
       </div>
+      
+      {/* Mobile - Header compacto */}
+      <div className="block sm:hidden">
+        <h1 className="text-lg font-bold text-gray-800">📊 Dashboard</h1>
+        <p className="text-sm text-gray-600 mt-1">{user?.nombre}</p>
+      </div>
+    </div>
 
       {/* Filtros */}
       <div className="card mb-6">
