@@ -88,12 +88,16 @@ class LogAuditoriaService {
       query = query.eq('modulo', filtros.modulo);
     }
 
+    // ⭐ FILTRO DE FECHA DESDE - Buscar desde las 00:00:00
     if (filtros?.fecha_desde) {
-      query = query.gte('created_at', filtros.fecha_desde);
+      const fechaDesdeCompleta = `${filtros.fecha_desde}T00:00:00.000Z`;
+      query = query.gte('created_at', fechaDesdeCompleta);
     }
 
+    // ⭐ FILTRO DE FECHA HASTA - Buscar hasta las 23:59:59
     if (filtros?.fecha_hasta) {
-      query = query.lte('created_at', filtros.fecha_hasta);
+      const fechaHastaCompleta = `${filtros.fecha_hasta}T23:59:59.999Z`;
+      query = query.lte('created_at', fechaHastaCompleta);
     }
 
     // Paginación
@@ -133,12 +137,16 @@ class LogAuditoriaService {
       query = query.eq('modulo', filtros.modulo);
     }
 
+    // ⭐ FILTRO DE FECHA DESDE - Buscar desde las 00:00:00
     if (filtros?.fecha_desde) {
-      query = query.gte('created_at', filtros.fecha_desde);
+      const fechaDesdeCompleta = `${filtros.fecha_desde}T00:00:00.000Z`;
+      query = query.gte('created_at', fechaDesdeCompleta);
     }
 
+    // ⭐ FILTRO DE FECHA HASTA - Buscar hasta las 23:59:59
     if (filtros?.fecha_hasta) {
-      query = query.lte('created_at', filtros.fecha_hasta);
+      const fechaHastaCompleta = `${filtros.fecha_hasta}T23:59:59.999Z`;
+      query = query.lte('created_at', fechaHastaCompleta);
     }
 
     const { count, error } = await query;
