@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleBasedRedirect from './components/RoleBasedRedirect';
 import MainLayout from './components/layout/MainLayout';
+import MobileLayout from './components/layout/MobileLayout';
+import { useDeviceDetection } from './hooks/useDeviceDetection';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DashboardDirector from './pages/DashboardDirector';
@@ -32,7 +34,16 @@ import DestinosFinales from './pages/DestinosFinales';
 import FoliosReservados from './pages/FoliosReservados';
 import LogsAuditoria from './pages/LogsAuditoria';
 
-
+// Wrapper component que decide qué layout usar
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  const { isMobile } = useDeviceDetection();
+  
+  if (isMobile) {
+    return <MobileLayout>{children}</MobileLayout>;
+  }
+  
+  return <MainLayout>{children}</MainLayout>;
+}
 
 function App() {
   return (
@@ -47,9 +58,9 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <Dashboard />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -58,9 +69,9 @@ function App() {
             path="/logs-auditoria" 
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <LogsAuditoria />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             } 
           />
@@ -69,9 +80,9 @@ function App() {
             path="/recolecciones"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'COORDINADOR', 'CAPTURADOR']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <Recolecciones />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -80,9 +91,9 @@ function App() {
             path="/usuarios"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <Usuarios />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -91,9 +102,9 @@ function App() {
             path="/tipos-residuos"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <TiposResiduos />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -102,9 +113,9 @@ function App() {
             path="/plazas"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <Plazas />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -113,28 +124,28 @@ function App() {
             path="/locales"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <Locales />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
 
           <Route path="/vehiculos" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><Vehiculos /></MainLayout>
+              <LayoutWrapper><Vehiculos /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/destinos-finales" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><DestinosFinales /></MainLayout>
+              <LayoutWrapper><DestinosFinales /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/folios-reservados" element={
             <ProtectedRoute allowedRoles={['ADMIN', 'DIRECTOR']}>
-              <MainLayout><FoliosReservados /></MainLayout>
+              <LayoutWrapper><FoliosReservados /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
@@ -143,9 +154,9 @@ function App() {
             path="/dashboard-director"
             element={
               <ProtectedRoute allowedRoles={['DIRECTOR']}>
-                <MainLayout>
+                <LayoutWrapper>
                   <DashboardDirector />
-                </MainLayout>
+                </LayoutWrapper>
               </ProtectedRoute>
             }
           />
@@ -153,131 +164,131 @@ function App() {
           {/* RUTAS Dashboard Empresa (Director) */}
           <Route path="/graficas-residuo" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <GraficasPorResiduos />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/graficas-lugar" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <GraficaPorLugar />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* RUTAS Dashboard Cliente (Director) */}
           <Route path="/residuos-totales" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <ResiduosTotales />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/graficas-residuo-cliente" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <GraficasResiduoCliente />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* RUTAS Reportes (Director) */}
           <Route path="/reporte-plaza" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <Proximamente 
                   titulo="Reporte por Plaza" 
                   descripcion="Reporte ejecutivo consolidado por plaza en PDF y Excel." 
                 />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/impacto-ambiental" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
-              <MainLayout>
+              <LayoutWrapper>
                 <Proximamente 
                   titulo="Impacto Ambiental" 
                   descripcion="Reportes de impacto ambiental para clientes e inversionistas." 
                 />
-              </MainLayout>
+              </LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* Rutas protegidas - COORDINADOR */}
           <Route path="/dashboard-coordinador" element={
             <ProtectedRoute allowedRoles={['COORDINADOR']}>
-              <MainLayout><DashboardCoordinador /></MainLayout>
+              <LayoutWrapper><DashboardCoordinador /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* NUEVA RUTA - INFRACCIONES (Coordinador + Director + Admin) */}
           <Route path="/infracciones" element={
             <ProtectedRoute allowedRoles={['COORDINADOR', 'DIRECTOR', 'ADMIN']}>
-              <MainLayout><ListaInfracciones /></MainLayout>
+              <LayoutWrapper><ListaInfracciones /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* NUEVA RUTA - MANIFIESTOS (Director + Admin) */}
           <Route path="/manifiestos" element={
             <ProtectedRoute allowedRoles={['DIRECTOR', 'ADMIN']}>
-              <MainLayout><ListaManifiestos /></MainLayout>
+              <LayoutWrapper><ListaManifiestos /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* NUEVA RUTA - PLAZAS INFRACCIONES (Solo Admin) */}
           <Route path="/plazas-infracciones" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><PlazasInfracciones /></MainLayout>
+              <LayoutWrapper><PlazasInfracciones /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/reglamentos-infracciones" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><ReglamentosInfracciones /></MainLayout>
+              <LayoutWrapper><ReglamentosInfracciones /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/tipos-aviso-infracciones" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><TiposAvisoInfracciones /></MainLayout>
+              <LayoutWrapper><TiposAvisoInfracciones /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           <Route path="/faltas-predefinidas" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><FaltasPredefinidas /></MainLayout>
+              <LayoutWrapper><FaltasPredefinidas /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* RUTA - LOCATARIOS INFRACCIONES (Solo Admin) */}
           <Route path="/locatarios-infracciones" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <MainLayout><LocatariosInfracciones /></MainLayout>
+              <LayoutWrapper><LocatariosInfracciones /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* Rutas protegidas - CAPTURADOR */}
           <Route path="/panel-capturador" element={
             <ProtectedRoute allowedRoles={['CAPTURADOR']}>
-              <MainLayout><PanelCapturador /></MainLayout>
+              <LayoutWrapper><PanelCapturador /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* Reportes - Director y Coordinador */}
           <Route path="/reportes" element={
             <ProtectedRoute allowedRoles={['DIRECTOR', 'COORDINADOR']}>
-              <MainLayout><ReportesDirector /></MainLayout>
+              <LayoutWrapper><ReportesDirector /></LayoutWrapper>
             </ProtectedRoute>
           } />
 
           {/* Reportes - Capturador (solo bitácoras) */}
           <Route path="/reportes-capturador" element={
             <ProtectedRoute allowedRoles={['CAPTURADOR']}>
-              <MainLayout><ReportesCapturador /></MainLayout>
+              <LayoutWrapper><ReportesCapturador /></LayoutWrapper>
             </ProtectedRoute>
           } />
 

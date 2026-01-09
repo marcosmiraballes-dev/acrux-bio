@@ -1,4 +1,4 @@
-// frontend/src/components/layout/MainLayout.tsx
+// frontend/src/components/layout/MobileLayout.tsx
 
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -15,18 +15,18 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const MobileLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // Menú según el rol del usuario
+  // Menú según el rol del usuario (mismo que MainLayout)
   const getMenuItems = (): MenuItem[] | MenuSection[] => {
     if (!user) return [];
 
@@ -131,122 +131,113 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const menuItems = getMenuItems();
   const hasMenuSections = menuItems.length > 0 && 'title' in menuItems[0];
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-primary-700 to-primary-900 text-white transition-all duration-300 flex flex-col overflow-y-auto`}>
-        {/* Logo */}
-        <div className="p-4 border-b border-primary-600">
-          <div className="flex items-center space-x-3">
-            {/* Logo Elefantes Verdes desde /public */}
-            <div className="flex-shrink-0">
-              <img 
-                src="/logo.png" 
-                alt="Elefantes Verdes" 
-                className="w-12 h-12 object-contain rounded-lg bg-white p-1"
-              />
-            </div>
-            {sidebarOpen && (
-              <div className="flex-1 min-w-0">
-                <h1 className="font-bold text-base leading-tight truncate">Elefante Verde</h1>
-                <p className="text-xs text-primary-200 leading-tight">Acrux-Bio - Sistema de trazabilidad</p>
-              </div>
-            )}
-          </div>
-        </div>
+  // Bottom Navigation Items (primeras 4 opciones del menú)
+  const getBottomNavItems = (): MenuItem[] => {
+    if (hasMenuSections) {
+      const sections = menuItems as MenuSection[];
+      const firstSection = sections[0];
+      return firstSection.items.slice(0, 4);
+    } else {
+      const items = menuItems as MenuItem[];
+      return items.slice(0, 4);
+    }
+  };
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
+  const bottomNavItems = getBottomNavItems();
+
+  return (
+    <div className="mobile-layout">
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <button 
+          className="mobile-header-hamburger"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          ☰
+        </button>
+        <div className="mobile-header-logo">
+          <img src="/logo.png" alt="Logo" className="mobile-header-logo-img" />
+          <span className="mobile-header-logo-text">Acrux-Bio</span>
+        </div>
+        <div className="mobile-header-avatar">
+          {user?.nombre?.charAt(0)}
+        </div>
+      </header>
+
+      {/* Mobile Content */}
+      <main className="mobile-main-content">
+        <div className="p-4">
+          {children}
+        </div>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        {bottomNavItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`mobile-bottom-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+          >
+            <span className="mobile-bottom-nav-icon">{item.icon}</span>
+            <span className="mobile-bottom-nav-label">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      {/* Mobile Drawer Overlay */}
+      <div 
+        className={`mobile-drawer-overlay ${mobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Mobile Drawer Menu */}
+      <div className={`mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-drawer-header">
+          <div className="mobile-drawer-user-name">{user?.nombre}</div>
+          <span className="mobile-drawer-user-role">{user?.rol}</span>
+        </div>
+        <div className="mobile-drawer-content">
           {hasMenuSections ? (
-            // Menú con secciones (DIRECTOR y ADMIN)
-            (menuItems as MenuSection[]).map((section, sectionIndex) => (
-              <div key={sectionIndex} className="mb-6">
-                {sidebarOpen && (
-                  <h3 className="text-xs font-semibold text-primary-300 uppercase tracking-wider mb-2 px-2">
-                    {section.title}
-                  </h3>
-                )}
-                <div className="space-y-1">
-                  {section.items.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                        location.pathname === item.path
-                          ? 'bg-primary-600 text-white'
-                          : 'text-primary-100 hover:bg-primary-600 hover:text-white'
-                      }`}
-                      title={!sidebarOpen ? item.label : ''}
-                    >
-                      <span className="text-xl">{item.icon}</span>
-                      {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
-                    </Link>
-                  ))}
-                </div>
+            (menuItems as MenuSection[]).map((section, idx) => (
+              <div key={idx} className="mobile-drawer-section">
+                <div className="mobile-drawer-section-title">{section.title}</div>
+                {section.items.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`mobile-drawer-item ${location.pathname === item.path ? 'active' : ''}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="mobile-drawer-item-icon">{item.icon}</span>
+                    <span className="mobile-drawer-item-label">{item.label}</span>
+                  </Link>
+                ))}
               </div>
             ))
           ) : (
-            // Menú simple (COORDINADOR, CAPTURADOR)
-            <div className="space-y-1">
+            <div className="mobile-drawer-section">
               {(menuItems as MenuItem[]).map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                    location.pathname === item.path
-                      ? 'bg-primary-600 text-white'
-                      : 'text-primary-100 hover:bg-primary-600 hover:text-white'
-                  }`}
-                  title={!sidebarOpen ? item.label : ''}
+                  className={`mobile-drawer-item ${location.pathname === item.path ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="text-xl">{item.icon}</span>
-                  {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                  <span className="mobile-drawer-item-icon">{item.icon}</span>
+                  <span className="mobile-drawer-item-label">{item.label}</span>
                 </Link>
               ))}
             </div>
           )}
-        </nav>
-
-        {/* User Info & Logout */}
-        <div className="p-4 border-t border-primary-600">
-          {sidebarOpen ? (
-            <div className="mb-3">
-              <p className="text-sm font-medium truncate">{user?.nombre}</p>
-              <p className="text-xs text-primary-300">{user?.rol}</p>
-            </div>
-          ) : (
-            <div className="flex justify-center mb-3">
-              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold">{user?.nombre?.charAt(0)}</span>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-          >
-            <span>🚪</span>
-            {sidebarOpen && <span className="text-sm font-medium">Cerrar Sesión</span>}
-          </button>
         </div>
-
-        {/* Toggle Sidebar */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 border-t border-primary-600 hover:bg-primary-600 transition-colors"
-        >
-          <span className="text-xl">{sidebarOpen ? '◀' : '▶'}</span>
+        <button className="mobile-drawer-logout" onClick={handleLogout}>
+          <span>🚪</span>
+          <span>Cerrar Sesión</span>
         </button>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-[1400px] mx-auto">
-          {children}
-        </div>
-      </main>
+      </div>
     </div>
   );
 };
 
-export default MainLayout;
+export default MobileLayout;
