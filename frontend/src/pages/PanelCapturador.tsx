@@ -272,27 +272,14 @@ const PanelCapturador: React.FC = () => {
   return (
     <div className="pb-8">
       {/* Header */}
-<div className="mb-6">
-  {/* Desktop - Header grande */}
-  <div className="hidden sm:block">
-    <h1 className="text-3xl font-bold text-gray-800">
-      📝 Panel de Captura
-    </h1>
-      <p className="text-gray-600 mt-1">
-        Bienvenido, {user?.nombre} - Captura rápida de recolecciones
-      </p>
-    </div>
-    
-    {/* Mobile - Header compacto */}
-    <div className="block sm:hidden">
-      <h1 className="text-lg font-bold text-gray-800">
-        📝 Panel de Captura
-      </h1>
-      <p className="text-sm text-gray-600 mt-1">
-        {user?.nombre}
-      </p>
-    </div>
-  </div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
+          📝 Panel de Captura
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Bienvenido, {user?.nombre} - Captura rápida de recolecciones
+        </p>
+      </div>
 
       {/* Mensajes */}
       {error && (
