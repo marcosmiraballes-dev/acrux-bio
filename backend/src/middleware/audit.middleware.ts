@@ -97,31 +97,49 @@ const generarDescripcionDetallada = (
     // ==================== INFRACCIONES ====================
     if (modulo === 'infracciones') {
       if (accion === 'CREATE' && datos_nuevos) {
-        const local = datos_nuevos.locatario_nombre || datos_nuevos.local || 'Local desconocido';
-        const tipoAviso = datos_nuevos.tipo_aviso_tipo || datos_nuevos.tipo_aviso || 'Aviso';
-        const fecha = datos_nuevos.fecha_infraccion || 'Sin fecha';
+        // ✅ CORREGIDO: Extraer información correctamente
+        const localNombre = datos_nuevos.locales?.nombre || 
+                           datos_nuevos.locatario_nombre || 
+                           datos_nuevos.local_nombre ||
+                           'Local desconocido';
         
-        let faltasTexto = '';
-        if (datos_nuevos.faltas && Array.isArray(datos_nuevos.faltas)) {
-          const faltas = datos_nuevos.faltas
-            .map((f: any) => f.descripcion || 'Falta')
-            .slice(0, 3)
-            .join(', ');
-          
-          if (faltas) {
-            faltasTexto = `\nFaltas: ${faltas}`;
+        const reglamentoPunto = datos_nuevos.reglamentos?.numero_punto || 
+                               datos_nuevos.reglamento_numero ||
+                               datos_nuevos.numero_punto ||
+                               'N/A';
+        
+        const tipoAviso = datos_nuevos.tipos_aviso?.tipo || 
+                         datos_nuevos.tipo_aviso_tipo ||
+                         datos_nuevos.tipo_aviso ||
+                         'Aviso';
+        
+        // Formatear fecha dd/mm/aaaa
+        let fechaFormateada = 'Sin fecha';
+        if (datos_nuevos.fecha_infraccion) {
+          try {
+            const fecha = new Date(datos_nuevos.fecha_infraccion);
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const anio = fecha.getFullYear();
+            fechaFormateada = `${dia}/${mes}/${anio}`;
+          } catch (e) {
+            fechaFormateada = datos_nuevos.fecha_infraccion;
           }
         }
         
-        return `Registró infracción - ${tipoAviso}\nLocal: ${local}\nFecha: ${fecha}${faltasTexto}`;
+        return `Registró infracción - Local: ${localNombre}, Reglamento: ${reglamentoPunto}, Tipo Aviso: ${tipoAviso}, Fecha: ${fechaFormateada}`;
       }
       
       if (accion === 'UPDATE' && datos_nuevos) {
         if (datos_nuevos.estatus === 'resuelto' || datos_nuevos.estatus === 'RESUELTO') {
-          const local = datos_nuevos.locatario_nombre || 'Local';
+          const local = datos_nuevos.locales?.nombre || 
+                       datos_nuevos.locatario_nombre || 
+                       'Local';
           return `Resolvió infracción de ${local}`;
         }
-        const local = datos_nuevos.locatario_nombre || 'Local';
+        const local = datos_nuevos.locales?.nombre || 
+                     datos_nuevos.locatario_nombre || 
+                     'Local';
         return `Editó infracción de ${local}`;
       }
       
