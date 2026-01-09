@@ -252,7 +252,7 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
 
     <!-- Alerta de multa -->
     <div class="multa-alert">
-      <p>Al tercer aviso, serán acreedores a una multa por un valor de $ 5,000 + IVA</p>
+      <p>Del tercer aviso en adelante, se harán acreedores a una multa por un valor de $ 5,000 + IVA</p>
     </div>
 
     <!-- Historial de avisos -->
