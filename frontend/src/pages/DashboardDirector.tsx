@@ -190,22 +190,22 @@ const DashboardDirector: React.FC = () => {
 
   // ✅ NUEVO: Función para exportar a PDF (construido con código)
   const handleExportarPDF = () => {
-  const plazaSeleccionada = plazas.find(p => p.id === selectedPlaza);
-  const nombrePlaza = plazaSeleccionada ? plazaSeleccionada.nombre : 'Todas las Plazas';
-  
-  generateDirectorHTML({
-    stats,
-    statsByTipo,
-    tendencia,
-    comparativaPlazas,
-    topLocales,
-    comparativaMensual,
-    comparativaAnual,
-    comparativaTrimestral,
-    plazaSeleccionada: nombrePlaza,
-    userName: user?.nombre
-  });
-};
+    const plazaSeleccionada = plazas.find(p => p.id === selectedPlaza);
+    const nombrePlaza = plazaSeleccionada ? plazaSeleccionada.nombre : 'Todas las Plazas';
+    
+    generateDirectorHTML({
+      stats,
+      statsByTipo,
+      tendencia,
+      comparativaPlazas,
+      topLocales,
+      comparativaMensual,
+      comparativaAnual,
+      comparativaTrimestral,
+      plazaSeleccionada: nombrePlaza,
+      userName: user?.nombre
+    });
+  };
 
   if (loading && !stats.total_recolecciones) {
     return (
@@ -390,7 +390,7 @@ const DashboardDirector: React.FC = () => {
               <div className="card">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">📈 Tendencia Mensual (Últimos 6 Meses)</h2>
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={tendencia.slice(0, 6).reverse()}>
+                  <BarChart data={[...tendencia].slice(0, 6).reverse()}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
@@ -407,7 +407,7 @@ const DashboardDirector: React.FC = () => {
                 <ResponsiveContainer width="100%" height={400}>
                   <PieChart>
                     <Pie
-                      data={comparativaPlazas.sort((a, b) => (b.total_kilos || 0) - (a.total_kilos || 0))}
+                      data={[...comparativaPlazas].sort((a, b) => (b.total_kilos || 0) - (a.total_kilos || 0))}
                       dataKey="total_kilos"
                       nameKey="plaza_nombre"
                       cx="50%"
@@ -642,7 +642,7 @@ const DashboardDirector: React.FC = () => {
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">🏢 Totales por Plaza</h2>
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={comparativaPlazas} layout="vertical">
+                <BarChart data={[...comparativaPlazas]} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis dataKey="plaza_nombre" type="category" width={150} />
