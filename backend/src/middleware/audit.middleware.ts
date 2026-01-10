@@ -97,21 +97,27 @@ const generarDescripcionDetallada = (
     // ==================== INFRACCIONES ====================
     if (modulo === 'infracciones') {
       if (accion === 'CREATE' && datos_nuevos) {
-        // ✅ CORREGIDO: Extraer información correctamente
-        const localNombre = datos_nuevos.locales?.nombre || 
-                           datos_nuevos.locatario_nombre || 
-                           datos_nuevos.local_nombre ||
-                           'Local desconocido';
+        // ✅ SIMPLIFICADO - Sin intentar acceder a objetos anidados complejos
+        const localNombre = typeof datos_nuevos.locales === 'string' 
+                           ? datos_nuevos.locales 
+                           : datos_nuevos.locales?.nombre || 
+                             datos_nuevos.locatario_nombre || 
+                             datos_nuevos.local_nombre ||
+                             'Local desconocido';
         
-        const reglamentoPunto = datos_nuevos.reglamentos?.numero_punto || 
-                               datos_nuevos.reglamento_numero ||
-                               datos_nuevos.numero_punto ||
-                               'N/A';
+        const reglamentoPunto = typeof datos_nuevos.reglamentos === 'string'
+                               ? datos_nuevos.reglamentos
+                               : datos_nuevos.reglamentos?.numero_punto || 
+                                 datos_nuevos.reglamento_numero ||
+                                 datos_nuevos.numero_punto ||
+                                 'N/A';
         
-        const tipoAviso = datos_nuevos.tipos_aviso?.tipo || 
-                         datos_nuevos.tipo_aviso_tipo ||
-                         datos_nuevos.tipo_aviso ||
-                         'Aviso';
+        const tipoAviso = typeof datos_nuevos.tipos_aviso === 'string'
+                         ? datos_nuevos.tipos_aviso
+                         : datos_nuevos.tipos_aviso?.tipo || 
+                           datos_nuevos.tipo_aviso_tipo ||
+                           datos_nuevos.tipo_aviso ||
+                           'Aviso';
         
         // Formatear fecha dd/mm/aaaa
         let fechaFormateada = 'Sin fecha';
