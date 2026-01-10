@@ -97,24 +97,28 @@ const generarDescripcionDetallada = (
     // ==================== INFRACCIONES ====================
     if (modulo === 'infracciones') {
       if (accion === 'CREATE' && datos_nuevos) {
-        // ✅ SIMPLIFICADO - Sin intentar acceder a objetos anidados complejos
+        // ✅ CORREGIDO: Usar nombres SINGULARES según estructura del service
         const localNombre = typeof datos_nuevos.locales === 'string' 
                            ? datos_nuevos.locales 
-                           : datos_nuevos.locales?.nombre || 
+                           : datos_nuevos.locatario?.nombre_comercial ||
+                             datos_nuevos.locatario?.codigo_local ||
+                             datos_nuevos.locales?.nombre || 
                              datos_nuevos.locatario_nombre || 
                              datos_nuevos.local_nombre ||
                              'Local desconocido';
         
         const reglamentoPunto = typeof datos_nuevos.reglamentos === 'string'
                                ? datos_nuevos.reglamentos
-                               : datos_nuevos.reglamentos?.numero_punto || 
+                               : datos_nuevos.reglamento?.numero_punto ||
+                                 datos_nuevos.reglamentos?.numero_punto || 
                                  datos_nuevos.reglamento_numero ||
                                  datos_nuevos.numero_punto ||
                                  'N/A';
         
         const tipoAviso = typeof datos_nuevos.tipos_aviso === 'string'
                          ? datos_nuevos.tipos_aviso
-                         : datos_nuevos.tipos_aviso?.tipo || 
+                         : datos_nuevos.tipo_aviso?.tipo ||
+                           datos_nuevos.tipos_aviso?.tipo || 
                            datos_nuevos.tipo_aviso_tipo ||
                            datos_nuevos.tipo_aviso ||
                            'Aviso';
@@ -138,12 +142,14 @@ const generarDescripcionDetallada = (
       
       if (accion === 'UPDATE' && datos_nuevos) {
         if (datos_nuevos.estatus === 'resuelto' || datos_nuevos.estatus === 'RESUELTO') {
-          const local = datos_nuevos.locales?.nombre || 
+          const local = datos_nuevos.locatario?.nombre_comercial ||
+                       datos_nuevos.locales?.nombre || 
                        datos_nuevos.locatario_nombre || 
                        'Local';
           return `Resolvió infracción de ${local}`;
         }
-        const local = datos_nuevos.locales?.nombre || 
+        const local = datos_nuevos.locatario?.nombre_comercial ||
+                     datos_nuevos.locales?.nombre || 
                      datos_nuevos.locatario_nombre || 
                      'Local';
         return `Editó infracción de ${local}`;
