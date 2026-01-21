@@ -1,3 +1,5 @@
+// backend/src/services/infraccion.service.ts
+
 import { supabase } from '../config/supabase';
 import type { CreateInfraccionInput, UpdateInfraccionInput, ResolverInfraccionInput } from '../schemas/infraccion.schema';
 
@@ -28,6 +30,7 @@ export class InfraccionService {
     if (filters?.estatus) {
       query = query.eq('estatus', filters.estatus);
     }
+    
     const fechaDesdeLimpia = filters?.fechaDesde ? filters.fechaDesde.split('T')[0] : null;
     const fechaHastaLimpia = filters?.fechaHasta ? filters.fechaHasta.split('T')[0] : null;
     
@@ -37,6 +40,28 @@ export class InfraccionService {
     if (fechaHastaLimpia) {
       query = query.lte('fecha_infraccion', fechaHastaLimpia);
     }
+
+    // ⭐ NUEVO: Si hay filtro de plaza, primero obtener locatarios de esa plaza
+    let locatarioIdsPermitidos: string[] = [];
+    if (filters?.plazaId) {
+      console.log('🔍 Obteniendo locatarios de plaza:', filters.plazaId);
+      const { data: locatariosPlaza } = await supabase
+        .from('locatarios_infracciones')
+        .select('id')
+        .eq('plaza_id', filters.plazaId);
+      
+      locatarioIdsPermitidos = locatariosPlaza?.map((l: any) => l.id) || [];
+      console.log('✅ Locatarios de la plaza:', locatarioIdsPermitidos.length);
+      
+      // Si no hay locatarios en esa plaza, retornar vacío
+      if (locatarioIdsPermitidos.length === 0) {
+        return [];
+      }
+      
+      // Aplicar filtro de locatarios
+      query = query.in('locatario_id', locatarioIdsPermitidos);
+    }
+
     // Paginación
     if (filters?.limit && filters?.offset !== undefined && filters.offset > 0) {
       const start = filters.offset;
@@ -78,7 +103,7 @@ export class InfraccionService {
     const locatariosMap = new Map(locatarios?.map((l: any) => [l.id, l]) || []);
     const plazasMap = new Map(plazas?.map((p: any) => [p.id, p]) || []);
 
-    let result = data.map((infraccion: any) => {
+    const result = data.map((infraccion: any) => {
       const locatario = locatariosMap.get(infraccion.locatario_id);
       const plaza = locatario ? plazasMap.get(locatario.plaza_id) : null;
 
@@ -96,15 +121,7 @@ export class InfraccionService {
       };
     });
 
-    // Filtrar por plaza DESPUÉS de tener todos los datos
-    if (filters?.plazaId) {
-      result = result.filter((item: any) => 
-        item.locatario?.plaza_id === filters.plazaId
-      );
-    }
-
-    console.log('✅ Infracciones después de filtros:', result.length);
-
+    console.log('✅ Infracciones finales:', result.length);
     return result;
   }
 
@@ -121,6 +138,7 @@ export class InfraccionService {
       .from('infracciones')
       .select('id', { count: 'exact', head: true });
 
+    // Filtros directos
     if (filters?.locatarioId) {
       query = query.eq('locatario_id', filters.locatarioId);
     }
@@ -130,6 +148,7 @@ export class InfraccionService {
     if (filters?.estatus) {
       query = query.eq('estatus', filters.estatus);
     }
+    
     const fechaDesdeLimpia = filters?.fechaDesde ? filters.fechaDesde.split('T')[0] : null;
     const fechaHastaLimpia = filters?.fechaHasta ? filters.fechaHasta.split('T')[0] : null;
     
@@ -140,16 +159,31 @@ export class InfraccionService {
       query = query.lte('fecha_infraccion', fechaHastaLimpia);
     }
 
-    const { count, error } = await query;
-
-    if (error) throw error;
-    
-    // Si hay filtro de plaza, contar en memoria
+    // ⭐ NUEVO: Filtro de plaza optimizado
     if (filters?.plazaId) {
-      const infracciones = await this.getAll({ ...filters, limit: 10000 });
-      return infracciones.length;
+      console.log('🔍 Contando infracciones de plaza:', filters.plazaId);
+      const { data: locatariosPlaza } = await supabase
+        .from('locatarios_infracciones')
+        .select('id')
+        .eq('plaza_id', filters.plazaId);
+      
+      const locatarioIds = locatariosPlaza?.map((l: any) => l.id) || [];
+      
+      if (locatarioIds.length === 0) {
+        return 0;
+      }
+      
+      query = query.in('locatario_id', locatarioIds);
     }
 
+    const { count, error } = await query;
+
+    if (error) {
+      console.error('❌ Error contando infracciones:', error);
+      throw error;
+    }
+
+    console.log('✅ Total count:', count);
     return count || 0;
   }
 

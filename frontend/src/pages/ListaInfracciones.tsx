@@ -1,3 +1,5 @@
+// frontend/src/pages/ListaInfracciones.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -76,15 +78,14 @@ const ListaInfracciones: React.FC = () => {
   const [page, setPage] = useState(1);
   const limit = 50;
 
-  // Cargar datos iniciales
+  // ⭐ CAMBIO 1: Cargar datos iniciales SIN llamar a loadInfracciones()
   useEffect(() => {
     loadPlazas();
     loadTiposAviso();
-    // Cargar infracciones al inicio SIN filtros
-    loadInfracciones();
+    // ❌ ELIMINADO: loadInfracciones() - Usuario debe hacer click en "Buscar"
   }, []);
 
-  // Cargar locatarios cuando cambia la plaza
+  // ⭐ CAMBIO 2: Cargar locatarios cuando cambia la plaza (SIN recargar infracciones)
   useEffect(() => {
     if (plazaId) {
       loadLocatarios();
@@ -93,6 +94,13 @@ const ListaInfracciones: React.FC = () => {
       setLocatarioId('');
     }
   }, [plazaId]);
+
+  // ⭐ CAMBIO 3: Recargar infracciones solo cuando cambia la página
+  useEffect(() => {
+    if (page > 1) {
+      loadInfracciones();
+    }
+  }, [page]);
 
   const loadPlazas = async () => {
     try {
@@ -114,7 +122,6 @@ const ListaInfracciones: React.FC = () => {
   };
 
   const loadTiposAviso = async () => {
-    // Tipos de aviso hardcodeados
     setTiposAviso([
       { id: 'e5874eff-4e5f-4fed-aee9-1e30fc2ac5b5', tipo: '1er aviso', orden: 1, color_badge: '#10B981' },
       { id: '204a4302-53fb-4ff2-9c8b-420ab3a619c1', tipo: '2do aviso', orden: 2, color_badge: '#F59E0B' },
@@ -124,6 +131,7 @@ const ListaInfracciones: React.FC = () => {
     ]);
   };
 
+  // ⭐ CAMBIO 4: Llamadas secuenciales en vez de Promise.all()
   const loadInfracciones = async () => {
     setLoading(true);
     try {
@@ -139,12 +147,11 @@ const ListaInfracciones: React.FC = () => {
 
       console.log('🔍 Filtros enviados:', { plazaId, locatarioId, estatusFilter, tipoAvisoId, fechaDesde, fechaHasta, page, limit });
 
-      const [infraccionesRes, countRes] = await Promise.all([
-        api.get(`/infracciones?${params}`),
-        api.get(`/infracciones/count?${params}`)
-      ]);
-
+      // ⭐ MEJORADO: Llamadas secuenciales
+      const infraccionesRes = await api.get(`/infracciones?${params}`);
       console.log('✅ Infracciones recibidas:', infraccionesRes.data.data?.length || 0);
+
+      const countRes = await api.get(`/infracciones/count?${params}`);
       console.log('✅ Total count:', countRes.data.count);
 
       setInfracciones(infraccionesRes.data.data || []);
@@ -158,6 +165,7 @@ const ListaInfracciones: React.FC = () => {
     }
   };
 
+  // ⭐ CAMBIO 5: Resetear página y limpiar tabla
   const handleLimpiarFiltros = () => {
     setPlazaId('');
     setLocatarioId('');
@@ -167,6 +175,8 @@ const ListaInfracciones: React.FC = () => {
     setFechaHasta('');
     setPage(1);
     setLocatarios([]);
+    setInfracciones([]);
+    setTotalCount(0);
   };
 
   const handleResolver = async (id: string) => {
@@ -203,7 +213,6 @@ const ListaInfracciones: React.FC = () => {
   };
 
   const getBadgeColor = (nroAviso: string) => {
-    // Extraer número del formato AV-XXX
     const match = nroAviso.match(/AV-(\d+)/);
     if (!match) {
       return {
@@ -217,17 +226,16 @@ const ListaInfracciones: React.FC = () => {
     }
 
     const numero = parseInt(match[1], 10);
-
-    let color = '#7F1D1D'; // Default: rojo oscuro
+    let color = '#7F1D1D';
 
     if (numero === 1) {
-      color = '#10B981'; // 1er aviso: Verde
+      color = '#10B981';
     } else if (numero === 2) {
-      color = '#F59E0B'; // 2do aviso: Amarillo
+      color = '#F59E0B';
     } else if (numero === 3) {
-      color = '#EF4444'; // 3er aviso: Rojo
+      color = '#EF4444';
     } else {
-      color = '#991B1B'; // 4to en adelante: Rojo oscuro
+      color = '#991B1B';
     }
 
     return {
@@ -255,9 +263,8 @@ const ListaInfracciones: React.FC = () => {
 
   const totalPages = Math.ceil(totalCount / limit);
 
-  // Verificar permisos
   const puedeCrearResolver = user?.rol === 'ADMIN' || user?.rol === 'COORDINADOR';
-  const puedeEliminar = user?.rol === 'ADMIN'; // SOLO ADMIN puede eliminar
+  const puedeEliminar = user?.rol === 'ADMIN';
 
   return (
     <div className="p-6">
@@ -279,7 +286,7 @@ const ListaInfracciones: React.FC = () => {
               value={plazaId}
               onChange={(e) => {
                 setPlazaId(e.target.value);
-                setLocatarioId(''); // Limpiar locatario al cambiar plaza
+                setLocatarioId('');
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
             >
@@ -390,7 +397,10 @@ const ListaInfracciones: React.FC = () => {
         {/* Botones */}
         <div className="flex items-center space-x-2">
           <button
-            onClick={loadInfracciones}
+            onClick={() => {
+              setPage(1);
+              loadInfracciones();
+            }}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
             disabled={loading}
           >
@@ -402,7 +412,6 @@ const ListaInfracciones: React.FC = () => {
           >
             Limpiar Filtros
           </button>
-          {/* Botón Nueva Infracción - Solo ADMIN y COORDINADOR */}
           {puedeCrearResolver && (
             <button
               onClick={() => setShowModal(true)}
@@ -417,8 +426,14 @@ const ListaInfracciones: React.FC = () => {
       {/* Stats */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
         <p className="text-sm text-gray-600">
-          Mostrando <span className="font-semibold">{infracciones.length}</span> de{' '}
-          <span className="font-semibold">{totalCount}</span> infracciones
+          {infracciones.length > 0 ? (
+            <>
+              Mostrando <span className="font-semibold">{infracciones.length}</span> de{' '}
+              <span className="font-semibold">{totalCount}</span> infracciones
+            </>
+          ) : (
+            <span>No hay infracciones cargadas. Haz click en "🔍 Buscar" para ver resultados.</span>
+          )}
         </p>
       </div>
 
@@ -497,7 +512,6 @@ const ListaInfracciones: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex space-x-2">
-                        {/* Botón Resolver - Solo ADMIN y COORDINADOR */}
                         {infraccion.estatus === 'Pendiente' && puedeCrearResolver && (
                           <button
                             onClick={() => handleResolver(infraccion.id)}
@@ -507,7 +521,6 @@ const ListaInfracciones: React.FC = () => {
                             ✓ Resolver
                           </button>
                         )}
-                        {/* Botón PDF - Todos */}
                         <button
                           onClick={() => handleGenerarHTML(infraccion)}
                           className="text-primary-600 hover:text-primary-800 font-medium"
@@ -515,7 +528,6 @@ const ListaInfracciones: React.FC = () => {
                         >
                           📄 PDF
                         </button>
-                        {/* Botón Eliminar - SOLO ADMIN */}
                         {puedeEliminar && (
                           <button
                             onClick={() => handleEliminar(infraccion.id)}
@@ -539,10 +551,7 @@ const ListaInfracciones: React.FC = () => {
       {totalPages > 1 && (
         <div className="mt-6 flex justify-center items-center space-x-2">
           <button
-            onClick={() => {
-              setPage(page - 1);
-              loadInfracciones();
-            }}
+            onClick={() => setPage(p => p - 1)}
             disabled={page === 1}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
@@ -552,10 +561,7 @@ const ListaInfracciones: React.FC = () => {
             Página {page} de {totalPages}
           </span>
           <button
-            onClick={() => {
-              setPage(page + 1);
-              loadInfracciones();
-            }}
+            onClick={() => setPage(p => p + 1)}
             disabled={page === totalPages}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
@@ -564,7 +570,7 @@ const ListaInfracciones: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Nueva Infracción */}
+      {/* Modal */}
       {puedeCrearResolver && (
         <NuevaInfraccionModal
           isOpen={showModal}
