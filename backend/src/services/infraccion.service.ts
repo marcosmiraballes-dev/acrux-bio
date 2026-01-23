@@ -472,25 +472,40 @@ export class InfraccionService {
     return data;
   }
 
-  // HELPERS - Mapeo con UUIDs reales de la base de datos
+  // ✅ CORREGIDO: Mapeo con UUIDs CORRECTOS de la base de datos
   private getReglamentoById(id: string | null) {
     if (!id) return null;
 
     const reglamentosMap: { [key: string]: any } = {
-      '107ade00-5887-4181-b6a5-512845f533c4': { 
-        id: '107ade00-5887-4181-b6a5-512845f533c4', 
-        numero_punto: 'Punto 1', 
-        descripcion: 'Separación de residuos' 
-      },
-      '8baaf39a-44e7-4261-8e23-e5682c261692': { 
-        id: '8baaf39a-44e7-4261-8e23-e5682c261692', 
-        numero_punto: 'Punto 2', 
-        descripcion: 'Restricciones de peso' 
-      },
+      // ✅ Punto 1 - UUID CORRECTO
       'd14f6636-b6b6-4190-8d22-9f071b4a39f4': { 
         id: 'd14f6636-b6b6-4190-8d22-9f071b4a39f4', 
+        numero_punto: 'Punto 1', 
+        descripcion: 'Queda estrictamente prohibido abandonar residuos en pasillos, áreas comunes, estacionamiento, fuera de la camara o sin registrarse.'
+      },
+      // ✅ Punto 2 - UUID CORRECTO
+      '107ade00-5887-4181-b6a5-512845f533c4': { 
+        id: '107ade00-5887-4181-b6a5-512845f533c4', 
+        numero_punto: 'Punto 2', 
+        descripcion: 'Los residuos solo se entregarán en los horarios establecidos.'
+      },
+      // ✅ Punto 3 - UUID CORRECTO
+      '8baaf39a-44e7-4261-8e23-e5682c261692': { 
+        id: '8baaf39a-44e7-4261-8e23-e5682c261692', 
         numero_punto: 'Punto 3', 
-        descripcion: 'Horarios de recolección' 
+        descripcion: 'Los residuos sólo se aceptarán separados en las siguientes categorías: Orgánicos, Inorgánicos no reciclables, Lata de aluminio, Lata de conserva, Chatarra, Plástico suave tipo 1 - PET, Plástico duro tipo 2 - HDPE, Playo tipo 4 - PEBD, Cartón, Archivo muerto, Tetra pak, Envase multicapa, Aceite vegetal quemado.'
+      },
+      // ✅ Punto 4 - NUEVO (faltaba)
+      'a3595a26-87c2-4a6c-8c55-6a0ca2f13c14': { 
+        id: 'a3595a26-87c2-4a6c-8c55-6a0ca2f13c14', 
+        numero_punto: 'Punto 4', 
+        descripcion: 'Condiciones de disposición e identificación del generador.'
+      },
+      // ✅ Punto 5 - NUEVO (faltaba)
+      '1d6ce833-9580-4360-a413-25f287be7d77': { 
+        id: '1d6ce833-9580-4360-a413-25f287be7d77', 
+        numero_punto: 'Punto 5', 
+        descripcion: 'Se prohíbe depositar los siguientes residuos en la cámara: manteca o grasa, poda, madera, escombro, Tablaroca, cerámica, vidrio, unicel, electrodomésticos, fierros, muebles, jeringas, medicamentos, ampolletas, baterías/pilas, insecticidas, botes de pintura, aceite de motor, voluminosos, residuos peligrosos.'
       }
     };
 
