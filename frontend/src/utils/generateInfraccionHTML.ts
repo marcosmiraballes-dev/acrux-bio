@@ -33,12 +33,25 @@ interface HistorialAviso {
   descripcion_falta: string;
 }
 
-// Mapeo de plaza_id a logo
+// ✅ MAPEO ACTUALIZADO DE LOGOS POR PLAZA (Enero 2026)
 const PLAZA_LOGOS: Record<string, string> = {
+  // Marina Puerto Cancún
+  '3b48675e-8a3c-4b2b-8616-dc944a139cb0': 'plaza-puerto-cancun.png',
+  
+  // Plaza Américas - Malecón (ANTIGUA - A ELIMINAR EVENTUALMENTE)
   '2c983cd6-f756-494d-a1c1-ff251b337ad5': 'plaza-americas-malecon.png',
+  
+  // Plaza Las Américas - Cancún (NUEVA)
+  '7f2fcd40-1b3f-4dbd-8de4-de57aac173cf': 'plaza-americas-cancun.png',
+  
+  // Plaza Las Américas - Playa
   '3dece273-3dfe-495a-b15c-4508451a01ae': 'plaza-americas-playa.png',
-  'eef705d0-709d-47b6-853a-c88b57984c59': 'plaza-mall.png',
-  '3b48675e-8a3c-4b2b-8616-dc944a139cb0': 'plaza-puerto-cancun.png'
+  
+  // Plaza Malecón - Cancún (NUEVA)
+  '3b1aab0e-0258-4065-9ada-d7e0d6cab38f': 'plaza-malecon-cancun.png',
+  
+  // Plaza Mall
+  'eef705d0-709d-47b6-853a-c88b57984c59': 'plaza-mall.png'
 };
 
 // Función para convertir imagen a base64
@@ -82,8 +95,12 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
     console.error('Error al cargar historial:', error);
   }
 
-  // Cargar logos en base64
+  // ✅ CARGAR LOGOS CON CONSOLE.LOGS PARA DEBUGGING
   const logoPlazaFile = PLAZA_LOGOS[data.locatario.plaza.id] || 'plaza-mall.png';
+  console.log('🏢 Plaza ID:', data.locatario.plaza.id);
+  console.log('🏢 Plaza Nombre:', data.locatario.plaza.nombre);
+  console.log('🖼️ Logo seleccionado:', logoPlazaFile);
+  
   const logoPlazaBase64 = await getImageBase64(`/logos-plazas/${logoPlazaFile}`);
   const logoElefanteBase64 = await getImageBase64('/logo-blanco.png');
 
