@@ -66,7 +66,7 @@ export class BitacoraService {
 
       // Crear workbook
       const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Reporte de Locatario');
+      const sheet = workbook.addWorksheet('Bitácora de Residuos Sólidos'); // ✅ CAMBIO
       
       // Configurar página para impresión
       sheet.pageSetup = {
@@ -96,10 +96,10 @@ export class BitacoraService {
       
       let currentRow = 1;
       
-      // Título "Reporte de Locatario" - Fila 1 con fondo verde
+      // Título - Fila 1 con fondo verde
       sheet.mergeCells('A1:L1');
       const titleCell = sheet.getCell('A1');
-      titleCell.value = 'Reporte de Locatario';
+      titleCell.value = 'Bitácora de Residuos Sólidos'; // ✅ CAMBIO
       titleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
       titleCell.fill = {
         type: 'pattern',
@@ -109,8 +109,8 @@ export class BitacoraService {
       titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       sheet.getRow(1).height = 30;
       
-      // Logo (si existe) - Ajustado proporcionalmente
-      const logoPath = path.join(__dirname, '../../public/logo-elefantes-verdes.png');
+      // Logo (si existe) - ✅ CAMBIO: ruta actualizada a logo-blanco.png
+      const logoPath = path.join(__dirname, '../../public/logo-blanco.png');
       if (fs.existsSync(logoPath)) {
         const logoId = workbook.addImage({
           filename: logoPath,
@@ -306,7 +306,7 @@ export class BitacoraService {
               // Números - centrados con formato
               const numValue = value as number;
               cell.value = numValue;
-              cell.numFmt = '#,##0.00'; // Formato con separador de miles y 2 decimales
+              cell.numFmt = '#,##0.00';
               cell.alignment = { horizontal: 'center', vertical: 'middle' };
             }
             
@@ -331,7 +331,7 @@ export class BitacoraService {
         totalLabelCell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'FF10B981' } // Verde más claro
+          fgColor: { argb: 'FF10B981' }
         };
         totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
         totalLabelCell.border = {
@@ -359,13 +359,13 @@ export class BitacoraService {
         totalesArray.forEach((total, index) => {
           const cell = totalRow.getCell(index + 2);
           cell.value = parseFloat(total.toFixed(2));
-          cell.numFmt = '#,##0.00'; // Formato con separador de miles y 2 decimales
+          cell.numFmt = '#,##0.00';
           totalGeneral += total;
           cell.font = { bold: true, size: 10 };
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFD1FAE5' } // Verde muy claro
+            fgColor: { argb: 'FFD1FAE5' }
           };
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
           cell.border = {
@@ -384,17 +384,15 @@ export class BitacoraService {
         
         const totalGeneralRow = sheet.getRow(tableStartRow + 2 + bitacora.length);
         
-        // Celda "Total General:"
-        const totalGeneralLabelCell = totalGeneralRow.getCell(11); // Columna K
+        const totalGeneralLabelCell = totalGeneralRow.getCell(11);
         totalGeneralLabelCell.value = 'Total General:';
         totalGeneralLabelCell.font = { bold: true, size: 12 };
         totalGeneralLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
         
-        // Valor del Total General con formato de miles
-        const totalGeneralValueCell = totalGeneralRow.getCell(12); // Columna L
+        const totalGeneralValueCell = totalGeneralRow.getCell(12);
         totalGeneralValueCell.value = parseFloat(totalGeneral.toFixed(2));
         totalGeneralValueCell.font = { bold: true, size: 12, color: { argb: `FF${VERDE_CORPORATIVO}` } };
-        totalGeneralValueCell.numFmt = '#,##0.00'; // ✅ FORMATO CON SEPARADOR DE MILES
+        totalGeneralValueCell.numFmt = '#,##0.00';
         totalGeneralValueCell.alignment = { horizontal: 'center', vertical: 'middle' };
         totalGeneralValueCell.fill = {
           type: 'pattern',
