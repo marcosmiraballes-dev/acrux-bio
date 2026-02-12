@@ -66,11 +66,11 @@ export class BitacoraService {
 
       // Crear workbook
       const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Bitácora de Residuos Sólidos'); // ✅ CAMBIO
+      const sheet = workbook.addWorksheet('Bitácora de Residuos Sólidos');
       
       // Configurar página para impresión
       sheet.pageSetup = {
-        paperSize: 9, // A4
+        paperSize: 9,
         orientation: 'landscape',
         fitToPage: true,
         fitToWidth: 1,
@@ -88,7 +88,7 @@ export class BitacoraService {
       // ============================================================
       // COLORES CORPORATIVOS
       // ============================================================
-      const VERDE_CORPORATIVO = '047857'; // Verde Elefantes Verdes
+      const VERDE_CORPORATIVO = '047857';
       
       // ============================================================
       // HEADER CON TÍTULO Y LOGO
@@ -99,7 +99,7 @@ export class BitacoraService {
       // Título - Fila 1 con fondo verde
       sheet.mergeCells('A1:L1');
       const titleCell = sheet.getCell('A1');
-      titleCell.value = 'Bitácora de Residuos Sólidos'; // ✅ CAMBIO
+      titleCell.value = 'Bitácora de Residuos Sólidos';
       titleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
       titleCell.fill = {
         type: 'pattern',
@@ -109,22 +109,26 @@ export class BitacoraService {
       titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       sheet.getRow(1).height = 30;
       
-      // Logo (si existe) - ✅ CAMBIO: ruta actualizada a logo-blanco.png
-      const logoPath = path.join(__dirname, '../../public/logo-blanco.png');
+      // ✅ Ruta corregida - sube desde dist/services/ hasta la raíz del proyecto
+      const logoPath = path.join(__dirname, '../../../frontend/public/logo-blanco.png');
+      console.log('🖼️ Buscando logo en:', logoPath);
+      
       if (fs.existsSync(logoPath)) {
+        console.log('✅ Logo encontrado');
         const logoId = workbook.addImage({
           filename: logoPath,
           extension: 'png',
         });
         
-        // Posicionar logo proporcionalmente (altura máxima 5 filas)
+        // Logo original: 1600x907 (proporción 16:9)
+        // Posicionado en columnas J-L, filas 2-7
         sheet.addImage(logoId, {
-          tl: { col: 9.5, row: 1.5 },   // Top-left ajustado
-          br: { col: 11.5, row: 6.5 },  // Bottom-right - mantiene proporción
-          editAs: 'oneCell'              // Mantiene aspecto ratio
+          tl: { col: 9.1, row: 1.2 },
+          br: { col: 11.9, row: 6.8 },
+          editAs: 'oneCell'
         });
       } else {
-        // Si no hay logo, agregar texto en J2:L7
+        console.log('⚠️ Logo no encontrado en:', logoPath);
         sheet.mergeCells('J2:L7');
         const logoTextCell = sheet.getCell('J2');
         logoTextCell.value = 'ELEFANTE VERDE\nEstrategias Ambientales';
@@ -132,19 +136,17 @@ export class BitacoraService {
         logoTextCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
       }
       
-      currentRow = 3; // Dejar una fila en blanco
+      currentRow = 3;
       
       // ============================================================
-      // INFORMACIÓN DEL REPORTE (4 FILAS CON FONDO VERDE)
+      // INFORMACIÓN DEL REPORTE
       // ============================================================
       
-      // Convertir fechas de YYYY-MM-DD a DD/MM/YYYY
       const formatearFecha = (fecha: string) => {
         const partes = fecha.split('-');
         return `${partes[2]}/${partes[1]}/${partes[0]}`;
       };
       
-      // Estilo para labels de información
       const estiloLabel = {
         font: { bold: true, size: 10, color: { argb: 'FFFFFFFF' } },
         fill: {
@@ -191,10 +193,9 @@ export class BitacoraService {
       // TABLA DE DATOS
       // ============================================================
       
-      currentRow++; // Fila en blanco antes de la tabla
+      currentRow++;
       const tableStartRow = currentRow;
       
-      // Headers de la tabla con fondo verde
       const headers = [
         'Fecha',
         'Organico',
@@ -230,7 +231,6 @@ export class BitacoraService {
       });
       headerRow.height = 22;
       
-      // Inicializar totales
       const totales = {
         organico: 0,
         inorganico: 0,
@@ -247,12 +247,10 @@ export class BitacoraService {
       
       let totalGeneral = 0;
       
-      // Datos de la bitácora
       if (bitacora && bitacora.length > 0) {
         bitacora.forEach((row: any, index: number) => {
           const dataRow = sheet.getRow(tableStartRow + 1 + index);
           
-          // Formatear fecha
           const fechaFormateada = formatearFecha(row.fecha);
           
           const organico = parseFloat(row.organico) || 0;
@@ -267,7 +265,6 @@ export class BitacoraService {
           const tetra_pak = parseFloat(row.tetra_pak) || 0;
           const chatarra = parseFloat(row.chatarra) || 0;
           
-          // Acumular totales
           totales.organico += organico;
           totales.inorganico += inorganico;
           totales.carton += carton;
@@ -299,11 +296,9 @@ export class BitacoraService {
             const cell = dataRow.getCell(colIndex + 1);
             
             if (colIndex === 0) {
-              // Fecha - centrada
               cell.value = value;
               cell.alignment = { horizontal: 'center', vertical: 'middle' };
             } else {
-              // Números - centrados con formato
               const numValue = value as number;
               cell.value = numValue;
               cell.numFmt = '#,##0.00';
@@ -321,10 +316,9 @@ export class BitacoraService {
           dataRow.height = 18;
         });
         
-        // Fila de TOTALES con fondo verde claro
+        // Fila de TOTALES
         const totalRow = sheet.getRow(tableStartRow + 1 + bitacora.length);
         
-        // Celda "Total:"
         const totalLabelCell = totalRow.getCell(1);
         totalLabelCell.value = 'Total:';
         totalLabelCell.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
@@ -341,7 +335,6 @@ export class BitacoraService {
           right: { style: 'thin' }
         };
         
-        // Valores de totales
         const totalesArray = [
           totales.organico,
           totales.inorganico,
@@ -378,10 +371,7 @@ export class BitacoraService {
         
         totalRow.height = 22;
         
-        // ============================================================
-        // TOTAL GENERAL (Esquina inferior derecha)
-        // ============================================================
-        
+        // TOTAL GENERAL
         const totalGeneralRow = sheet.getRow(tableStartRow + 2 + bitacora.length);
         
         const totalGeneralLabelCell = totalGeneralRow.getCell(11);
@@ -409,7 +399,6 @@ export class BitacoraService {
         totalGeneralRow.height = 25;
         
       } else {
-        // No hay datos
         const noDataRow = sheet.getRow(tableStartRow + 1);
         sheet.mergeCells(tableStartRow + 1, 1, tableStartRow + 1, 12);
         const noDataCell = noDataRow.getCell(1);
@@ -423,18 +412,18 @@ export class BitacoraService {
       // AJUSTAR ANCHOS DE COLUMNAS
       // ============================================================
       
-      sheet.getColumn(1).width = 12;  // Fecha
-      sheet.getColumn(2).width = 11;  // Orgánico
-      sheet.getColumn(3).width = 12;  // Inorgánico
-      sheet.getColumn(4).width = 10;  // Cartón
-      sheet.getColumn(5).width = 10;  // Aluminio
-      sheet.getColumn(6).width = 10;  // Archivo
-      sheet.getColumn(7).width = 13;  // Plástico Duro
-      sheet.getColumn(8).width = 9;   // Pet
-      sheet.getColumn(9).width = 9;   // Playo
-      sheet.getColumn(10).width = 9;  // Vidrio
-      sheet.getColumn(11).width = 10; // TetraPak
-      sheet.getColumn(12).width = 10; // Chatarra
+      sheet.getColumn(1).width = 12;
+      sheet.getColumn(2).width = 11;
+      sheet.getColumn(3).width = 12;
+      sheet.getColumn(4).width = 10;
+      sheet.getColumn(5).width = 10;
+      sheet.getColumn(6).width = 10;
+      sheet.getColumn(7).width = 13;
+      sheet.getColumn(8).width = 9;
+      sheet.getColumn(9).width = 9;
+      sheet.getColumn(10).width = 9;
+      sheet.getColumn(11).width = 10;
+      sheet.getColumn(12).width = 10;
       
       // ============================================================
       // GENERAR Y ENVIAR
