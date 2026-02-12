@@ -69,10 +69,10 @@ export class ManifiestoService {
     };
   }
 
-/**
- * ⭐ NUEVO: Obtener residuos valorizables de un local en un periodo
- * Retorna los 9 tipos con sus kilos (0 si no hubo recolección)
- */
+  /**
+   * ⭐ Obtener residuos valorizables de un local en un periodo
+   * Retorna los 9 tipos con sus kilos (0 si no hubo recolección)
+   */
   private async obtenerResiduosDelPeriodo(
     localId: string,
     fechaDesde: string,
@@ -111,8 +111,8 @@ export class ManifiestoService {
       .from('recolecciones')
       .select('id')
       .eq('local_id', localId)
-      .gte('fecha_recoleccion', fechaDesde)  // ⭐ CORREGIDO
-      .lte('fecha_recoleccion', fechaHasta); // ⭐ CORREGIDO
+      .gte('fecha_recoleccion', fechaDesde)
+      .lte('fecha_recoleccion', fechaHasta);
 
     console.log('🔍 RECOLECCIONES ENCONTRADAS:', recolecciones);
     console.log('🔍 ERROR RECOLECCIONES:', recoleccionesError);
@@ -371,6 +371,7 @@ export class ManifiestoService {
 
       // SNAPSHOTS DEL RECOLECTOR (Elefante Verde)
       recolector_empresa: configMap.empresa_recolector || 'Arcelin, S.A. de C.V.',
+      recolector_rfc: configMap.recolector_rfc || 'No especificado',        // ✅ FIX
       recolector_domicilio: configMap.domicilio_recolector || 'No especificado',
       recolector_email: configMap.email_recolector || 'direccion@elefantesverdes.com',
       recolector_telefono: configMap.telefono_recolector || '9987449963',
