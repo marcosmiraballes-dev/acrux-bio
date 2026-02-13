@@ -365,6 +365,7 @@ export class ManifiestoService {
       generador_razon_social: local.razon_social || local.nombre,
       generador_rfc: local.rfc || 'No especificado',
       generador_domicilio_completo: domicilioCompleto,
+      generador_municipio: local.ciudad || 'No especificado', 
       generador_email: local.email || 'No especificado',
       generador_telefono: local.telefono || 'No especificado',
       generador_encargado_entrega: local.encargado_entrega || 'No especificado',
