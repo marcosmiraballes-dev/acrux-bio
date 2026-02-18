@@ -27,41 +27,35 @@ const LocalModal: React.FC<LocalModalProps> = ({
     telefono: '',
     email: '',
     direccion: '',
-    // ========================================
-    // CAMPOS NUEVOS PARA MANIFIESTOS
-    // ========================================
     razon_social: '',
     rfc: '',
     ciudad: '',
     estado: '',
     codigo_postal: '',
     encargado_entrega: '',
+    codigo_acceso: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  // ========================================
-  // ESTADO DE ACORDEONES (secciones colapsables)
-  // ========================================
   const [acordeon, setAcordeon] = useState({
-    legal: false,      // Información Legal
-    ubicacion: false,  // Ubicación
-    contacto: false,   // Contacto
-    recoleccion: false // Recolección
+    legal: false,
+    ubicacion: false,
+    contacto: false,
+    recoleccion: false,
+    portal: false,
   });
 
   const toggleAcordeon = (seccion: keyof typeof acordeon) => {
     setAcordeon({ ...acordeon, [seccion]: !acordeon[seccion] });
   };
 
-  // Cargar plazas al abrir el modal
   useEffect(() => {
     if (isOpen) {
       loadPlazas();
     }
   }, [isOpen]);
 
-  // Cargar datos si es edición
   useEffect(() => {
     if (local) {
       setFormData({
@@ -73,16 +67,15 @@ const LocalModal: React.FC<LocalModalProps> = ({
         telefono: local.telefono || '',
         email: local.email || '',
         direccion: local.direccion || '',
-        // Campos nuevos
         razon_social: (local as any).razon_social || '',
         rfc: (local as any).rfc || '',
         ciudad: (local as any).ciudad || '',
         estado: (local as any).estado || '',
         codigo_postal: (local as any).codigo_postal || '',
         encargado_entrega: (local as any).encargado_entrega || '',
+        codigo_acceso: (local as any).codigo_acceso || '',
       });
     } else {
-      // Reset form
       setFormData({
         nombre: '',
         plaza_id: '',
@@ -98,6 +91,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         estado: '',
         codigo_postal: '',
         encargado_entrega: '',
+        codigo_acceso: '',
       });
     }
     setErrors({});
@@ -123,28 +117,25 @@ const LocalModal: React.FC<LocalModalProps> = ({
       newErrors.plaza_id = 'Debes seleccionar una plaza o marcar como independiente';
     }
 
-    // Validar teléfono si se proporciona (10 dígitos)
     if (formData.telefono && !/^\d{10}$/.test(formData.telefono.replace(/\D/g, ''))) {
       newErrors.telefono = 'El teléfono debe tener 10 dígitos';
     }
 
-    // Validar email si se proporciona
     if (formData.email && !formData.email.includes('@')) {
       newErrors.email = 'Email inválido';
     }
 
-    // ========================================
-    // VALIDACIONES NUEVAS PARA MANIFIESTOS
-    // ========================================
-    
-    // RFC - solo si se proporciona
     if (formData.rfc && !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(formData.rfc.toUpperCase())) {
       newErrors.rfc = 'RFC inválido. Debe tener 13 caracteres (ej: ABC123456XYZ)';
     }
 
-    // Código Postal - solo si se proporciona
     if (formData.codigo_postal && !/^\d{5}$/.test(formData.codigo_postal)) {
       newErrors.codigo_postal = 'Código postal debe tener 5 dígitos';
+    }
+
+    // Código acceso: solo letras, números y guión, máx 20 caracteres
+    if (formData.codigo_acceso && !/^[A-Z0-9\-]{1,20}$/.test(formData.codigo_acceso.toUpperCase())) {
+      newErrors.codigo_acceso = 'Solo letras, números y guión. Máximo 20 caracteres.';
     }
 
     setErrors(newErrors);
@@ -166,13 +157,13 @@ const LocalModal: React.FC<LocalModalProps> = ({
         telefono: formData.telefono.trim() || undefined,
         email: formData.email.trim() || undefined,
         direccion: formData.direccion.trim() || undefined,
-        // Campos nuevos
         razon_social: formData.razon_social.trim() || undefined,
         rfc: formData.rfc.trim().toUpperCase() || undefined,
         ciudad: formData.ciudad.trim() || undefined,
         estado: formData.estado.trim() || undefined,
         codigo_postal: formData.codigo_postal.trim() || undefined,
         encargado_entrega: formData.encargado_entrega.trim() || undefined,
+        codigo_acceso: formData.codigo_acceso.trim().toUpperCase() || undefined,
       } as any);
       onClose();
     } catch (error) {
@@ -207,11 +198,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          
-          {/* ========================================
-              SECCIÓN 1: INFORMACIÓN BÁSICA (Siempre visible)
-              ======================================== */}
-          
+
           {/* Nombre */}
           <div>
             <label className="label">
@@ -291,7 +278,62 @@ const LocalModal: React.FC<LocalModalProps> = ({
           </div>
 
           {/* ========================================
-              SECCIÓN 2: INFORMACIÓN LEGAL (Acordeón)
+              SECCIÓN: PORTAL DE LOCATARIOS (Acordeón)
+              ======================================== */}
+          <div className="border border-green-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('portal')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-green-50 hover:bg-green-100 transition-colors"
+              disabled={loading}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🌐</span>
+                <span className="font-semibold text-gray-700">Portal de Locatarios</span>
+                <span className="text-xs text-gray-500">(Acceso web)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.portal ? '▼' : '▶'}</span>
+            </button>
+
+            {acordeon.portal && (
+              <div className="p-4 bg-white space-y-3">
+                <div>
+                  <label className="label">Código de Acceso</label>
+                  <input
+                    type="text"
+                    value={formData.codigo_acceso}
+                    onChange={(e) => setFormData({ ...formData, codigo_acceso: e.target.value.toUpperCase() })}
+                    className={`input ${errors.codigo_acceso ? 'border-red-500' : ''}`}
+                    placeholder="Ej: EV-0001"
+                    maxLength={20}
+                    disabled={loading}
+                  />
+                  {errors.codigo_acceso && (
+                    <p className="text-red-500 text-sm mt-1">{errors.codigo_acceso}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Código único que el locatario usa para acceder a <strong>elefantesverdes.com.mx/acceso-a-usuarios</strong>. 
+                    Solo letras, números y guión. Déjalo vacío si no tiene acceso.
+                  </p>
+                </div>
+
+                {formData.codigo_acceso && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+                    ✅ Este local tiene acceso al portal con el código <strong>{formData.codigo_acceso}</strong>
+                  </div>
+                )}
+
+                {!formData.codigo_acceso && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-500">
+                    🔒 Sin código asignado — el locatario no puede acceder al portal
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ========================================
+              SECCIÓN: INFORMACIÓN LEGAL (Acordeón)
               ======================================== */}
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <button
@@ -310,7 +352,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
             
             {acordeon.legal && (
               <div className="p-4 bg-white space-y-4">
-                {/* Razón Social */}
                 <div>
                   <label className="label">Razón Social / Nombre Legal</label>
                   <input
@@ -326,7 +367,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   </p>
                 </div>
 
-                {/* RFC */}
                 <div>
                   <label className="label">RFC</label>
                   <input
@@ -350,7 +390,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
           </div>
 
           {/* ========================================
-              SECCIÓN 3: UBICACIÓN (Acordeón)
+              SECCIÓN: UBICACIÓN (Acordeón)
               ======================================== */}
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <button
@@ -369,7 +409,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
             
             {acordeon.ubicacion && (
               <div className="p-4 bg-white space-y-4">
-                {/* Dirección */}
                 <div>
                   <label className="label">Dirección</label>
                   <textarea
@@ -382,9 +421,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   />
                 </div>
 
-                {/* Ciudad y Estado en grid 2 columnas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Ciudad */}
                   <div>
                     <label className="label">Ciudad</label>
                     <input
@@ -397,7 +434,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
                     />
                   </div>
 
-                  {/* Estado */}
                   <div>
                     <label className="label">Estado</label>
                     <input
@@ -411,7 +447,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   </div>
                 </div>
 
-                {/* Código Postal */}
                 <div>
                   <label className="label">Código Postal</label>
                   <input
@@ -426,16 +461,14 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   {errors.codigo_postal && (
                     <p className="text-red-500 text-sm mt-1">{errors.codigo_postal}</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    5 dígitos numéricos
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">5 dígitos numéricos</p>
                 </div>
               </div>
             )}
           </div>
 
           {/* ========================================
-              SECCIÓN 4: CONTACTO (Acordeón)
+              SECCIÓN: CONTACTO (Acordeón)
               ======================================== */}
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <button
@@ -454,7 +487,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
             
             {acordeon.contacto && (
               <div className="p-4 bg-white space-y-4">
-                {/* Nombre de contacto */}
                 <div>
                   <label className="label">Nombre del Contacto</label>
                   <input
@@ -467,7 +499,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   />
                 </div>
 
-                {/* Teléfono */}
                 <div>
                   <label className="label">Teléfono</label>
                   <input
@@ -483,7 +514,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   )}
                 </div>
 
-                {/* Email */}
                 <div>
                   <label className="label">Email</label>
                   <input
@@ -503,7 +533,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
           </div>
 
           {/* ========================================
-              SECCIÓN 5: RECOLECCIÓN (Acordeón)
+              SECCIÓN: RECOLECCIÓN (Acordeón)
               ======================================== */}
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <button
@@ -522,7 +552,6 @@ const LocalModal: React.FC<LocalModalProps> = ({
             
             {acordeon.recoleccion && (
               <div className="p-4 bg-white">
-                {/* Encargado de Entrega */}
                 <div>
                   <label className="label">Encargado de Entrega de Residuos</label>
                   <input
