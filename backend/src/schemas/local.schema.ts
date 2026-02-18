@@ -4,6 +4,7 @@ import { z } from 'zod';
  * Schema para crear un nuevo local
  * ✅ ACTUALIZADO: Campo 'direccion' en lugar de 'notas'
  * ✅ ACTUALIZADO: Agregados campos para manifiestos (opcionales)
+ * ✅ ACTUALIZADO: Agregado codigo_acceso para portal de locatarios
  */
 export const createLocalSchema = z.object({
   // ========================================
@@ -15,11 +16,11 @@ export const createLocalSchema = z.object({
   contacto: z.string().max(100).optional(),
   telefono: z.string().max(20).optional(),
   email: z.string().email('Email inválido').max(100).optional(),
-  direccion: z.string().optional(), // ✅ CAMBIADO: 'notas' → 'direccion'
+  direccion: z.string().optional(),
   activo: z.boolean().optional().default(true),
   
   // ========================================
-  // CAMPOS NUEVOS PARA MANIFIESTOS (OPCIONALES)
+  // CAMPOS PARA MANIFIESTOS (OPCIONALES)
   // ========================================
   razon_social: z.string()
     .max(255, 'Razón social debe tener máximo 255 caracteres')
@@ -50,12 +51,22 @@ export const createLocalSchema = z.object({
   encargado_entrega: z.string()
     .max(255, 'Encargado de entrega debe tener máximo 255 caracteres')
     .optional()
+    .nullable(),
+
+  // ========================================
+  // PORTAL DE LOCATARIOS
+  // ========================================
+  codigo_acceso: z.string()
+    .max(20, 'Código de acceso debe tener máximo 20 caracteres')
+    .regex(/^[A-Z0-9\-]+$/, 'Solo letras mayúsculas, números y guión')
+    .optional()
     .nullable()
+    .transform(val => val ? val.toUpperCase() : val),
 });
 
 /**
  * Schema para actualizar un local
- * ✅ ACTUALIZADO: Agregados campos para manifiestos (opcionales)
+ * ✅ ACTUALIZADO: Agregado codigo_acceso para portal de locatarios
  */
 export const updateLocalSchema = z.object({
   // ========================================
@@ -67,11 +78,11 @@ export const updateLocalSchema = z.object({
   contacto: z.string().max(100).optional(),
   telefono: z.string().max(20).optional(),
   email: z.string().email('Email inválido').max(100).optional(),
-  direccion: z.string().optional(), // ✅ CAMBIADO: 'notas' → 'direccion'
+  direccion: z.string().optional(),
   activo: z.boolean().optional(),
   
   // ========================================
-  // CAMPOS NUEVOS PARA MANIFIESTOS (OPCIONALES)
+  // CAMPOS PARA MANIFIESTOS (OPCIONALES)
   // ========================================
   razon_social: z.string()
     .max(255, 'Razón social debe tener máximo 255 caracteres')
@@ -102,7 +113,17 @@ export const updateLocalSchema = z.object({
   encargado_entrega: z.string()
     .max(255, 'Encargado de entrega debe tener máximo 255 caracteres')
     .optional()
+    .nullable(),
+
+  // ========================================
+  // PORTAL DE LOCATARIOS
+  // ========================================
+  codigo_acceso: z.string()
+    .max(20, 'Código de acceso debe tener máximo 20 caracteres')
+    .regex(/^[A-Z0-9\-]+$/, 'Solo letras mayúsculas, números y guión')
+    .optional()
     .nullable()
+    .transform(val => val ? val.toUpperCase() : val),
 });
 
 /**
@@ -110,27 +131,3 @@ export const updateLocalSchema = z.object({
  */
 export type CreateLocalInput = z.infer<typeof createLocalSchema>;
 export type UpdateLocalInput = z.infer<typeof updateLocalSchema>;
-
-/**
- * ============================================
- * NOTAS IMPORTANTES
- * ============================================
- * 
- * CAMPOS AGREGADOS PARA MANIFIESTOS:
- * - razon_social: Nombre legal del local
- * - rfc: RFC del local (auto-uppercase)
- * - ciudad: Ciudad del local
- * - estado: Estado del local
- * - codigo_postal: CP del local (5 dígitos)
- * - encargado_entrega: Persona que entrega residuos
- * 
- * TODOS SON OPCIONALES (.optional().nullable()):
- * - No afecta los 463 locales existentes
- * - No rompe funcionalidad actual
- * - Se validan solo si se proporciona valor
- * 
- * VALIDACIONES ACTIVAS:
- * - RFC: 13 caracteres alfanuméricos + auto-uppercase
- * - CP: Exactamente 5 dígitos numéricos
- * - Email: Formato email válido
- */
