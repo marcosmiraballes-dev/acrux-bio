@@ -76,6 +76,13 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
     return `${parseInt(day)} de ${mesNombre} de ${year}`;
   };
 
+  // ⭐ FECHA = ÚLTIMO DÍA DEL MES EN CURSO
+  const hoy = new Date();
+  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const fechaManifiesto = `${ultimoDiaMes.getDate()} de ${meses[ultimoDiaMes.getMonth()]} de ${ultimoDiaMes.getFullYear()}`;
+
   // ⭐ CARGAR LOGO Y FIRMA EN BASE64
   const logoArcelinBase64 = await getImageBase64('/logo-arcelin.png');
   const firmaGabrielBase64 = await getImageBase64('/firma_gabriel.png');
@@ -122,15 +129,6 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
       margin: 0 auto;
       background: white;
       padding: 10mm;
-    }
-
-    /* TIMESTAMP */
-    .timestamp {
-      position: absolute;
-      top: 5mm;
-      left: 5mm;
-      font-size: 6pt;
-      color: #666;
     }
 
     /* HEADER - CAMBIO 1: margin-bottom de 12px a 20px */
@@ -443,9 +441,6 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
 <body>
   <div class="page">
     
-    <!-- Timestamp -->
-    <div class="timestamp">${new Date().toLocaleString('es-MX')}</div>
-
     <!-- ========== HEADER ========== -->
     <div class="header">
       <div class="header-left">
@@ -458,7 +453,7 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
         <div class="logo-separator"></div>
         <div class="folio-info">
           <div>FOLIO: <span class="folio-number">${data.folio}</span></div>
-          <div>FECHA: <span>${formatearFecha(data.fecha_emision)}</span></div>
+          <div>FECHA: <span>${fechaManifiesto}</span></div>
         </div>
       </div>
     </div>
@@ -578,29 +573,7 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
       </div>
     </div>
 
-    <!-- ========== 4. DESTINO ========== -->
-    <div class="seccion">
-      <div class="seccion-title">4. Destino</div>
-      <div class="seccion-content">
-        <div class="destino-section">
-          <div class="destino-title">Destino final para aprovechamiento:</div>
-          <div class="data-row">
-            <span class="label">Nombre:</span>
-            <span class="value">${data.destino_nombre}</span>
-          </div>
-          <div class="data-row">
-            <span class="label">Domicilio del destino:</span>
-            <span class="value">${data.destino_domicilio}</span>
-          </div>
-          <div class="data-row">
-            <span class="label">No. de autorización:</span>
-            <span class="value mono">${data.destino_final_oficio}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========== 5. DECLARACIONES Y FIRMAS ========== -->
+    <!-- ========== 4. DECLARACIONES Y FIRMAS ========== -->
     <div class="seccion">
       <div class="seccion-title">5. Declaraciones y Firmas</div>
       <div class="seccion-content">
@@ -638,9 +611,7 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
       <div style="margin-bottom: 3px;">
         <strong>Acrux-Bio / Elefante Verde</strong> - Sistema de Trazabilidad de Residuos
       </div>
-      <div>
-        Generado: ${new Date().toLocaleString('es-MX')} | Sistema automatizado
-      </div>
+      <div>Sistema automatizado de trazabilidad de residuos</div>
     </div>
 
   </div>
