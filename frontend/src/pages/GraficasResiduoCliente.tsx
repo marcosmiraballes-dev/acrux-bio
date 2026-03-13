@@ -364,13 +364,30 @@ const GraficasResiduoCliente: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800">Filtros</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div>
             <label className="label">Plaza</label>
             <select value={plazaId} onChange={(e) => setPlazaId(e.target.value)} className="input">
               <option value="">Todas las plazas</option>
               {plazas.map(plaza => (
                 <option key={plaza.id} value={plaza.id}>{plaza.nombre}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label">Locatario</label>
+            <select
+              value={localId}
+              onChange={(e) => setLocalId(e.target.value)}
+              disabled={!plazaId}
+              className="input disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              <option value="">
+                {!plazaId ? 'Selecciona una plaza primero' : 'Todos los locatarios'}
+              </option>
+              {localesFiltrados.map(local => (
+                <option key={local.id} value={local.id}>{local.nombre}</option>
               ))}
             </select>
           </div>
