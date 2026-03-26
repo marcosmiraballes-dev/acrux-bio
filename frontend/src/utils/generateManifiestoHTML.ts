@@ -64,24 +64,31 @@ const getImageBase64 = async (imagePath: string): Promise<string> => {
 export const generateManifiestoHTML = async (data: ManifiestoData) => {
   // ⭐ CALCULAR TOTAL DE KILOS
   const totalKilos = data.residuos?.reduce((sum, r) => sum + (r.cantidad_kg || 0), 0) || 0;
-  
-  // Formatear fecha: "04 de enero de 2026"
-  const formatearFecha = (fechaISO: string): string => {
-    const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-    ];
-    const [year, month, day] = fechaISO.split('T')[0].split('-');
-    const mesNombre = meses[parseInt(month) - 1];
-    return `${parseInt(day)} de ${mesNombre} de ${year}`;
+
+  const getUltimoDiaDelMes = (fecha: Date): Date => {
+    return new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
   };
 
-  // ⭐ FECHA = ÚLTIMO DÍA DEL MES EN CURSO
-  const hoy = new Date();
-  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  const fechaManifiesto = `${ultimoDiaMes.getDate()} de ${meses[ultimoDiaMes.getMonth()]} de ${ultimoDiaMes.getFullYear()}`;
+  const parseFechaISO = (fechaISO: string): Date => {
+    if (!fechaISO) {
+      throw new Error('fecha_emision vacía en generateManifiestoHTML');
+    }
+    const [year, month, day] = fechaISO.split('T')[0].split('-').map(Number);
+    if (!year || !month || !day) {
+      throw new Error(`Formato inválido de fecha_emision: ${fechaISO}`);
+    }
+    return new Date(year, month - 1, day);
+  };
+
+  const formatearFechaDDMMYYYY = (fecha: Date): string => {
+    const day = String(fecha.getDate()).padStart(2, '0');
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const year = fecha.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const fechaBase = parseFechaISO(data.fecha_emision);
+  const fechaManifiesto = formatearFechaDDMMYYYY(getUltimoDiaDelMes(fechaBase));
 
   // ⭐ CARGAR LOGO Y FIRMA EN BASE64
   const logoArcelinBase64 = await getImageBase64('/logo-arcelin.png');

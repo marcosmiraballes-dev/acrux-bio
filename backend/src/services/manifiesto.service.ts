@@ -3,6 +3,34 @@
 import { supabase } from '../config/supabase';
 import { CreateManifiestoInput, UpdateManifiestoInput } from '../schemas/manifiesto.schema';
 
+function getUltimoDiaDelMes(fecha: Date): Date {
+  return new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+}
+
+function parseFechaISO(fecha: string): Date {
+  if (!fecha) {
+    throw new Error('fecha_emision vacía');
+  }
+  const [year, month, day] = fecha.split('T')[0].split('-').map(Number);
+  if (!year || !month || !day) {
+    throw new Error(`Formato inválido de fecha_emision: ${fecha}`);
+  }
+
+  const parsed = new Date(year, month - 1, day);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`fecha_emision inválida: ${fecha}`);
+  }
+
+  return parsed;
+}
+
+function formatearISOFecha(fecha: Date): string {
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(2, '0');
+  const day = String(fecha.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export class ManifiestoService {
   
   /**
@@ -312,6 +340,10 @@ export class ManifiestoService {
     let folio = input.folio_manual;
     
     if (input.folio_manual) {
+      if (!input.fecha_emision) {
+        throw new Error('La fecha_emision es obligatoria cuando se usa folio manual');
+      }
+
       // FOLIO MANUAL: Verificar que esté disponible
       const { data: folioDisponible } = await supabase.rpc(
         'folio_manual_disponible',
@@ -345,6 +377,11 @@ export class ManifiestoService {
     // ========================================
     // PASO 8: Crear el manifiesto con TODOS los snapshots
     // ========================================
+    const fechaBaseEmision = input.fecha_emision ? parseFechaISO(input.fecha_emision) : new Date();
+    const fechaEmision = formatearISOFecha(getUltimoDiaDelMes(fechaBaseEmision));
+    console.log('🧪 fecha_emision recibida en payload:', input.fecha_emision);
+    console.log('🧪 fecha_emision guardada (último día del mes):', fechaEmision);
+
     const manifiestoData = {
       // Referencias
       local_id: input.local_id,
@@ -358,7 +395,7 @@ export class ManifiestoService {
 
       // Control
       folio: folio,
-      fecha_emision: input.fecha_emision || new Date().toISOString().split('T')[0],
+      fecha_emision: fechaEmision,
 
       // SNAPSHOTS DEL GENERADOR (local)
       generador_nombre_comercial: local.nombre,

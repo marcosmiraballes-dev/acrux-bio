@@ -25,7 +25,7 @@ export const createManifiestoSchema = z.object({
   // CONTROL
   // ========================================
   folio_manual: z.string().max(50).optional(), // Para folios reservados
-  fecha_emision: z.string().optional(),        // Default: fecha actual
+  fecha_emision: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
 });
 
 /**

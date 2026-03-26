@@ -50,6 +50,37 @@ interface Recoleccion {
   total_kilos: number;
 }
 
+function getUltimoDiaDelMes(fecha: Date): Date {
+  return new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+}
+
+function parseFechaInput(fechaISO: string): Date {
+  if (!fechaISO) {
+    throw new Error('fechaEmisionPersonalizada vacía');
+  }
+  const [year, month, day] = fechaISO.split('-').map(Number);
+  if (!year || !month || !day) {
+    throw new Error(`Formato inválido de fechaEmisionPersonalizada: ${fechaISO}`);
+  }
+  return new Date(year, month - 1, day);
+}
+
+function formatearISOFecha(fecha: Date): string {
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(2, '0');
+  const day = String(fecha.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function obtenerFechaEmisionUltimoDia(fechaISO: string): string {
+  return formatearISOFecha(getUltimoDiaDelMes(parseFechaInput(fechaISO)));
+}
+
+function formatearFechaDDMMYYYY(fechaISO: string): string {
+  const [year, month, day] = fechaISO.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 const NuevoManifiestoModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
   // ========================================
   // ESTADOS DEL WIZARD (7 pasos)
@@ -301,10 +332,16 @@ const loadLocales = async () => {
 
       if (tipoFolio === 'manual') {
         payload.folio_manual = folioManualSeleccionado;
-        payload.fecha_emision = fechaEmisionPersonalizada; // NUEVO - Fecha personalizada
+        console.log('🧪 fechaEmisionPersonalizada antes de obtenerFechaEmisionUltimoDia:', fechaEmisionPersonalizada);
+        payload.fecha_emision = obtenerFechaEmisionUltimoDia(fechaEmisionPersonalizada);
+        console.log('🧪 payload.fecha_emision normalizada (último día del mes):', payload.fecha_emision);
       }
 
+      const fechaBase = fechaEmisionPersonalizada || fechaHasta;
+      payload.fecha_emision = obtenerFechaEmisionUltimoDia(fechaBase);
+
       // 1. CREAR EL MANIFIESTO
+      console.log('🧪 payload completo:', JSON.stringify(payload, null, 2));
       const response = await api.post('/manifiestos', payload);
       const manifiestoCreado = response.data.data;
 
@@ -670,7 +707,7 @@ const loadLocales = async () => {
                   {tipoFolio === 'manual' && fechaEmisionPersonalizada && (
                     <div>
                       <span className="font-medium">Fecha de emisión:</span>{' '}
-                      {fechaEmisionPersonalizada}
+                      {formatearFechaDDMMYYYY(obtenerFechaEmisionUltimoDia(fechaEmisionPersonalizada))}
                     </div>
                   )}
                   <div>
