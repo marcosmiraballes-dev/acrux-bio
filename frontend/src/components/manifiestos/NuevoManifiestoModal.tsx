@@ -178,12 +178,10 @@ const NuevoManifiestoModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
     if (!plazaSeleccionada) return;
 
     try {
-      const mesActual = new Date().getMonth() + 1;
       const anioActual = new Date().getFullYear();
       
       const response = await api.get(`/folios-reservados/disponibles`, {
         params: {
-          mes: mesActual,
           anio: anioActual
         }
       });

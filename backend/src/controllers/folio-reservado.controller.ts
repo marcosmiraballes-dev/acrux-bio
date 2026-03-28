@@ -1,4 +1,4 @@
-// backend/src/controllers/Folio reservado.controller.ts
+// backend/src/controllers/folio-reservado.controller.ts
 
 import { Request, Response } from 'express';
 import { FolioReservadoService } from '../services/folio-reservado.service';
@@ -35,20 +35,12 @@ export class FolioReservadoController {
     }
   };
 
-  // GET /api/folios-reservados/disponibles?mes=1&anio=2026
+  // ✅ CORREGIDO: GET /api/folios-reservados/disponibles?anio=2026 (anio es opcional)
   getDisponibles = async (req: Request, res: Response) => {
     try {
-      const mes = parseInt(req.query.mes as string);
-      const anio = parseInt(req.query.anio as string);
+      const anio = req.query.anio ? parseInt(req.query.anio as string) : undefined;
 
-      if (!mes || !anio) {
-        return res.status(400).json({
-          success: false,
-          error: 'Se requieren los parámetros mes y anio'
-        });
-      }
-
-      const folios = await this.folioReservadoService.getDisponibles(mes, anio);
+      const folios = await this.folioReservadoService.getDisponibles(anio);
 
       res.json({
         success: true,
@@ -128,8 +120,8 @@ export class FolioReservadoController {
   create = async (req: Request, res: Response) => {
     try {
       const validatedData = createFolioReservadoSchema.parse(req.body);
-      const userId = (req as any).user.id;  // Del middleware de auth
-      
+      const userId = (req as any).user.id;
+
       const folio = await this.folioReservadoService.create(validatedData, userId);
 
       res.status(201).json({

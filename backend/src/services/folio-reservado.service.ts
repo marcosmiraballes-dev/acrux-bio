@@ -1,4 +1,4 @@
-// backend/src/services/Folio reservado.service.ts
+// backend/src/services/folio-reservado.service.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateFolioReservadoInput, UpdateFolioReservadoInput } from '../schemas/folio-reservado.schema';
@@ -24,15 +24,19 @@ export class FolioReservadoService {
     return data;
   }
 
-  // Obtener folios disponibles (no usados) de un mes/año específico
-  async getDisponibles(mes: number, anio: number) {
-    const { data, error } = await this.supabase
+  // ✅ CORREGIDO: ya no filtra por mes, solo por anio (opcional)
+  async getDisponibles(anio?: number) {
+    let query = this.supabase
       .from('folios_reservados')
       .select('*')
       .eq('usado', false)
-      .eq('mes', mes)
-      .eq('anio', anio)
       .order('folio_manual', { ascending: true });
+
+    if (anio) {
+      query = query.eq('anio', anio);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       throw new Error(`Error al obtener folios disponibles: ${error.message}`);
@@ -41,7 +45,7 @@ export class FolioReservadoService {
     return data || [];
   }
 
-  // Obtener estadísticas de un mes/año
+  // Obtener estadísticas de un mes/año (se mantiene para la página de catálogos)
   async getEstadisticasMes(mes: number, anio: number) {
     const { data, error } = await this.supabase
       .from('folios_reservados')
@@ -93,10 +97,11 @@ export class FolioReservadoService {
       throw new Error('Ya existe un folio con ese número');
     }
 
-    // Extraer año del folio_manual (formato: AmPDC-001-2026)
+    // ✅ CORREGIDO: extraer anio del folio (formato: AmPDC-001-2026, el año es el último segmento)
     const parts = folioData.folio_manual.split('-');
-    const anio = parseInt(parts[2]) || new Date().getFullYear();
-    const mes = 1; // Default, ya no se usa pero la BD lo requiere
+    const anio = parseInt(parts[parts.length - 1]) || new Date().getFullYear();
+    // ✅ CORREGIDO: mes real de creación (no hardcodeado a 1)
+    const mes = new Date().getMonth() + 1;
 
     // Crear el folio
     const { data, error } = await this.supabase
