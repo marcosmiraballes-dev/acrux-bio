@@ -500,6 +500,7 @@ const GraficasResiduoCliente: React.FC = () => {
                     <p className="text-4xl font-bold text-blue-700">
                       {materialSeleccionado.co2_evitado.toLocaleString('es-MX', { maximumFractionDigits: 0 })} kg
                     </p>
+                    <p className="text-xs text-gray-400 mt-1">* Factor CO₂ según EPA WARM v16</p>
                   </div>
                   <div className="text-5xl">🌍</div>
                 </div>

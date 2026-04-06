@@ -154,9 +154,9 @@ const ResiduosTotales: React.FC = () => {
   };
 
   // Calcular métricas
-  const arbolesEquivalentes = Math.round((stats.co2_evitado / 1000) * 45);
-  const kwh = Math.round((stats.co2_evitado / 1000) * 4500);
-  const kmAuto = Math.round((stats.co2_evitado / 1000) * 4500);
+  const arbolesEquivalentes = Math.round(stats.co2_evitado / 21.77);
+  const kwh = Math.round(stats.co2_evitado / 0.454);
+  const kmAuto = Math.round(stats.co2_evitado / 0.192);
 
   // Obtener nombre de plaza/local seleccionado
   const plazaSeleccionada = plazas.find(p => p.id === plazaId);
@@ -452,6 +452,7 @@ const ResiduosTotales: React.FC = () => {
             </p>
             <p className="text-lg font-semibold text-gray-700">Árboles plantados</p>
             <p className="text-sm text-gray-600 mt-2">durante un año completo</p>
+            <p className="text-xs text-gray-400 mt-1">* Estimado con factor EPA: 21.77 kg CO₂/árbol/año</p>
           </div>
 
           {/* Equivalencia 2 */}
@@ -462,6 +463,7 @@ const ResiduosTotales: React.FC = () => {
             </p>
             <p className="text-lg font-semibold text-gray-700">kWh de energía</p>
             <p className="text-sm text-gray-600 mt-2">suficiente para 50 casas/año</p>
+            <p className="text-xs text-gray-400 mt-1">* Estimado con factor CFE México: 0.454 kg CO₂/kWh</p>
           </div>
 
           {/* Equivalencia 3 */}
@@ -472,6 +474,7 @@ const ResiduosTotales: React.FC = () => {
             </p>
             <p className="text-lg font-semibold text-gray-700">Km evitados en auto</p>
             <p className="text-sm text-gray-600 mt-2">~{Math.round(kmAuto / 40000)} vueltas al mundo</p>
+            <p className="text-xs text-gray-400 mt-1">* Estimado con factor IPCC: 0.192 kg CO₂/km</p>
           </div>
 
         </div>
