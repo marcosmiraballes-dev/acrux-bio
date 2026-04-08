@@ -104,7 +104,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {
             title: 'REPORTES',
             items: [
-              { path: '/reportes', label: 'Bitácora de Locatario', icon: '📋' }
+              { path: '/reportes', label: 'Bitácora de Locatario', icon: '📋' },
+              { path: '/impacto-ambiental', label: 'Huella de Carbono', icon: '🌱' }
             ]
           }
         ];

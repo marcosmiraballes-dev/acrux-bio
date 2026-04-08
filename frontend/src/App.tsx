@@ -14,6 +14,7 @@ import Locales from './pages/Locales';
 import Usuarios from './pages/Usuarios';
 import Recolecciones from './pages/Recolecciones';
 import ReportesDirector from './pages/ReportesDirector';
+import HuellaCarbonoDirector from './pages/HuellaCarbonoDirector';
 import DashboardCoordinador from './pages/DashboardCoordinador';
 import PanelCapturador from './pages/PanelCapturador';
 import ReportesCapturador from './pages/ReportesCapturador';
@@ -210,10 +211,7 @@ function App() {
           <Route path="/impacto-ambiental" element={
             <ProtectedRoute allowedRoles={['DIRECTOR']}>
               <LayoutWrapper>
-                <Proximamente 
-                  titulo="Impacto Ambiental" 
-                  descripcion="Reportes de impacto ambiental para clientes e inversionistas." 
-                />
+                <HuellaCarbonoDirector />
               </LayoutWrapper>
             </ProtectedRoute>
           } />
