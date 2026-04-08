@@ -252,7 +252,7 @@ export class HuellaCarbononService {
           es_inorganico: nombre === 'Inorgánico',
         }))
         .sort((a, b) => b.co2_evitado - a.co2_evitado),
-      tendencia_mensual: (mensualPlaza ?? []).map(m => ({
+      tendencia_mensual: (mensualPlaza ?? []).map((m: { mes: string; co2_evitado: string }) => ({
         mes:         m.mes,
         co2_evitado: parseFloat(m.co2_evitado ?? 0),
       })),
