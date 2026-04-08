@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 // ✅ NUEVO: Import para PDF construido con código
 import { generateDirectorHTML } from '../utils/generateDirectorHTML';
+import AsistenteDirector from '../components/AsistenteDirector';
 
 // Interfaces - SIN arboles_equivalentes
 interface Stats {
@@ -679,6 +680,7 @@ const DashboardDirector: React.FC = () => {
           </div>
         )}
       </div>
+      <AsistenteDirector />
     </div>
   );
 };

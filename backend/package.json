@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.86.0",
     "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^5.1.1",
     "chartjs-node-canvas": "^5.0.0",

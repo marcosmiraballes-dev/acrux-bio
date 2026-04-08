@@ -28,9 +28,10 @@ function calcularEquivalencias(co2Kg: number) {
 
 export class HuellaCarbononService {
 
-  async getReporteLocatario(local_id: string, anio: number) {
-    const fechaDesde = `${anio}-01-01`;
-    const fechaHasta = `${anio}-12-31`;
+  async getReporteLocatario(local_id: string, anio: number, mes?: number) {
+    const fechaDesde = mes ? `${anio}-${String(mes).padStart(2,'0')}-01` : `${anio}-01-01`;
+    const ultimoDia = mes ? new Date(anio, mes, 0).getDate() : 31;
+    const fechaHasta = mes ? `${anio}-${String(mes).padStart(2,'0')}-${ultimoDia}` : `${anio}-12-31`;
 
     const { data: local, error: localError } = await supabase
       .from('locales')
@@ -131,9 +132,10 @@ export class HuellaCarbononService {
     };
   }
 
-  async getReportePlaza(plaza_id: string, anio: number) {
-    const fechaDesde = `${anio}-01-01`;
-    const fechaHasta = `${anio}-12-31`;
+  async getReportePlaza(plaza_id: string, anio: number, mes?: number) {
+    const fechaDesde = mes ? `${anio}-${String(mes).padStart(2,'0')}-01` : `${anio}-01-01`;
+    const ultimoDia = mes ? new Date(anio, mes, 0).getDate() : 31;
+    const fechaHasta = mes ? `${anio}-${String(mes).padStart(2,'0')}-${ultimoDia}` : `${anio}-12-31`;
 
     const { data: plaza, error: plazaError } = await supabase
       .from('plazas')

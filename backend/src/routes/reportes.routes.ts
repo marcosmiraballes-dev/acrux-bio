@@ -121,13 +121,14 @@ router.get('/huella/locatario', authenticate, async (req, res) => {
     return res.status(403).json({ success: false, error: 'No autorizado' });
   }
   try {
-    const { local_id, anio } = req.query;
+    const { local_id, anio, mes } = req.query;
     if (!local_id) {
       return res.status(400).json({ success: false, error: 'Se requiere local_id' });
     }
     const data = await huellaCarbonoService.getReporteLocatario(
       local_id as string,
-      parseInt(anio as string) || new Date().getFullYear()
+      parseInt(anio as string) || new Date().getFullYear(),
+      mes ? parseInt(mes as string) : undefined
     );
     return res.json({ success: true, data });
   } catch (error) {
@@ -149,13 +150,14 @@ router.get('/huella/plaza', authenticate, async (req, res) => {
     return res.status(403).json({ success: false, error: 'No autorizado' });
   }
   try {
-    const { plaza_id, anio } = req.query;
+    const { plaza_id, anio, mes } = req.query;
     if (!plaza_id) {
       return res.status(400).json({ success: false, error: 'Se requiere plaza_id' });
     }
     const data = await huellaCarbonoService.getReportePlaza(
       plaza_id as string,
-      parseInt(anio as string) || new Date().getFullYear()
+      parseInt(anio as string) || new Date().getFullYear(),
+      mes ? parseInt(mes as string) : undefined
     );
     return res.json({ success: true, data });
   } catch (error) {
