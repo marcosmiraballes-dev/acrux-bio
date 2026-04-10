@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { facturacionService } from '../services/facturacion.service';
+import { generateReporteFacturacionHTML } from '../utils/generateReporteFacturacionHTML';
+import { useAuth } from '../context/AuthContext';
 
 const CobrosFacturacion: React.FC = () => {
+  const { user } = useAuth();
   const now = useMemo(() => new Date(), []);
   const [mes, setMes] = useState<number>(now.getMonth() + 1);
   const [anio, setAnio] = useState<number>(now.getFullYear());
@@ -54,6 +57,105 @@ const CobrosFacturacion: React.FC = () => {
       setError(err.response?.data?.error || 'Error al generar cobros del mes');
       setTimeout(() => setError(''), 3000);
     }
+  };
+
+  const editableInputStyle: React.CSSProperties = {
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    padding: '6px 8px',
+    fontSize: '13px',
+    width: '100%',
+    background: 'white',
+    outline: 'none',
+  };
+
+  const handleFolioBlur = async (cobro: any, value: string) => {
+    const nextValue = value.trim();
+    const currentValue = cobro.folio ? String(cobro.folio).trim() : '';
+
+    if (nextValue === currentValue) return;
+
+    try {
+      await facturacionService.updateCobro(cobro.id, { folio: nextValue || null });
+      await loadCobros();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error actualizando folio');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleNumeroServicioBlur = async (cobro: any, value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 6);
+    const nextValue = digits ? Number(digits) : null;
+    const currentValue = cobro.numero_servicio != null ? Number(cobro.numero_servicio) : null;
+
+    if (nextValue === currentValue) return;
+
+    try {
+      await facturacionService.updateCobro(cobro.id, { numero_servicio: nextValue });
+      await loadCobros();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error actualizando número de servicio');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleFechaPagoBlur = async (cobro: any, value: string) => {
+    const nextValue = value || '';
+    const currentValue = cobro.fecha_pago ? String(cobro.fecha_pago).slice(0, 10) : '';
+
+    if (nextValue === currentValue) return;
+
+    try {
+      await facturacionService.updateCobro(cobro.id, { fecha_pago: nextValue || null });
+      await loadCobros();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error actualizando fecha de pago');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleExportarReporte = () => {
+    const clientes = cobros.map((cobro) => {
+      const servicios = (cobro.servicios_cliente || []).map((servicio: any) => ({
+        nombre_servicio: servicio.nombre_servicio,
+        costo: Number(servicio.costo || 0),
+      }));
+
+      const subtotal = servicios.reduce((sum: number, servicio: any) => sum + Number(servicio.costo || 0), 0);
+      const iva = subtotal * 0.16;
+      const total_mensual = subtotal + iva;
+
+      return {
+        local_nombre: cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo',
+        razon_social: cobro.clientes_facturacion?.locales?.razon_social || '-',
+        rfc: cobro.clientes_facturacion?.locales?.rfc || '-',
+        plaza_nombre: cobro.clientes_facturacion?.locales?.plaza_nombre || '-',
+        modo_pago: cobro.clientes_facturacion?.modo_pago || '-',
+        forma_pago: cobro.clientes_facturacion?.forma_pago || '-',
+        numero_servicio: cobro.numero_servicio ?? null,
+        folio: cobro.folio ?? null,
+        servicios,
+        subtotal,
+        iva,
+        total_mensual,
+        monto_cobrado: cobro.monto_cobrado ?? null,
+        monto_pagado: cobro.monto_pagado ?? null,
+        estado: cobro.estado,
+        fecha_pago: cobro.fecha_pago ?? null,
+      };
+    });
+
+    const html = generateReporteFacturacionHTML({
+      mes,
+      anio,
+      clientes,
+      userName: user?.nombre,
+    });
+
+    const ventana = window.open('', '_blank');
+    ventana?.document.write(html);
+    ventana?.document.close();
   };
 
   const openPago = (cobro: any) => {
@@ -134,6 +236,10 @@ const CobrosFacturacion: React.FC = () => {
 
           <button onClick={handleGenerarCobros} className="btn btn-primary whitespace-nowrap">
             Generar cobros del mes
+          </button>
+
+          <button onClick={handleExportarReporte} className="btn btn-secondary whitespace-nowrap">
+            Exportar reporte
           </button>
         </div>
       </div>
@@ -243,12 +349,14 @@ const CobrosFacturacion: React.FC = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Servicio</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Razón social</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto esperado</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto cobrado</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto pagado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de pago</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
@@ -256,14 +364,57 @@ const CobrosFacturacion: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {cobros.map((cobro) => (
                   <tr key={cobro.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <input
+                        type="number"
+                        placeholder="0"
+                        defaultValue={cobro.numero_servicio ?? ''}
+                        maxLength={6}
+                        style={editableInputStyle}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                          handleNumeroServicioBlur(cobro, e.currentTarget.value);
+                        }}
+                        onInput={(e) => {
+                          const target = e.currentTarget;
+                          const digits = target.value.replace(/\D/g, '').slice(0, 6);
+                          target.value = digits;
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-900">{cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo'}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{cobro.clientes_facturacion?.locales?.razon_social || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{cobro.folio || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <input
+                        type="text"
+                        placeholder="Sin folio"
+                        defaultValue={cobro.folio || ''}
+                        style={editableInputStyle}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                          handleFolioBlur(cobro, e.currentTarget.value);
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {formatCurrency(Number(cobro.monto_esperado || 0) * 1.16)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_cobrado || 0))}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_pagado || 0))}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <input
+                        type="date"
+                        defaultValue={cobro.fecha_pago ? String(cobro.fecha_pago).slice(0, 10) : ''}
+                        style={editableInputStyle}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                          handleFechaPagoBlur(cobro, e.currentTarget.value);
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEstadoBadgeClass(cobro.estado)}`}>
                         {cobro.estado}
