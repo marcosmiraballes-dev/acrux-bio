@@ -23,7 +23,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
     email: '',
     password: '',
     confirmPassword: '',
-    rol: 'CAPTURADOR' as 'ADMIN' | 'DIRECTOR' | 'COORDINADOR' | 'CAPTURADOR',
+    rol: 'CAPTURADOR' as 'ADMIN' | 'DIRECTOR' | 'COORDINADOR' | 'CAPTURADOR' | 'FINANCIERO',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -144,6 +144,12 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
       description: 'Solo captura de recolecciones',
       icon: '✍️',
       color: 'text-green-700 bg-green-50 border-green-200',
+    },
+    FINANCIERO: {
+      label: 'Financiero',
+      description: 'Gestión del módulo de facturación',
+      icon: '💼',
+      color: 'text-amber-700 bg-amber-50 border-amber-200',
     },
   };
 

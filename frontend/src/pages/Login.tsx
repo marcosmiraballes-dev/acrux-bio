@@ -30,6 +30,9 @@ const Login: React.FC = () => {
         case 'CAPTURADOR':
           navigate('/recolecciones', { replace: true });
           break;
+        case 'FINANCIERO':
+          navigate('/facturacion/clientes', { replace: true });
+          break;
         default:
           navigate('/dashboard', { replace: true });
       }

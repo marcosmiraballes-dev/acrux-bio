@@ -25,6 +25,7 @@ import foliosReservadosRoutes from './routes/folios-reservados.routes';
 import logsAuditoriaRoutes from './routes/logs-auditoria.routes';
 import portalRoutes from './routes/portal.routes';
 import asistenteRoutes from './routes/asistente.routes';
+import facturacionRoutes from './routes/facturacion.routes';
 
 
 
@@ -105,6 +106,7 @@ app.use('/api/folios-reservados', foliosReservadosRoutes);
 app.use('/api/logs-auditoria', logsAuditoriaRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/asistente', asistenteRoutes);
+app.use('/api/facturacion', facturacionRoutes);
 
 
 

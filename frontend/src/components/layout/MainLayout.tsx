@@ -30,6 +30,18 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const getMenuItems = (): MenuItem[] | MenuSection[] => {
     if (!user) return [];
 
+    if ((user as any).rol === 'FINANCIERO') {
+      return [
+        {
+          title: 'FACTURACIÓN',
+          items: [
+            { path: '/facturacion/clientes', label: 'Clientes', icon: '🧾' },
+            { path: '/facturacion/cobros', label: 'Cobros del mes', icon: '💵' }
+          ]
+        }
+      ];
+    }
+
     switch (user.rol) {
       case 'ADMIN':
         return [
@@ -70,6 +82,13 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ]
           },
           {
+            title: 'FACTURACIÓN',
+            items: [
+              { path: '/facturacion/clientes', label: 'Clientes', icon: '🧾' },
+              { path: '/facturacion/cobros', label: 'Cobros del mes', icon: '💵' }
+            ]
+          },
+          {
             title: 'SISTEMA',
             items: [
               { path: '/logs-auditoria', label: 'Logs de Auditoría', icon: '📋' }
@@ -99,6 +118,13 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             items: [
               { path: '/infracciones', label: 'Infracciones', icon: '⚠️' },
               { path: '/manifiestos', label: 'Manifiestos', icon: '📄' }
+            ]
+          },
+          {
+            title: 'FACTURACIÓN',
+            items: [
+              { path: '/facturacion/clientes', label: 'Clientes', icon: '🧾' },
+              { path: '/facturacion/cobros', label: 'Cobros del mes', icon: '💵' }
             ]
           },
           {

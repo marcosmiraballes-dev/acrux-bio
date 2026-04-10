@@ -34,6 +34,8 @@ import Vehiculos from './pages/Vehiculos';
 import DestinosFinales from './pages/DestinosFinales';
 import FoliosReservados from './pages/FoliosReservados';
 import LogsAuditoria from './pages/LogsAuditoria';
+import ClientesFacturacion from './pages/ClientesFacturacion';
+import CobrosFacturacion from './pages/CobrosFacturacion';
 
 // Wrapper component que decide qué layout usar
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -287,6 +289,18 @@ function App() {
           <Route path="/reportes-capturador" element={
             <ProtectedRoute allowedRoles={['CAPTURADOR']}>
               <LayoutWrapper><ReportesCapturador /></LayoutWrapper>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/facturacion/clientes" element={
+            <ProtectedRoute allowedRoles={['FINANCIERO', 'ADMIN', 'DIRECTOR']}>
+              <LayoutWrapper><ClientesFacturacion /></LayoutWrapper>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/facturacion/cobros" element={
+            <ProtectedRoute allowedRoles={['FINANCIERO', 'ADMIN', 'DIRECTOR']}>
+              <LayoutWrapper><CobrosFacturacion /></LayoutWrapper>
             </ProtectedRoute>
           } />
 

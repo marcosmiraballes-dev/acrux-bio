@@ -30,6 +30,8 @@ const RoleBasedRedirect = () => {
       return <Navigate to="/dashboard-coordinador" replace />;
     case 'CAPTURADOR':
       return <Navigate to="/panel-capturador" replace />;
+    case 'FINANCIERO':
+      return <Navigate to="/facturacion/clientes" replace />;
     default:
       return <Navigate to="/login" replace />;
   }

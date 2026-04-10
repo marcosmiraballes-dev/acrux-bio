@@ -4,7 +4,7 @@ export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  rol: 'ADMIN' | 'DIRECTOR' | 'COORDINADOR' | 'CAPTURADOR';
+  rol: 'ADMIN' | 'DIRECTOR' | 'COORDINADOR' | 'CAPTURADOR' | 'FINANCIERO';
   activo: boolean;
   created_at?: string;
   updated_at?: string;
