@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { facturacionService } from '../services/facturacion.service';
 import { generateReporteFacturacionHTML } from '../utils/generateReporteFacturacionHTML';
 import { generateEstadoCuentaHTML } from '../utils/generateEstadoCuentaHTML';
+import { generateReportePorPlazaHTML } from '../utils/generateReportePorPlazaHTML';
 import { listarMovimientosPorCliente } from '../services/facturacion.service';
+import { plazaService } from '../services/plaza.service';
 import { useAuth } from '../context/AuthContext';
 import MovimientoModal from '../components/common/MovimientoModal';
 
@@ -17,6 +19,8 @@ const CobrosFacturacion: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [movimientoClienteId, setMovimientoClienteId] = useState<string | null>(null);
   const [movimientoClienteNombre, setMovimientoClienteNombre] = useState<string>('');
+  const [plazas, setPlazas] = useState<any[]>([]);
+  const [plazaFiltro, setPlazaFiltro] = useState<string>('');
 
   const [editingCobro, setEditingCobro] = useState<any | null>(null);
   const [pagoData, setPagoData] = useState({
@@ -48,9 +52,24 @@ const CobrosFacturacion: React.FC = () => {
     }
   };
 
+  const loadPlazas = async () => {
+    try {
+      const getPlazasFn = (plazaService as any).getPlazas || plazaService.getAll;
+      const data = await getPlazasFn();
+      setPlazas((data || []).filter((p: any) => p.activo));
+    } catch (err) {
+      console.error('Error cargando plazas:', err);
+    }
+  };
+
   useEffect(() => {
     loadCobros();
+    loadPlazas();
   }, [mes, anio]);
+
+  const cobrosFiltrados = plazaFiltro
+    ? cobros.filter(c => c.clientes_facturacion?.locales?.plazas?.id === plazaFiltro)
+    : cobros;
 
   const handleGenerarCobros = async () => {
     try {
@@ -161,6 +180,60 @@ const CobrosFacturacion: React.FC = () => {
     const ventana = window.open('', '_blank');
     ventana?.document.write(html);
     ventana?.document.close();
+    ventana?.print();
+  };
+
+  const handleExportarPorPlaza = () => {
+    const plazasEnCobros = Array.from(
+      new Map(
+        cobros
+          .filter(c => c.clientes_facturacion?.locales?.plazas?.id)
+          .map(c => [
+            c.clientes_facturacion.locales.plazas.id,
+            c.clientes_facturacion.locales.plazas.nombre
+          ])
+      ).entries()
+    ).map(([id, nombre]) => ({ id, nombre }));
+
+    const grupos = plazasEnCobros.map(plaza => {
+      const cobrosPlaza = cobros.filter(
+        c => c.clientes_facturacion?.locales?.plazas?.id === plaza.id
+      );
+      const clientes = cobrosPlaza.map((cobro) => {
+        const servicios = (cobro.servicios_cliente || []).map((s: any) => ({
+          nombre_servicio: s.nombre_servicio,
+          costo: Number(s.costo || 0),
+        }));
+        const subtotal = servicios.reduce((sum: number, s: any) => sum + s.costo, 0);
+        const iva = subtotal * 0.16;
+        const total_mensual = subtotal + iva;
+        return {
+          local_nombre: cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo',
+          razon_social: cobro.clientes_facturacion?.locales?.razon_social || '-',
+          rfc: cobro.clientes_facturacion?.locales?.rfc || '-',
+          plaza_nombre: plaza.nombre,
+          modo_pago: cobro.clientes_facturacion?.modo_pago || '-',
+          forma_pago: cobro.clientes_facturacion?.forma_pago || '-',
+          numero_servicio: cobro.numero_servicio ?? null,
+          folio: cobro.folio ?? null,
+          servicios,
+          subtotal,
+          iva,
+          total_mensual,
+          monto_cobrado: cobro.monto_cobrado ?? null,
+          monto_pagado: cobro.monto_pagado ?? null,
+          estado: cobro.estado,
+          fecha_pago: cobro.fecha_pago ?? null,
+        };
+      });
+      return { plaza: plaza.nombre, clientes };
+    });
+
+    const html = generateReportePorPlazaHTML({ mes, anio, grupos, userName: user?.nombre });
+    const ventana = window.open('', '_blank');
+    ventana?.document.write(html);
+    ventana?.document.close();
+    ventana?.print();
   };
 
   const handleEstadoCuenta = async (cobro: any) => {
@@ -198,6 +271,7 @@ const CobrosFacturacion: React.FC = () => {
       const ventana = window.open('', '_blank');
       ventana?.document.write(html);
       ventana?.document.close();
+      ventana?.print();
     } catch (err) {
       setError('Error al generar estado de cuenta');
       setTimeout(() => setError(''), 3000);
@@ -262,15 +336,12 @@ const CobrosFacturacion: React.FC = () => {
           <p className="text-gray-600">Gestiona cobros mensuales y registro de pagos</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
           <select value={mes} onChange={(e) => setMes(Number(e.target.value))} className="input w-full sm:w-44">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((numeroMes) => (
-              <option key={numeroMes} value={numeroMes}>
-                Mes {numeroMes}
-              </option>
+              <option key={numeroMes} value={numeroMes}>Mes {numeroMes}</option>
             ))}
           </select>
-
           <input
             type="number"
             value={anio}
@@ -279,13 +350,23 @@ const CobrosFacturacion: React.FC = () => {
             min={2000}
             max={9999}
           />
-
+          <select value={plazaFiltro} onChange={(e) => setPlazaFiltro(e.target.value)} className="input w-full sm:w-52">
+            <option value="">Todas las plazas</option>
+            {plazas.map(p => (
+              <option key={p.id} value={p.id}>{p.nombre}</option>
+            ))}
+          </select>
           <button onClick={handleGenerarCobros} className="btn btn-primary whitespace-nowrap">
             Generar cobros del mes
           </button>
-
           <button onClick={handleExportarReporte} className="btn btn-secondary whitespace-nowrap">
             Exportar reporte
+          </button>
+          <button
+            onClick={handleExportarPorPlaza}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+          >
+            Exportar por plaza
           </button>
         </div>
       </div>
@@ -407,7 +488,7 @@ const CobrosFacturacion: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {cobros.map((cobro) => (
+                {cobrosFiltrados.map((cobro) => (
                   <tr key={cobro.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 text-sm text-gray-900">
                       <input

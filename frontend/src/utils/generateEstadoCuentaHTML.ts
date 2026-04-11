@@ -148,7 +148,7 @@ export const generateEstadoCuentaHTML = (params: EstadoCuentaParams): string => 
 <body>
   <div class="header">
     <div class="logo-area">
-      <img src="/logo-blanco.png" alt="Elefantes Verdes" class="logo" />
+      <img src="/logo.png" alt="Elefantes Verdes" class="logo" />
       <h2 style="font-size:14px;color:#374151;margin-top:6px;font-weight:600;">Estado de Cuenta General</h2>
     </div>
     <div class="meta">
