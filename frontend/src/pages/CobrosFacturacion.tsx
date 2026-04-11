@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { facturacionService } from '../services/facturacion.service';
 import { generateReporteFacturacionHTML } from '../utils/generateReporteFacturacionHTML';
+import { generateEstadoCuentaHTML } from '../utils/generateEstadoCuentaHTML';
+import { listarMovimientosPorCliente } from '../services/facturacion.service';
 import { useAuth } from '../context/AuthContext';
+import MovimientoModal from '../components/common/MovimientoModal';
 
 const CobrosFacturacion: React.FC = () => {
   const { user } = useAuth();
@@ -12,6 +15,8 @@ const CobrosFacturacion: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [movimientoClienteId, setMovimientoClienteId] = useState<string | null>(null);
+  const [movimientoClienteNombre, setMovimientoClienteNombre] = useState<string>('');
 
   const [editingCobro, setEditingCobro] = useState<any | null>(null);
   const [pagoData, setPagoData] = useState({
@@ -156,6 +161,47 @@ const CobrosFacturacion: React.FC = () => {
     const ventana = window.open('', '_blank');
     ventana?.document.write(html);
     ventana?.document.close();
+  };
+
+  const handleEstadoCuenta = async (cobro: any) => {
+    try {
+      const clienteId = cobro.clientes_facturacion?.id;
+      if (!clienteId) return;
+
+      const movimientos = await listarMovimientosPorCliente(clienteId);
+
+      const cobrosMapeados = [{
+        mes: cobro.mes,
+        anio: cobro.anio,
+        folio: cobro.folio ?? null,
+        numero_servicio: cobro.numero_servicio ?? null,
+        monto_esperado: Number(cobro.monto_esperado || 0),
+        monto_cobrado: cobro.monto_cobrado ?? null,
+        monto_pagado: cobro.monto_pagado ?? null,
+        estado: cobro.estado,
+        fecha_pago: cobro.fecha_pago ?? null,
+        notas: cobro.notas ?? null,
+      }];
+
+      const html = generateEstadoCuentaHTML({
+        clienteNombre: cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo',
+        razonSocial: cobro.clientes_facturacion?.locales?.razon_social || '-',
+        rfc: cobro.clientes_facturacion?.locales?.rfc || '-',
+        plaza: cobro.clientes_facturacion?.locales?.plazas?.nombre || '-',
+        modoPago: cobro.clientes_facturacion?.modo_pago || '-',
+        formaPago: cobro.clientes_facturacion?.forma_pago || '-',
+        cobros: cobrosMapeados,
+        movimientos,
+        userName: user?.nombre,
+      });
+
+      const ventana = window.open('', '_blank');
+      ventana?.document.write(html);
+      ventana?.document.close();
+    } catch (err) {
+      setError('Error al generar estado de cuenta');
+      setTimeout(() => setError(''), 3000);
+    }
   };
 
   const openPago = (cobro: any) => {
@@ -349,28 +395,27 @@ const CobrosFacturacion: React.FC = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Servicio</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Razón social</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto esperado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto cobrado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto pagado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de pago</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Servicio</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto esperado</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto cobrado</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto pagado</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de pago</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {cobros.map((cobro) => (
                   <tr key={cobro.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-3 py-3 text-sm text-gray-900">
                       <input
                         type="number"
                         placeholder="0"
                         defaultValue={cobro.numero_servicio ?? ''}
                         maxLength={6}
-                        style={editableInputStyle}
+                        style={{ ...editableInputStyle, width: '70px' }}
                         onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
                         onBlur={(e) => {
                           e.currentTarget.style.borderColor = '#d1d5db';
@@ -383,14 +428,13 @@ const CobrosFacturacion: React.FC = () => {
                         }}
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{cobro.clientes_facturacion?.locales?.razon_social || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-3 py-3 text-sm text-gray-900">{cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo'}</td>
+                    <td className="px-3 py-3 text-sm text-gray-900">
                       <input
                         type="text"
                         placeholder="Sin folio"
                         defaultValue={cobro.folio || ''}
-                        style={editableInputStyle}
+                        style={{ ...editableInputStyle, minWidth: '90px', maxWidth: '120px' }}
                         onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
                         onBlur={(e) => {
                           e.currentTarget.style.borderColor = '#d1d5db';
@@ -398,16 +442,16 @@ const CobrosFacturacion: React.FC = () => {
                         }}
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    <td className="px-3 py-3 text-sm font-medium text-gray-900">
                       {formatCurrency(Number(cobro.monto_esperado || 0) * 1.16)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_cobrado || 0))}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_pagado || 0))}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-3 py-3 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_cobrado || 0))}</td>
+                    <td className="px-3 py-3 text-sm text-gray-900">{formatCurrency(Number(cobro.monto_pagado || 0))}</td>
+                    <td className="px-3 py-3 text-sm text-gray-900">
                       <input
                         type="date"
                         defaultValue={cobro.fecha_pago ? String(cobro.fecha_pago).slice(0, 10) : ''}
-                        style={editableInputStyle}
+                        style={{ ...editableInputStyle, width: '130px' }}
                         onFocus={(e) => { e.currentTarget.style.borderColor = '#047857'; }}
                         onBlur={(e) => {
                           e.currentTarget.style.borderColor = '#d1d5db';
@@ -415,18 +459,35 @@ const CobrosFacturacion: React.FC = () => {
                         }}
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEstadoBadgeClass(cobro.estado)}`}>
                         {cobro.estado}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <button
-                        onClick={() => openPago(cobro)}
-                        className="text-primary-600 hover:text-primary-800 font-medium"
-                      >
-                        Registrar pago
-                      </button>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <div className="flex flex-col items-stretch gap-1">
+                        <button
+                          onClick={() => {
+                            setMovimientoClienteId(cobro.clientes_facturacion?.id);
+                            setMovimientoClienteNombre(cobro.clientes_facturacion?.locales?.nombre || 'Cliente externo');
+                          }}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                        >
+                          + Movimiento
+                        </button>
+                        <button
+                          onClick={() => handleEstadoCuenta(cobro)}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          Estado de cuenta
+                        </button>
+                        <button
+                          onClick={() => openPago(cobro)}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                        >
+                          Registrar pago
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -435,6 +496,14 @@ const CobrosFacturacion: React.FC = () => {
           </div>
         )}
       </div>
+      {movimientoClienteId && (
+        <MovimientoModal
+          clienteId={movimientoClienteId}
+          clienteNombre={movimientoClienteNombre}
+          onClose={() => setMovimientoClienteId(null)}
+          onSuccess={() => loadCobros()}
+        />
+      )}
     </div>
   );
 };

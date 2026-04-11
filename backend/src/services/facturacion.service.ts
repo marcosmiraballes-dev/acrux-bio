@@ -6,6 +6,8 @@ import {
   UpdateServicioClienteInput,
   CreateCobroMensualInput,
   UpdateCobroMensualInput,
+  CrearMovimientoDTO,
+  MovimientoResponse,
 } from '../schemas/facturacion.schema';
 
 export class FacturacionService {
@@ -209,7 +211,11 @@ export class FacturacionService {
             id,
             nombre,
             razon_social,
-            rfc
+            rfc,
+            plazas:plaza_id (
+              id,
+              nombre
+            )
           )
         )
       `)
@@ -367,5 +373,33 @@ export class FacturacionService {
     }
 
     return creados || [];
+  }
+
+  async crearMovimiento(data: CrearMovimientoDTO): Promise<MovimientoResponse> {
+    const { data: result, error } = await supabase
+      .from('movimientos_cuenta')
+      .insert(data)
+      .select()
+      .single();
+    if (error) throw error;
+    return result;
+  }
+
+  async listarMovimientosPorCliente(cliente_id: string): Promise<MovimientoResponse[]> {
+    const { data, error } = await supabase
+      .from('movimientos_cuenta')
+      .select('*')
+      .eq('cliente_id', cliente_id)
+      .order('fecha', { ascending: true });
+    if (error) throw error;
+    return data;
+  }
+
+  async eliminarMovimiento(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('movimientos_cuenta')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   }
 }

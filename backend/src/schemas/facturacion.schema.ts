@@ -42,3 +42,27 @@ export type CreateServicioClienteInput = z.infer<typeof createServicioClienteSch
 export type UpdateServicioClienteInput = z.infer<typeof updateServicioClienteSchema>;
 export type CreateCobroMensualInput = z.infer<typeof createCobroMensualSchema>;
 export type UpdateCobroMensualInput = z.infer<typeof updateCobroMensualSchema>;
+
+export const CrearMovimientoSchema = z.object({
+  cliente_id: z.string().uuid(),
+  tipo: z.enum(['penalizacion', 'descuento', 'ajuste', 'nota_credito']),
+  descripcion: z.string().optional(),
+  monto: z.number().positive(),
+  es_cargo: z.boolean(),
+  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export type CrearMovimientoDTO = z.infer<typeof CrearMovimientoSchema>;
+
+export const MovimientoResponseSchema = z.object({
+  id: z.string().uuid(),
+  cliente_id: z.string().uuid(),
+  tipo: z.string(),
+  descripcion: z.string().nullable(),
+  monto: z.number(),
+  es_cargo: z.boolean(),
+  fecha: z.string(),
+  created_at: z.string(),
+});
+
+export type MovimientoResponse = z.infer<typeof MovimientoResponseSchema>;

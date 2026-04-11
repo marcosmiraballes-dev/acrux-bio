@@ -21,4 +21,8 @@ router.post('/cobros', (req, res) => facturacionController.createCobro(req, res)
 router.put('/cobros/:id', (req, res) => facturacionController.updateCobro(req, res));
 router.post('/cobros/generar/:mes/:anio', (req, res) => facturacionController.generarCobrosMes(req, res));
 
+router.post('/movimientos', (req, res) => facturacionController.crearMovimiento(req, res));
+router.get('/movimientos/cliente/:cliente_id', (req, res) => facturacionController.listarMovimientosPorCliente(req, res));
+router.delete('/movimientos/:id', (req, res) => facturacionController.eliminarMovimiento(req, res));
+
 export default router;

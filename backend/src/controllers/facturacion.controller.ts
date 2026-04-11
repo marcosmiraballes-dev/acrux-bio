@@ -8,6 +8,7 @@ import {
   updateServicioClienteSchema,
   createCobroMensualSchema,
   updateCobroMensualSchema,
+  CrearMovimientoSchema,
 } from '../schemas/facturacion.schema';
 
 const facturacionService = new FacturacionService();
@@ -187,6 +188,36 @@ export class FacturacionController {
       return res.json({ success: true, data });
     } catch (error: any) {
       return res.status(500).json({ success: false, error: error.message || 'Error interno del servidor' });
+    }
+  }
+
+  async crearMovimiento(req: Request, res: Response): Promise<void> {
+    try {
+      const data = CrearMovimientoSchema.parse(req.body);
+      const result = await facturacionService.crearMovimiento(data);
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(400).json({ error: 'Error al crear movimiento', details: error });
+    }
+  }
+
+  async listarMovimientosPorCliente(req: Request, res: Response): Promise<void> {
+    try {
+      const { cliente_id } = req.params;
+      const result = await facturacionService.listarMovimientosPorCliente(cliente_id);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al listar movimientos', details: error });
+    }
+  }
+
+  async eliminarMovimiento(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      await facturacionService.eliminarMovimiento(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Error al eliminar movimiento', details: error });
     }
   }
 }

@@ -107,3 +107,14 @@ export interface Estadisticas {
   locales_activos: number;
   promedio_kilos_por_recoleccion: number;
 }
+
+export interface MovimientoCuenta {
+  id: string;
+  cliente_id: string;
+  tipo: 'penalizacion' | 'descuento' | 'ajuste' | 'nota_credito';
+  descripcion: string | null;
+  monto: number;
+  es_cargo: boolean;
+  fecha: string;
+  created_at: string;
+}

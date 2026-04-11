@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { MovimientoCuenta } from '../types';
 
 export const facturacionService = {
   getClientes: async (): Promise<any[]> => {
@@ -70,4 +71,25 @@ export const facturacionService = {
     const response = await api.post(`/facturacion/cobros/generar/${mes}/${anio}`);
     return response.data.data || [];
   },
+};
+
+export const crearMovimiento = async (data: {
+  cliente_id: string;
+  tipo: 'penalizacion' | 'descuento' | 'ajuste' | 'nota_credito';
+  descripcion?: string;
+  monto: number;
+  es_cargo: boolean;
+  fecha: string;
+}): Promise<MovimientoCuenta> => {
+  const response = await api.post('/facturacion/movimientos', data);
+  return response.data;
+};
+
+export const listarMovimientosPorCliente = async (cliente_id: string): Promise<MovimientoCuenta[]> => {
+  const response = await api.get(`/facturacion/movimientos/cliente/${cliente_id}`);
+  return response.data;
+};
+
+export const eliminarMovimiento = async (id: string): Promise<void> => {
+  await api.delete(`/facturacion/movimientos/${id}`);
 };
