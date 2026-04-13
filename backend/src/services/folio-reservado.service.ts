@@ -65,7 +65,7 @@ export class FolioReservadoService {
       total,
       usados,
       disponibles,
-      limite: 10
+      limite: null
     };
   }
 
