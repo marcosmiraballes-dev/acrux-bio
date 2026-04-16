@@ -470,7 +470,7 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
       <div class="seccion-content two-columns">
         <div class="data-row">
           <span class="label">Nombre/Razón Social:</span>
-          <span class="value">${data.generador_razon_social || data.generador_nombre_comercial}</span>
+          <span class="value" style="font-size: 6.5pt; line-height: 1.15;">${data.generador_nombre_comercial || ''}${data.generador_razon_social && data.generador_razon_social.trim() ? `<br/>${data.generador_razon_social}` : ''}</span>
         </div>
         <div class="data-row">
           <span class="label">RFC:</span>
