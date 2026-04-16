@@ -9,10 +9,13 @@ interface Mensaje {
 
 interface Accion {
   action: string;
-  tipo: 'locatario' | 'plaza';
-  id: string;
-  anio: number;
+  tipo?: 'locatario' | 'plaza';
+  id?: string;
+  anio?: number;
   mes?: number;
+  local_id?: string;
+  fecha_desde?: string;
+  fecha_hasta?: string;
 }
 
 const AsistenteDirector: React.FC = () => {
@@ -42,20 +45,65 @@ const AsistenteDirector: React.FC = () => {
   // Ejecutar acción de generación de reporte
   useEffect(() => {
     if (!accionPendiente) return;
-    if (accionPendiente.action === 'GENERATE_REPORT') {
-      const endpoint = accionPendiente.tipo === 'locatario'
-        ? `/reportes/huella/locatario?local_id=${accionPendiente.id}&anio=${accionPendiente.anio}${accionPendiente.mes ? `&mes=${accionPendiente.mes}` : ''}`
-        : `/reportes/huella/plaza?plaza_id=${accionPendiente.id}&anio=${accionPendiente.anio}${accionPendiente.mes ? `&mes=${accionPendiente.mes}` : ''}`;
 
-      api.get(endpoint)
-        .then(res => {
+    const ejecutarAccion = async () => {
+      try {
+        if (accionPendiente.action === 'GENERATE_REPORT') {
+          if (!accionPendiente.tipo || !accionPendiente.id || !accionPendiente.anio) {
+            throw new Error('Acción GENERATE_REPORT incompleta');
+          }
+
+          const endpoint = accionPendiente.tipo === 'locatario'
+            ? `/reportes/huella/locatario?local_id=${accionPendiente.id}&anio=${accionPendiente.anio}${accionPendiente.mes ? `&mes=${accionPendiente.mes}` : ''}`
+            : `/reportes/huella/plaza?plaza_id=${accionPendiente.id}&anio=${accionPendiente.anio}${accionPendiente.mes ? `&mes=${accionPendiente.mes}` : ''}`;
+
+          const res = await api.get(endpoint);
           if (res.data.success) {
             generarReporteHuella(res.data.data, accionPendiente.tipo as TipoReporte);
           }
-        })
-        .catch(console.error)
-        .finally(() => setAccionPendiente(null));
-    }
+          return;
+        }
+
+        if (accionPendiente.action === 'GENERATE_BITACORA') {
+          if (!accionPendiente.local_id || !accionPendiente.fecha_desde || !accionPendiente.fecha_hasta) {
+            throw new Error('Acción GENERATE_BITACORA incompleta');
+          }
+
+          const response = await api.get('/bitacoras/locatario', {
+            params: {
+              local_id: accionPendiente.local_id,
+              fecha_desde: accionPendiente.fecha_desde,
+              fecha_hasta: accionPendiente.fecha_hasta,
+            },
+            responseType: 'arraybuffer',
+          });
+
+          const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
+
+          const nombreArchivo = `bitacora_${accionPendiente.local_id}_${accionPendiente.fecha_desde}_${accionPendiente.fecha_hasta}.xlsx`;
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = nombreArchivo;
+
+          document.body.appendChild(link);
+          link.click();
+
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error ejecutando acción del asistente:', error);
+      } finally {
+        setAccionPendiente(null);
+      }
+    };
+
+    ejecutarAccion();
   }, [accionPendiente]);
 
   const enviarMensaje = async () => {

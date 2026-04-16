@@ -25,9 +25,16 @@ REGLAS CRÍTICAS:
   c) Si hay más de un locatario con nombre similar, PREGUNTA al Director cuál quiere antes de generar.
   d) Solo cuando tengas el ID exacto y confirmado, usa generate_huella_report.
   e) NUNCA intentes generar múltiples reportes en una sola respuesta.
-5. Responde siempre en español.
-6. Sé conciso y directo. El Director es una persona ocupada.
-7. Cuando presentes números, usa formato mexicano: 1,234,567.89
+5. Cuando el Director pida manifiestos de un local y no tengas el local_id exacto:
+  a) Usa primero get_locatarios_plaza para localizar el ID correcto.
+  b) Solo con el local_id confirmado usa get_manifiestos_local.
+6. Cuando el Director pida generar una bitácora:
+  a) Si hay ambigüedad en el nombre del local, pregunta antes de generar.
+  b) NUNCA generes bitácora sin local_id confirmado, fecha_desde y fecha_hasta exactas.
+7. NUNCA intentes generar múltiples bitácoras o reportes en una sola respuesta.
+8. Responde siempre en español.
+9. Sé conciso y directo. El Director es una persona ocupada.
+10. Cuando presentes números, usa formato mexicano: 1,234,567.89
 
 Contexto del sistema:
 - Elefantes Verdes gestiona residuos reciclables en plazas comerciales de Quintana Roo, México
@@ -100,6 +107,31 @@ const tools: Anthropic.Tool[] = [
         periodo2_hasta: { type: 'string', description: 'Fin período 2 (YYYY-MM-DD)' },
       },
       required: ['periodo1_desde', 'periodo1_hasta', 'periodo2_desde', 'periodo2_hasta'],
+    },
+  },
+  {
+    name: 'get_manifiestos_local',
+    description: 'Obtiene los manifiestos de un locatario específico para consulta del Director.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        local_id: { type: 'string', description: 'ID UUID del locatario' },
+        plaza_id: { type: 'string', description: 'ID UUID de la plaza (opcional)' },
+      },
+      required: ['local_id'],
+    },
+  },
+  {
+    name: 'generate_bitacora_report',
+    description: 'Genera y descarga la bitácora de un locatario en Excel. Usar cuando el Director solicite generar bitácora.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        local_id: { type: 'string', description: 'ID UUID del locatario' },
+        fecha_desde: { type: 'string', description: 'Fecha inicio en formato YYYY-MM-DD' },
+        fecha_hasta: { type: 'string', description: 'Fecha fin en formato YYYY-MM-DD' },
+      },
+      required: ['local_id', 'fecha_desde', 'fecha_hasta'],
     },
   },
   {
@@ -255,6 +287,71 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
         return JSON.stringify(data);
       }
 
+      case 'get_manifiestos_local': {
+        const { local_id, plaza_id } = input;
+
+        const baseUrl = process.env.ASISTENTE_API_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+        const params = new URLSearchParams({ local_id });
+        if (plaza_id) params.append('plaza_id', plaza_id);
+
+        const authToken = process.env.ASISTENTE_INTERNAL_TOKEN || process.env.INTERNAL_API_TOKEN;
+        const headers: Record<string, string> = {};
+        if (authToken) {
+          headers.Authorization = `Bearer ${authToken}`;
+        }
+
+        const response = await fetch(`${baseUrl}/api/manifiestos?${params.toString()}`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error consultando /api/manifiestos: ${response.status} ${response.statusText}`);
+        }
+
+        const payload: any = await response.json();
+        const manifiestos = Array.isArray(payload?.data) ? payload.data : [];
+
+        const resumen = manifiestos.map((m: any) => {
+          const rawSnapshot = m.residuos_snapshot;
+          let residuosSnapshot: any[] = [];
+
+          if (Array.isArray(rawSnapshot)) {
+            residuosSnapshot = rawSnapshot;
+          } else if (typeof rawSnapshot === 'string') {
+            try {
+              const parsed = JSON.parse(rawSnapshot);
+              residuosSnapshot = Array.isArray(parsed) ? parsed : [];
+            } catch {
+              residuosSnapshot = [];
+            }
+          }
+
+          const totalKilos = residuosSnapshot.reduce((sum: number, residuo: any) => {
+            const cantidad = Number(residuo?.cantidad_kg || 0);
+            return sum + (Number.isFinite(cantidad) ? cantidad : 0);
+          }, 0);
+
+          return {
+            folio: m.folio,
+            fecha_emision: m.fecha_emision,
+            generador_nombre_comercial: m.generador_nombre_comercial,
+            total_kilos: Math.round(totalKilos * 100) / 100,
+          };
+        });
+
+        return JSON.stringify(resumen);
+      }
+
+      case 'generate_bitacora_report': {
+        return JSON.stringify({
+          action: 'GENERATE_BITACORA',
+          local_id: input.local_id,
+          fecha_desde: input.fecha_desde,
+          fecha_hasta: input.fecha_hasta,
+        });
+      }
+
       case 'generate_huella_report': {
         // Esta herramienta le indica al frontend que debe generar el reporte
         // El frontend intercepta esta acción y llama a HuellaCarbonoDirector
@@ -331,7 +428,7 @@ export async function procesarMensajeDirector(
           // Capturar acción de generación de reporte
           try {
             const parsed = JSON.parse(resultado);
-            if (parsed.action === 'GENERATE_REPORT') {
+            if (parsed.action === 'GENERATE_REPORT' || parsed.action === 'GENERATE_BITACORA') {
               accion = parsed;
             }
           } catch {}
