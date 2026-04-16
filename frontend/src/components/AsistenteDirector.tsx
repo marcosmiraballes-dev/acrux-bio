@@ -69,32 +69,26 @@ const AsistenteDirector: React.FC = () => {
             throw new Error('Acción GENERATE_BITACORA incompleta');
           }
 
+          const local_id = accionPendiente.local_id;
+          const fecha_desde = accionPendiente.fecha_desde;
+          const fecha_hasta = accionPendiente.fecha_hasta;
+
           const response = await api.get('/bitacoras/locatario', {
-            params: {
-              local_id: accionPendiente.local_id,
-              fecha_desde: accionPendiente.fecha_desde,
-              fecha_hasta: accionPendiente.fecha_hasta,
-            },
+            params: { local_id, fecha_desde, fecha_hasta },
             responseType: 'arraybuffer',
           });
 
-          const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          const blob = new Blob([response.data], { 
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
           });
-
-          const nombreArchivo = `bitacora_${accionPendiente.local_id}_${accionPendiente.fecha_desde}_${accionPendiente.fecha_hasta}.xlsx`;
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = nombreArchivo;
-
+          link.setAttribute('download', `bitacora_${local_id}_${fecha_desde}_${fecha_hasta}.xlsx`);
           document.body.appendChild(link);
           link.click();
-
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 100);
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
         }
       } catch (error) {
         console.error('Error ejecutando acción del asistente:', error);
