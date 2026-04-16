@@ -65,7 +65,7 @@ export class ManifiestoService {
   }
 
   /**
-   * Obtener un manifiesto por ID con residuos del PERIODO
+   * Obtener un manifiesto por ID con snapshots fijos
    */
   async getById(id: string) {
     // Obtener manifiesto con snapshots
@@ -73,7 +73,7 @@ export class ManifiestoService {
       .from('manifiestos')
       .select(`
         *,
-        local:locales(id, nombre, plaza_id, giro),
+        local:locales(id, nombre, plaza_id, giro, municipio, ciudad),
         recolector:recolectores(id, nombre)
       `)
       .eq('id', id)
@@ -83,17 +83,24 @@ export class ManifiestoService {
       throw new Error(`Error al obtener manifiesto: ${error.message}`);
     }
 
-    // ⭐ CARGAR RESIDUOS VALORIZABLES DEL PERIODO
-    const residuosValorizables = await this.obtenerResiduosDelPeriodo(
-      data.local_id,
-      data.fecha_desde,
-      data.fecha_hasta
-    );
+    const snapshot = (data as any).residuos_snapshot;
 
-    // Agregar residuos al resultado
+    const residuosRaw = snapshot !== null
+      ? (Array.isArray(snapshot) ? snapshot : [])
+      : await this.obtenerResiduosDelPeriodo(
+          data.local_id,
+          data.fecha_desde,
+          data.fecha_hasta
+        );
+
+    const residuosSnapshot = residuosRaw.map((residuo: any) => ({
+      tipo: String(residuo?.tipo || ''),
+      cantidad_kg: Number(residuo?.cantidad_kg) || 0,
+    }));
+
     return {
       ...data,
-      residuos: residuosValorizables
+      residuos: residuosSnapshot
     };
   }
 
@@ -382,6 +389,17 @@ export class ManifiestoService {
     console.log('🧪 fecha_emision recibida en payload:', input.fecha_emision);
     console.log('🧪 fecha_emision guardada (último día del mes):', fechaEmision);
 
+    const residuosPeriodo = await this.obtenerResiduosDelPeriodo(
+      input.local_id,
+      input.fecha_desde,
+      input.fecha_hasta
+    );
+
+    const residuosSnapshot = (residuosPeriodo || []).map((residuo: any) => ({
+      tipo: String(residuo?.tipo || ''),
+      cantidad_kg: Number(residuo?.cantidad_kg) || 0,
+    }));
+
     const manifiestoData = {
       // Referencias
       local_id: input.local_id,
@@ -402,7 +420,7 @@ export class ManifiestoService {
       generador_razon_social: local.razon_social || local.nombre,
       generador_rfc: local.rfc || 'No especificado',
       generador_domicilio_completo: domicilioCompleto,
-      generador_municipio: local.ciudad || 'No especificado', 
+      generador_municipio: local.municipio || local.ciudad || 'No especificado', 
       generador_email: local.email || 'No especificado',
       generador_telefono: local.telefono || 'No especificado',
       generador_encargado_entrega: local.encargado_entrega || 'No especificado',
@@ -427,6 +445,9 @@ export class ManifiestoService {
 
       // SNAPSHOT DESTINO (oficio)
       destino_final_oficio: configMap.destino_final_oficio || 'Oficio No. PENDIENTE/2026',
+
+      // SNAPSHOT DE RESIDUOS DEL PERIODO
+      residuos_snapshot: residuosSnapshot,
 
       // Control PDF
       pdf_generado: false,

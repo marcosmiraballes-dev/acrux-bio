@@ -35,8 +35,7 @@ interface ManifiestoData {
   // Residuos
   residuos: Array<{
     tipo: string;
-    cantidad: number;
-    unidad: string;
+    cantidad_kg: number;
   }>;
   total_kilos: number;
   
@@ -483,7 +482,7 @@ export const generateManifiestoHTML = async (data: ManifiestoData) => {
         </div>
         <div class="data-row">
           <span class="label">Municipio:</span>
-          <span class="value">${data.generador_municipio || 'Playa del Carmen'}</span>
+          <span class="value">${data.generador_municipio || ''}</span>
         </div>
         <div class="data-row">
           <span class="label">Teléfono:</span>

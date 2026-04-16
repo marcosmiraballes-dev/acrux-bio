@@ -159,7 +159,9 @@ const ListaManifiestos: React.FC = () => {
       
       // El backend YA trae los residuos en manifiesto.residuos
       const residuos = manifiesto.residuos || [];
-      const totalKilos = manifiesto.recoleccion?.total_kilos || 0;
+      const totalKilos = residuos.reduce((sum: number, residuo: any) => {
+        return sum + (Number(residuo?.cantidad_kg) || 0);
+      }, 0);
       
       // Preparar datos para el PDF con TODOS los snapshots
       const pdfData = {
@@ -171,7 +173,7 @@ const ListaManifiestos: React.FC = () => {
         generador_razon_social: manifiesto.generador_razon_social || '',
         generador_rfc: manifiesto.generador_rfc || '',
         generador_domicilio_completo: manifiesto.generador_domicilio_completo || '',
-        generador_municipio: 'Playa del Carmen',
+        generador_municipio: manifiesto.generador_municipio || '',
         generador_telefono: manifiesto.generador_telefono || '',
         generador_email: manifiesto.generador_email || '',
         generador_actividad_principal: manifiesto.local?.giro || '',
