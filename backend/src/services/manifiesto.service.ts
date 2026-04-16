@@ -73,7 +73,7 @@ export class ManifiestoService {
       .from('manifiestos')
       .select(`
         *,
-        local:locales(id, nombre, plaza_id, giro, municipio, ciudad),
+        local:locales(id, nombre, plaza_id, giro, ciudad),
         recolector:recolectores(id, nombre)
       `)
       .eq('id', id)
