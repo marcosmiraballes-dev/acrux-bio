@@ -5,7 +5,7 @@ import { z } from 'zod';
  */
 export const detalleRecoleccionSchema = z.object({
   tipo_residuo_id: z.string().uuid('ID de tipo de residuo inválido'),
-  kilos: z.number().positive('Los kilos deben ser mayores a 0')
+kilos: z.number().min(0, 'Los kilos no pueden ser negativos')
 });
 
 /**
