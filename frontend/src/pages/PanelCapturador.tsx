@@ -179,7 +179,7 @@ const PanelCapturador: React.FC = () => {
       const materialesArray: MaterialInput[] = [];
       Object.entries(materiales).forEach(([tipoId, kilosStr]) => {
         const kilos = parseFloat(kilosStr);
-        if (!isNaN(kilos) && kilos > 0) {
+        if (!isNaN(kilos) && kilos >= 0) {
           materialesArray.push({
             tipo_residuo_id: tipoId,
             kilos: Number(kilos.toFixed(2))
@@ -188,7 +188,7 @@ const PanelCapturador: React.FC = () => {
       });
       
       if (materialesArray.length === 0) {
-        setError('Ingresa al menos un material con kilos mayor a 0');
+        setError('Ingresa al menos un material');
         return;
       }
       
@@ -388,9 +388,9 @@ const PanelCapturador: React.FC = () => {
                       onChange={(e) => handleMaterialChange(tipo.id, e.target.value)}
                       onBlur={(e) => {
                         const num = parseFloat(e.target.value);
-                        if (!isNaN(num) && num > 0) {
+                        if (!isNaN(num) && num >= 0) {
                           handleMaterialChange(tipo.id, num.toFixed(2));
-                        } else if (e.target.value && (isNaN(num) || num <= 0)) {
+                        } else if (e.target.value && isNaN(num)) {
                           handleMaterialChange(tipo.id, '');
                         }
                       }}
@@ -436,7 +436,7 @@ const PanelCapturador: React.FC = () => {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleGuardar}
-            disabled={loading || totalKilos === 0}
+            disabled={loading}
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
             {loading ? '⏳ Guardando...' : editando ? '💾 Actualizar' : '💾 Guardar Recolección'}
