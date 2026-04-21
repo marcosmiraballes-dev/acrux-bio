@@ -155,7 +155,7 @@ const ResiduosTotales: React.FC = () => {
 
   // Calcular métricas
   const arbolesEquivalentes = Math.round(stats.co2_evitado / 21.77);
-  const kwh = Math.round(stats.co2_evitado / 0.454);
+  const kwh = Math.round(stats.co2_evitado / 0.444);
   const kmAuto = Math.round(stats.co2_evitado / 0.192);
 
   // Obtener nombre de plaza/local seleccionado
@@ -463,7 +463,7 @@ const ResiduosTotales: React.FC = () => {
             </p>
             <p className="text-lg font-semibold text-gray-700">kWh de energía</p>
             <p className="text-sm text-gray-600 mt-2">suficiente para 50 casas/año</p>
-            <p className="text-xs text-gray-400 mt-1">* Estimado con factor CFE México: 0.454 kg CO₂/kWh</p>
+            <p className="text-xs text-gray-400 mt-1">* Factor SEMARNAT/RENE — Sistema Eléctrico Nacional 2025: 0.444 kg CO₂/kWh</p>
           </div>
 
           {/* Equivalencia 3 */}

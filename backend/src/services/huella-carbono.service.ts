@@ -15,7 +15,7 @@ const FACTORES_WARM: Record<string, number> = {
 };
 
 const ARBOLES_FACTOR = 21.77;
-const KWH_FACTOR     = 0.454;
+const KWH_FACTOR     = 0.444;
 const KM_AUTO_FACTOR = 0.192;
 
 function calcularEquivalencias(co2Kg: number) {
@@ -125,7 +125,7 @@ export class HuellaCarbononService {
       metodologia: {
         fuente_factores: 'EPA Waste Reduction Model (WARM) v16 — diciembre 2023',
         fuente_arboles:  'EPA GHG Equivalencies Calculator — 21.77 kg CO₂/árbol/año',
-        fuente_kwh:      'CFE/SEMARNAT FESEN 2023 — 0.454 kg CO₂/kWh',
+        fuente_kwh:      'SEMARNAT/RENE — Sistema Eléctrico Nacional 2025 — 0.444 kg CO₂/kWh',
         fuente_km:       'IPCC 2006 Guidelines / INECC — 0.192 kg CO₂/km',
         nota_inorganico: 'Residuo inorgánico gestionado en sitio autorizado. Sin CO₂ evitado atribuible.',
       },
@@ -261,7 +261,7 @@ export class HuellaCarbononService {
       metodologia: {
         fuente_factores: 'EPA Waste Reduction Model (WARM) v16 — diciembre 2023',
         fuente_arboles:  'EPA GHG Equivalencies Calculator — 21.77 kg CO₂/árbol/año',
-        fuente_kwh:      'CFE/SEMARNAT FESEN 2023 — 0.454 kg CO₂/kWh',
+        fuente_kwh:      'SEMARNAT/RENE — Sistema Eléctrico Nacional 2025 — 0.444 kg CO₂/kWh',
         fuente_km:       'IPCC 2006 Guidelines / INECC — 0.192 kg CO₂/km',
         nota_inorganico: 'Residuo inorgánico gestionado en sitio autorizado. Sin CO₂ evitado atribuible.',
       },

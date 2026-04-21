@@ -266,7 +266,7 @@ tfoot td{padding:10px 14px;font-weight:600;background:#E8F5EE;border-top:2px sol
     </div>
   </div>
   <div class="portada-footer">
-    <div class="metodologia">Factores EPA WARM v16 (dic. 2023) · EPA GHG Equivalencies Calculator · CFE/INECC FESEN 2023 · IPCC 2006 Guidelines. Elaborado por Elefantes Verdes — Estrategias Ambientales · Quintana Roo, México.</div>
+    <div class="metodologia">Factores EPA WARM v16 (dic. 2023) · EPA GHG Equivalencies Calculator · SEMARNAT/RENE SEN 2025 · IPCC 2006 Guidelines. Elaborado por Elefantes Verdes — Estrategias Ambientales · Quintana Roo, México.</div>
     <div class="num-pag">1</div>
   </div>
 </div>
@@ -289,7 +289,7 @@ tfoot td{padding:10px 14px;font-weight:600;background:#E8F5EE;border-top:2px sol
       <div class="equiv-icon">⚡</div>
       <div class="equiv-value">${eq.kwh.toLocaleString('es-MX')}</div>
       <div class="equiv-label">kWh de energía ahorrada</div>
-      <div class="equiv-fuente">CFE/INECC FESEN 2023: 0.454 kg CO₂/kWh</div>
+      <div class="equiv-fuente">SEMARNAT/RENE — SEN 2025: 0.444 kg CO₂/kWh</div>
     </div>
     <div class="equiv-card">
       <div class="equiv-icon">🚗</div>
@@ -374,7 +374,7 @@ ${rankingHTML}
     </div>
     <div class="metodo-item">
       <div class="metodo-titulo">Factor eléctrico (kWh)</div>
-      <div class="metodo-texto">FESEN 2023: 0.454 kg CO₂/kWh. Publicado por CFE/SEMARNAT/INECC. Referencia oficial para cálculos de huella de carbono en México.</div>
+      <div class="metodo-texto">SEMARNAT/RENE — Sistema Eléctrico Nacional 2025: 0.444 kg CO₂/kWh. Comunicado oficial RENE (14 abril 2026). Referencia vigente para el periodo de reporte COA 2026.</div>
       <div class="metodo-url">gob.mx/inecc · gob.mx/semarnat</div>
     </div>
     <div class="metodo-item">

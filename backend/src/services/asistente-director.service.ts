@@ -225,7 +225,7 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
           total_co2_evitado: Math.round(totalCO2 * 100) / 100,
           equivalencias: {
             arboles: Math.round(totalCO2 / 21.77),
-            kwh: Math.round(totalCO2 / 0.454),
+            kwh: Math.round(totalCO2 / 0.444),
             km_auto: Math.round(totalCO2 / 0.192),
           }
         });
@@ -262,7 +262,7 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
           total_co2_evitado: Math.round(totalCO2 * 100) / 100,
           equivalencias: {
             arboles: Math.round(totalCO2 / 21.77),
-            kwh: Math.round(totalCO2 / 0.454),
+            kwh: Math.round(totalCO2 / 0.444),
             km_auto: Math.round(totalCO2 / 0.192),
           },
           por_material: (materialesPlaza || []).map((m: any) => ({
