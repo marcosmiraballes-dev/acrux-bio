@@ -46,9 +46,25 @@ export class ManifiestoService {
       `)
       .order('created_at', { ascending: false });
 
-    // Filtros opcionales
+    // Filtro por local específico
     if (localId) {
       query = query.eq('local_id', localId);
+    }
+
+    // Filtro por plaza (a través de locales)
+    if (plazaId && !localId) {
+      const { data: localesDePlaza } = await supabase
+        .from('locales')
+        .select('id')
+        .eq('plaza_id', plazaId);
+
+      const localIds = (localesDePlaza || []).map((l: any) => l.id);
+
+      if (localIds.length > 0) {
+        query = query.in('local_id', localIds);
+      } else {
+        return [];
+      }
     }
 
     // Paginación
@@ -427,7 +443,7 @@ export class ManifiestoService {
 
       // SNAPSHOTS DEL RECOLECTOR (Elefante Verde)
       recolector_empresa: configMap.empresa_recolector || 'Arcelin, S.A. de C.V.',
-      recolector_rfc: configMap.recolector_rfc || 'No especificado',        // ✅ FIX
+      recolector_rfc: configMap.recolector_rfc || 'No especificado',
       recolector_domicilio: configMap.domicilio_recolector || 'No especificado',
       recolector_email: configMap.email_recolector || 'direccion@elefantesverdes.com',
       recolector_telefono: configMap.telefono_recolector || '9987449963',
