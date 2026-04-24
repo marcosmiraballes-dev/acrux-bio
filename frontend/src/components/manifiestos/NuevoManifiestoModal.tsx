@@ -95,14 +95,14 @@ const NuevoManifiestoModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
   const [tipoFolio, setTipoFolio] = useState<'automatico' | 'manual'>('automatico');
   const [foliosDisponibles, setFoliosDisponibles] = useState<FolioReservado[]>([]);
   const [folioManualSeleccionado, setFolioManualSeleccionado] = useState<string>('');
-  const [fechaEmisionPersonalizada, setFechaEmisionPersonalizada] = useState<string>(''); // NUEVO
+  const [fechaEmisionPersonalizada, setFechaEmisionPersonalizada] = useState<string>('');
 
   // Paso 3: Local
   const [locales, setLocales] = useState<Local[]>([]);
   const [localSeleccionado, setLocalSeleccionado] = useState<string>('');
   const [busquedaLocal, setBusquedaLocal] = useState('');
 
-  // Paso 4: Periodo ⭐ NUEVO
+  // Paso 4: Periodo
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
   const [recoleccionesDelPeriodo, setRecoleccionesDelPeriodo] = useState<Recoleccion[]>([]);
@@ -179,13 +179,14 @@ const NuevoManifiestoModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
 
     try {
       const anioActual = new Date().getFullYear();
-      
+
       const response = await api.get(`/folios-reservados/disponibles`, {
         params: {
-          anio: anioActual
+          anio: anioActual,
+          plaza_id: plazaSeleccionada  // ⭐ FIX: filtrar por plaza
         }
       });
-      
+
       setFoliosDisponibles(response.data.data || []);
     } catch (err) {
       console.error('Error al cargar folios:', err);
@@ -199,12 +200,12 @@ const NuevoManifiestoModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
     }
   }, [tipoFolio, plazaSeleccionada]);
 
-// ========================================
-// CARGAR LOCALES (Paso 3)
-// ========================================
-const loadLocales = async () => {
+  // ========================================
+  // CARGAR LOCALES (Paso 3)
+  // ========================================
+  const loadLocales = async () => {
     if (!plazaSeleccionada) {
-      setLocales([]); // ⭐ LIMPIAR locales si no hay plaza
+      setLocales([]);
       return;
     }
 
@@ -212,13 +213,13 @@ const loadLocales = async () => {
       const response = await api.get('/locales', {
         params: { plaza_id: plazaSeleccionada }
       });
-      
-      console.log('🏢 LOCALES FILTRADOS POR PLAZA:', response.data.data); // ⭐ DEBUG
-      
+
+      console.log('🏢 LOCALES FILTRADOS POR PLAZA:', response.data.data);
+
       setLocales(response.data.data || []);
     } catch (err) {
       console.error('Error al cargar locales:', err);
-      setLocales([]); // ⭐ LIMPIAR en caso de error
+      setLocales([]);
     }
   };
 
@@ -226,12 +227,12 @@ const loadLocales = async () => {
     if (plazaSeleccionada) {
       loadLocales();
     } else {
-      setLocales([]); // ⭐ LIMPIAR cuando se deselecciona plaza
+      setLocales([]);
     }
   }, [plazaSeleccionada]);
 
   // ========================================
-  // CARGAR RECOLECCIONES DEL PERIODO (Paso 4) ⭐ NUEVO
+  // CARGAR RECOLECCIONES DEL PERIODO (Paso 4)
   // ========================================
   const loadRecoleccionesDelPeriodo = async () => {
     if (!localSeleccionado || !fechaDesde || !fechaHasta) return;
@@ -261,7 +262,6 @@ const loadLocales = async () => {
   // NAVEGACIÓN DEL WIZARD
   // ========================================
   const handleNext = () => {
-    // Validaciones por paso
     if (step === 1 && !plazaSeleccionada) {
       setError('Selecciona una plaza');
       return;
@@ -374,7 +374,7 @@ const loadLocales = async () => {
     setPlazaSeleccionada('');
     setTipoFolio('automatico');
     setFolioManualSeleccionado('');
-    setFechaEmisionPersonalizada(''); // NUEVO
+    setFechaEmisionPersonalizada('');
     setLocalSeleccionado('');
     setBusquedaLocal('');
     setFechaDesde('');
@@ -503,7 +503,7 @@ const loadLocales = async () => {
                     </select>
                   )}
 
-                  {/* NUEVO: Campo de fecha de emisión */}
+                  {/* Campo de fecha de emisión */}
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       📅 Fecha de Emisión del Manifiesto:
@@ -528,7 +528,7 @@ const loadLocales = async () => {
           {step === 3 && (
             <div>
               <h3 className="text-xl font-semibold mb-4">Selecciona el Local</h3>
-              
+
               <input
                 type="text"
                 placeholder="🔍 Buscar local por nombre o giro..."
@@ -556,11 +556,11 @@ const loadLocales = async () => {
             </div>
           )}
 
-          {/* PASO 4: PERIODO ⭐ NUEVO */}
+          {/* PASO 4: PERIODO */}
           {step === 4 && (
             <div>
               <h3 className="text-xl font-semibold mb-4">Periodo de Recolecciones</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -676,7 +676,7 @@ const loadLocales = async () => {
           {step === 7 && (
             <div>
               <h3 className="text-xl font-semibold mb-4">Recolector y Confirmación</h3>
-              
+
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Selecciona el Recolector (Chofer):

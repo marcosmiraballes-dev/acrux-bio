@@ -24,8 +24,8 @@ export class FolioReservadoService {
     return data;
   }
 
-  // ✅ CORREGIDO: ya no filtra por mes, solo por anio (opcional)
-  async getDisponibles(anio?: number) {
+  // Obtener folios disponibles, filtrado por plaza y año
+  async getDisponibles(anio?: number, plazaId?: string) {
     let query = this.supabase
       .from('folios_reservados')
       .select('*')
@@ -34,6 +34,10 @@ export class FolioReservadoService {
 
     if (anio) {
       query = query.eq('anio', anio);
+    }
+
+    if (plazaId) {
+      query = query.eq('plaza_id', plazaId);
     }
 
     const { data, error } = await query;
@@ -97,10 +101,9 @@ export class FolioReservadoService {
       throw new Error('Ya existe un folio con ese número');
     }
 
-    // ✅ CORREGIDO: extraer anio del folio (formato: AmPDC-001-2026, el año es el último segmento)
+    // Extraer anio del folio (formato: AmPDC-001-2026, el año es el último segmento)
     const parts = folioData.folio_manual.split('-');
     const anio = parseInt(parts[parts.length - 1]) || new Date().getFullYear();
-    // ✅ CORREGIDO: mes real de creación (no hardcodeado a 1)
     const mes = new Date().getMonth() + 1;
 
     // Crear el folio

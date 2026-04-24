@@ -35,12 +35,13 @@ export class FolioReservadoController {
     }
   };
 
-  // ✅ CORREGIDO: GET /api/folios-reservados/disponibles?anio=2026 (anio es opcional)
+  // GET /api/folios-reservados/disponibles?anio=2026&plaza_id=xxx
   getDisponibles = async (req: Request, res: Response) => {
     try {
       const anio = req.query.anio ? parseInt(req.query.anio as string) : undefined;
+      const plazaId = req.query.plaza_id as string | undefined;
 
-      const folios = await this.folioReservadoService.getDisponibles(anio);
+      const folios = await this.folioReservadoService.getDisponibles(anio, plazaId);
 
       res.json({
         success: true,
