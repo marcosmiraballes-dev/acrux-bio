@@ -314,11 +314,13 @@ export async function procesarMensajeCoordinador(
   });
   const MODEL = 'claude-sonnet-4-6';
 
+  const SYSTEM_PROMPT_DINAMICO = SYSTEM_PROMPT + `\n\nTU CONTEXTO ACTUAL:\n- coordinador_id: ${coordinador_id}\n- Este es tu ID permanente. SIEMPRE úsalo automáticamente en todas las herramientas sin pedírselo al coordinador.\n- NUNCA pidas el coordinador_id al usuario — ya lo tienes.`;
+
   while (true) {
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 4096,
-      system: SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT_DINAMICO,
       tools,
       messages,
     });
