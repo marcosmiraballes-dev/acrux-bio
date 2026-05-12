@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { generateCoordinadorHTML } from '../utils/generateCoordinadorHTML';
+import AsistenteCoordinador from '../components/AsistenteCoordinador';
 
 // Interfaces
 interface Stats {
@@ -461,6 +462,8 @@ const DashboardCoordinador: React.FC = () => {
           <p className="text-red-700">{error}</p>
         </div>
       )}
+
+      <AsistenteCoordinador />
     </div>
   );
 };
