@@ -216,6 +216,35 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
       case 'get_infracciones_local': {
         const { local_id, plaza_id, solo_activas } = input;
 
+        let locatarioIds: string[] = [];
+
+        if (local_id) {
+          // Buscar en locatarios_infracciones por nombre_comercial del local
+          const { data: localData } = await supabase
+            .from('locales')
+            .select('nombre')
+            .eq('id', local_id)
+            .single();
+
+          if (localData) {
+            const { data: liData } = await supabase
+              .from('locatarios_infracciones')
+              .select('id')
+              .ilike('nombre_comercial', `%${localData.nombre}%`);
+            locatarioIds = (liData || []).map((li: any) => li.id);
+          }
+        } else if (plaza_id) {
+          const { data: liData } = await supabase
+            .from('locatarios_infracciones')
+            .select('id')
+            .eq('plaza_id', plaza_id);
+          locatarioIds = (liData || []).map((li: any) => li.id);
+        }
+
+        if (locatarioIds.length === 0) {
+          return JSON.stringify({ total: 0, infracciones: [], mensaje: 'No se encontraron registros de infracciones para este locatario.' });
+        }
+
         let query = supabase
           .from('infracciones')
           .select(`
@@ -224,34 +253,26 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
             tipos_aviso!tipo_aviso_id(nombre),
             reglamentos!reglamento_id(nombre)
           `)
+          .in('locatario_id', locatarioIds)
           .order('fecha_infraccion', { ascending: false });
-
-        if (local_id) {
-          query = query.eq('locatario_id', local_id);
-        } else if (plaza_id) {
-          const { data: localesPlaza } = await supabase
-            .from('locales')
-            .select('id')
-            .eq('plaza_id', plaza_id);
-          const ids = (localesPlaza || []).map((l: any) => l.id);
-          if (ids.length === 0) return JSON.stringify([]);
-          query = query.in('locatario_id', ids);
-        }
 
         if (solo_activas) query = query.neq('estatus', 'RESUELTA');
 
         const { data, error } = await query.limit(50);
         if (error) throw new Error(error.message);
 
-        return JSON.stringify((data || []).map((i: any) => ({
-          nro_aviso: i.nro_aviso,
-          descripcion: i.descripcion_falta,
-          tipo_aviso: i.tipos_aviso?.nombre,
-          reglamento: i.reglamentos?.nombre,
-          estatus: i.estatus,
-          fecha: i.fecha_infraccion,
-          resuelto_fecha: i.resuelto_fecha,
-        })));
+        return JSON.stringify({
+          total: (data || []).length,
+          infracciones: (data || []).map((i: any) => ({
+            nro_aviso: i.nro_aviso,
+            descripcion: i.descripcion_falta,
+            tipo_aviso: i.tipos_aviso?.nombre,
+            reglamento: i.reglamentos?.nombre,
+            estatus: i.estatus,
+            fecha: i.fecha_infraccion,
+            resuelto_fecha: i.resuelto_fecha,
+          }))
+        });
       }
 
       case 'redactar_informe': {
