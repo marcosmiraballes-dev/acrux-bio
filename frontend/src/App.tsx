@@ -36,6 +36,9 @@ import FoliosReservados from './pages/FoliosReservados';
 import LogsAuditoria from './pages/LogsAuditoria';
 import ClientesFacturacion from './pages/ClientesFacturacion';
 import CobrosFacturacion from './pages/CobrosFacturacion';
+import AlertasCumplimiento from './pages/AlertasCumplimiento';
+import HistorialLocatario from './pages/HistorialLocatario';
+import InformesOperativos from './pages/InformesOperativos';
 
 // Wrapper component que decide qué layout usar
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -222,6 +225,27 @@ function App() {
           <Route path="/dashboard-coordinador" element={
             <ProtectedRoute allowedRoles={['COORDINADOR']}>
               <LayoutWrapper><DashboardCoordinador /></LayoutWrapper>
+            </ProtectedRoute>
+          } />
+
+          {/* Alertas de Cumplimiento - Coordinador */}
+          <Route path="/alertas-cumplimiento" element={
+            <ProtectedRoute allowedRoles={['COORDINADOR', 'ADMIN']}>
+              <LayoutWrapper><AlertasCumplimiento /></LayoutWrapper>
+            </ProtectedRoute>
+          } />
+
+          {/* Historial de Locatario - Coordinador */}
+          <Route path="/historial-locatario" element={
+            <ProtectedRoute allowedRoles={['COORDINADOR', 'ADMIN']}>
+              <LayoutWrapper><HistorialLocatario /></LayoutWrapper>
+            </ProtectedRoute>
+          } />
+
+          {/* Informes Operativos - Director */}
+          <Route path="/informes-operativos" element={
+            <ProtectedRoute allowedRoles={['DIRECTOR', 'ADMIN']}>
+              <LayoutWrapper><InformesOperativos /></LayoutWrapper>
             </ProtectedRoute>
           } />
 

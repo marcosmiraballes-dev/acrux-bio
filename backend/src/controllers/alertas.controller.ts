@@ -80,4 +80,18 @@ export class AlertasController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async getTendenciaLocal(req: Request, res: Response): Promise<void> {
+    try {
+      const { local_id } = req.params;
+      const { mes_alerta } = req.query;
+      const [tendencia, alertasAnteriores] = await Promise.all([
+        alertasService.getTendenciaLocal(local_id),
+        alertasService.getAlertasAnteriores(local_id, mes_alerta as string || new Date().toISOString().split('T')[0]),
+      ]);
+      res.json({ tendencia, alertas_anteriores: alertasAnteriores });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

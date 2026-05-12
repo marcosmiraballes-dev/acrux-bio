@@ -16,6 +16,9 @@ router.get('/plaza/:plaza_id', (req, res) => alertasController.getAlertasByPlaza
 // GET /api/alertas/director — Informes elevados al director
 router.get('/director', (req, res) => alertasController.getAlertasParaDirector(req, res));
 
+// GET /api/alertas/tendencia/:local_id — Tendencia de kilos + alertas anteriores
+router.get('/tendencia/:local_id', (req, res) => alertasController.getTendenciaLocal(req, res));
+
 // PATCH /api/alertas/:id — Actualizar estatus o nota de una alerta
 router.patch('/:id', (req, res) => alertasController.actualizarAlerta(req, res));
 

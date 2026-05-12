@@ -131,17 +131,30 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             title: 'REPORTES',
             items: [
               { path: '/reportes', label: 'Bitácora de Locatario', icon: '📋' },
-              { path: '/impacto-ambiental', label: 'Huella de Carbono', icon: '🌱' }
+              { path: '/impacto-ambiental', label: 'Huella de Carbono', icon: '🌱' },
+              { path: '/informes-operativos', label: 'Informes Operativos', icon: '📬' }
             ]
           }
         ];
 
       case 'COORDINADOR':
         return [
-          { path: '/dashboard-coordinador', label: 'Dashboard', icon: '📊' },
-          { path: '/recolecciones', label: 'Recolecciones', icon: '📋' },
-          { path: '/infracciones', label: 'Infracciones', icon: '⚠️' },
-          { path: '/reportes', label: 'Reportes', icon: '📄' }
+          {
+            title: 'PANEL COORDINADOR',
+            items: [
+              { path: '/dashboard-coordinador', label: 'Dashboard', icon: '📊' },
+              { path: '/recolecciones', label: 'Recolecciones', icon: '📋' },
+              { path: '/infracciones', label: 'Infracciones', icon: '⚠️' },
+              { path: '/reportes', label: 'Reportes', icon: '📄' }
+            ]
+          },
+          {
+            title: 'SEGUIMIENTO',
+            items: [
+              { path: '/alertas-cumplimiento', label: 'Alertas de Cumplimiento', icon: '📉' },
+              { path: '/historial-locatario', label: 'Historial de Locatario', icon: '🗂️' }
+            ]
+          }
         ];
 
       case 'CAPTURADOR':

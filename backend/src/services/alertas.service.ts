@@ -116,4 +116,43 @@ export class AlertasService {
     if (error) throw new Error(`Error registrando en historial: ${error.message}`);
     return alerta;
   }
+
+  async getTendenciaLocal(local_id: string, meses: number = 6): Promise<any[]> {
+    const fechaHasta = new Date();
+    const fechaDesde = new Date();
+    fechaDesde.setMonth(fechaDesde.getMonth() - meses);
+
+    const { data, error } = await supabase
+      .from('recolecciones')
+      .select('fecha_recoleccion, total_kilos')
+      .eq('local_id', local_id)
+      .gte('fecha_recoleccion', fechaDesde.toISOString().split('T')[0])
+      .lte('fecha_recoleccion', fechaHasta.toISOString().split('T')[0])
+      .order('fecha_recoleccion', { ascending: true });
+
+    if (error) throw new Error(`Error obteniendo tendencia: ${error.message}`);
+
+    // Agrupar por mes
+    const porMes: Record<string, number> = {};
+    (data || []).forEach(r => {
+      const mes = r.fecha_recoleccion.substring(0, 7); // YYYY-MM
+      porMes[mes] = (porMes[mes] || 0) + Number(r.total_kilos);
+    });
+
+    return Object.entries(porMes).map(([mes, kilos]) => ({
+      mes,
+      kilos: Math.round(kilos * 100) / 100,
+    }));
+  }
+
+  async getAlertasAnteriores(local_id: string, mes_actual: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('alertas_cumplimiento')
+      .select('id', { count: 'exact', head: true })
+      .eq('local_id', local_id)
+      .lt('mes_alerta', mes_actual);
+
+    if (error) throw new Error(`Error contando alertas anteriores: ${error.message}`);
+    return count || 0;
+  }
 }
