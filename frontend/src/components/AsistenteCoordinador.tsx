@@ -7,20 +7,6 @@ interface Mensaje {
   content: string;
 }
 
-type SpeechRecognitionInstance = {
-  lang: string;
-  interimResults: boolean;
-  maxAlternatives: number;
-  onstart: (() => void) | null;
-  onresult: ((event: any) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
-
 const SUGERENCIAS = [
   '¿Qué alertas tengo pendientes?',
   '¿Qué locales no han reciclado este mes?',
@@ -39,12 +25,8 @@ const AsistenteCoordinador: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [cargando, setCargando] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const lastSpokenIndexRef = useRef(-1);
 
   useEffect(() => {
     if (abierto) setTimeout(() => inputRef.current?.focus(), 100);
@@ -53,13 +35,6 @@ const AsistenteCoordinador: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensajes, cargando]);
-
-  useEffect(() => {
-    return () => {
-      recognitionRef.current?.stop();
-      window.speechSynthesis.cancel();
-    };
-  }, []);
 
   const enviarMensaje = async (texto?: string) => {
     const mensajeTexto = texto || input.trim();
@@ -102,91 +77,6 @@ const AsistenteCoordinador: React.FC = () => {
       enviarMensaje();
     }
   };
-
-  const limpiarTextoParaVoz = (texto: string) => {
-    return texto
-      .split('\n')
-      .filter(linea => !/^\s*\|.*\|\s*$/.test(linea) && !/^\s*\|?\s*[-:]+\s*(\|\s*[-:]+\s*)+\|?\s*$/.test(linea))
-      .join(' ')
-      .replace(/[|\-*#]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const detenerLectura = () => {
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-  };
-
-  const leerEnVozAlta = (texto: string) => {
-    const textoLimpio = limpiarTextoParaVoz(texto);
-    if (!textoLimpio) return;
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(textoLimpio);
-    utterance.lang = 'es-ES';
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const iniciarReconocimientoVoz = () => {
-    if (cargando) return;
-
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-
-    const SpeechRecognition = ((window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
-
-    if (!SpeechRecognition) return;
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'es-MX';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onresult = (event: any) => {
-      const textoReconocido = event.results?.[0]?.[0]?.transcript?.trim() || '';
-
-      if (textoReconocido) {
-        setInput(textoReconocido);
-        enviarMensaje(textoReconocido);
-      }
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-  };
-
-  useEffect(() => {
-    const ultimoIndex = mensajes.length - 1;
-    if (ultimoIndex <= 0 || ultimoIndex === lastSpokenIndexRef.current) return;
-
-    const ultimoMensaje = mensajes[ultimoIndex];
-    if (ultimoMensaje.role !== 'assistant') return;
-
-    lastSpokenIndexRef.current = ultimoIndex;
-    leerEnVozAlta(ultimoMensaje.content);
-  }, [mensajes]);
 
   const formatearMensaje = (texto: string) => {
     return texto
@@ -302,7 +192,7 @@ const AsistenteCoordinador: React.FC = () => {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isListening ? 'Escuchando...' : 'Pregunta sobre tus plazas...'}
+          placeholder="Pregunta sobre tus plazas..."
           disabled={cargando}
           style={{
             flex: 1, padding: '0.5rem 0.75rem',
@@ -311,35 +201,6 @@ const AsistenteCoordinador: React.FC = () => {
             background: cargando ? '#f9fafb' : '#fff',
           }}
         />
-        <button
-          onClick={iniciarReconocimientoVoz}
-          disabled={cargando}
-          title="Entrada por voz"
-          style={{
-            padding: '0.5rem 0.7rem', borderRadius: '8px', border: 'none',
-            background: isListening ? '#16a34a' : '#e5e7eb',
-            color: isListening ? '#fff' : '#6b7280',
-            cursor: cargando ? 'default' : 'pointer',
-            fontSize: '0.85rem', fontWeight: 600,
-          }}
-        >
-          🎤
-        </button>
-        {isSpeaking && (
-          <button
-            onClick={detenerLectura}
-            title="Detener lectura"
-            style={{
-              padding: '0.5rem 0.7rem', borderRadius: '8px', border: 'none',
-              background: '#e5e7eb',
-              color: '#6b7280',
-              cursor: 'pointer',
-              fontSize: '0.85rem', fontWeight: 600,
-            }}
-          >
-            🔇
-          </button>
-        )}
         <button
           onClick={() => enviarMensaje()}
           disabled={!input.trim() || cargando}
