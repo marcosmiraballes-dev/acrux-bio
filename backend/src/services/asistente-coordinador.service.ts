@@ -214,36 +214,8 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
       }
 
       case 'get_infracciones_local': {
+        // ⭐ MIGRADO: usa local_id directo en infracciones — sin workaround por nombre
         const { local_id, plaza_id, solo_activas } = input;
-
-        let locatarioIds: string[] = [];
-
-        if (local_id) {
-          // Buscar en locatarios_infracciones por nombre_comercial del local
-          const { data: localData } = await supabase
-            .from('locales')
-            .select('nombre')
-            .eq('id', local_id)
-            .single();
-
-          if (localData) {
-            const { data: liData } = await supabase
-              .from('locatarios_infracciones')
-              .select('id')
-              .ilike('nombre_comercial', `%${localData.nombre}%`);
-            locatarioIds = (liData || []).map((li: any) => li.id);
-          }
-        } else if (plaza_id) {
-          const { data: liData } = await supabase
-            .from('locatarios_infracciones')
-            .select('id')
-            .eq('plaza_id', plaza_id);
-          locatarioIds = (liData || []).map((li: any) => li.id);
-        }
-
-        if (locatarioIds.length === 0) {
-          return JSON.stringify({ total: 0, infracciones: [], mensaje: 'No se encontraron registros de infracciones para este locatario.' });
-        }
 
         let query = supabase
           .from('infracciones')
@@ -253,8 +225,28 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
             tipos_aviso!tipo_aviso_id(nombre),
             reglamentos!reglamento_id(nombre)
           `)
-          .in('locatario_id', locatarioIds)
           .order('fecha_infraccion', { ascending: false });
+
+        if (local_id) {
+          // Filtro directo por local_id
+          query = query.eq('local_id', local_id);
+        } else if (plaza_id) {
+          // Obtener todos los local_ids de la plaza y filtrar
+          const { data: localesPlaza } = await supabase
+            .from('locales')
+            .select('id')
+            .eq('plaza_id', plaza_id);
+
+          const localIds = (localesPlaza || []).map((l: any) => l.id);
+
+          if (localIds.length === 0) {
+            return JSON.stringify({ total: 0, infracciones: [], mensaje: 'No se encontraron locales para esta plaza.' });
+          }
+
+          query = query.in('local_id', localIds);
+        } else {
+          return JSON.stringify({ total: 0, infracciones: [], mensaje: 'Debe proveer local_id o plaza_id.' });
+        }
 
         if (solo_activas) query = query.neq('estatus', 'RESUELTA');
 
