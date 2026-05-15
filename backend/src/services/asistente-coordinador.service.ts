@@ -222,8 +222,7 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
           .select(`
             id, nro_aviso, descripcion_falta, estatus,
             fecha_infraccion, resuelto_fecha,
-            tipos_aviso!tipo_aviso_id(nombre),
-            reglamentos!reglamento_id(nombre)
+            tipo_aviso_id, reglamento_id
           `)
           .order('fecha_infraccion', { ascending: false });
 
@@ -258,8 +257,8 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
           infracciones: (data || []).map((i: any) => ({
             nro_aviso: i.nro_aviso,
             descripcion: i.descripcion_falta,
-            tipo_aviso: i.tipos_aviso?.nombre,
-            reglamento: i.reglamentos?.nombre,
+            tipo_aviso_id: i.tipo_aviso_id,
+            reglamento_id: i.reglamento_id,
             estatus: i.estatus,
             fecha: i.fecha_infraccion,
             resuelto_fecha: i.resuelto_fecha,
