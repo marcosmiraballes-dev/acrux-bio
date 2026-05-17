@@ -168,6 +168,72 @@ const AsistenteCoordinador: React.FC = () => {
     return result.join('');
   };
 
+  const exportarComoInforme = (contenido: string) => {
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    const hora = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+    const ventana = window.open('', '_blank');
+    if (!ventana) return;
+
+    ventana.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Informe Operativo — Acrux Bio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; padding: 40px; }
+    .header { border-bottom: 3px solid #15803d; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .header-left h1 { font-size: 22px; color: #15803d; font-weight: 700; }
+    .header-left h2 { font-size: 14px; color: #555; font-weight: 400; margin-top: 4px; }
+    .header-right { text-align: right; font-size: 11px; color: #888; line-height: 1.6; }
+    .meta { background: #f0fdf4; border: 1px solid #d1fae5; border-radius: 6px; padding: 12px 16px; margin-bottom: 24px; font-size: 12px; color: #374151; }
+    .meta span { font-weight: 600; color: #15803d; }
+    .contenido { line-height: 1.7; }
+    .contenido table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+    .contenido th { background: #15803d; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+    .contenido td { padding: 6px 10px; border: 1px solid #d1fae5; }
+    .contenido tr:nth-child(even) td { background: #f0fdf4; }
+    .contenido tr:nth-child(odd) td { background: #fff; }
+    .contenido strong { color: #15803d; }
+    .contenido hr { border: none; border-top: 1px solid #d1fae5; margin: 12px 0; }
+    .contenido div[style*="font-weight:700"] { color: #15803d; font-weight: 700; margin: 10px 0 4px; }
+    .footer { margin-top: 40px; border-top: 1px solid #d1fae5; padding-top: 12px; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; }
+    @media print {
+      body { padding: 20px; }
+      @page { margin: 1.5cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>Informe Operativo</h1>
+      <h2>Acrux Bio — Elefantes Verdes / Estrategias Ambientales</h2>
+    </div>
+    <div class="header-right">
+      ${fecha}<br/>${hora}<br/>Coordinador: ${user?.nombre || ''}
+    </div>
+  </div>
+  <div class="meta">
+    Generado por: <span>Asistente IA Operativo</span> &nbsp;·&nbsp;
+    Coordinador: <span>${user?.nombre || ''}</span> &nbsp;·&nbsp;
+    Fecha: <span>${fecha}</span>
+  </div>
+  <div class="contenido">
+    ${formatearMensaje(contenido)}
+  </div>
+  <div class="footer">
+    <span>Acrux Bio · Sistema de Trazabilidad Ambiental</span>
+    <span>Elefantes Verdes / Estrategias Ambientales · Confidencial</span>
+  </div>
+  <script>window.onload = () => { window.print(); }</script>
+</body>
+</html>`);
+    ventana.document.close();
+  };
+
   if (!abierto) {
     return (
       <button
@@ -235,10 +301,7 @@ const AsistenteCoordinador: React.FC = () => {
         )}
 
         {mensajes.map((m, i) => (
-          <div key={i} style={{
-            display: 'flex',
-            justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
-          }}>
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{
               maxWidth: '85%',
               padding: '0.625rem 0.875rem',
@@ -251,6 +314,24 @@ const AsistenteCoordinador: React.FC = () => {
             }}
               dangerouslySetInnerHTML={{ __html: formatearMensaje(m.content) }}
             />
+            {m.role === 'assistant' && i > 0 && (
+              <button
+                onClick={() => exportarComoInforme(m.content)}
+                style={{
+                  marginTop: '4px',
+                  padding: '3px 10px',
+                  fontSize: '0.7rem',
+                  color: '#15803d',
+                  background: 'transparent',
+                  border: '1px solid #d1fae5',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  alignSelf: 'flex-start',
+                }}
+              >
+                📄 Exportar informe
+              </button>
+            )}
           </div>
         ))}
 
