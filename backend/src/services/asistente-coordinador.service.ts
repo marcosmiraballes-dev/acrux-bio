@@ -250,20 +250,22 @@ async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: s
 
         if (solo_activas) query = query.neq('estatus', 'RESUELTA');
 
-        const { data, error } = await query.limit(50);
+        const { data, error } = await query.limit(500);
         if (error) throw new Error(error.message);
 
+        const infracciones = (data || []).map((i: any) => ({
+          nro_aviso: i.nro_aviso,
+          local: i.locales?.nombre || 'Sin nombre',
+          descripcion: i.descripcion_falta,
+          tipo_aviso_id: i.tipo_aviso_id,
+          estatus: i.estatus,
+          fecha: i.fecha_infraccion,
+          resuelto_fecha: i.resuelto_fecha,
+        }));
+
         return JSON.stringify({
-          total: (data || []).length,
-          infracciones: (data || []).map((i: any) => ({
-            nro_aviso: i.nro_aviso,
-            local: i.locales?.nombre || 'Sin nombre',
-            descripcion: i.descripcion_falta,
-            tipo_aviso_id: i.tipo_aviso_id,
-            estatus: i.estatus,
-            fecha: i.fecha_infraccion,
-            resuelto_fecha: i.resuelto_fecha,
-          }))
+          total: infracciones.length,
+          infracciones,
         });
       }
 
