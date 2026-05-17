@@ -78,10 +78,94 @@ const AsistenteCoordinador: React.FC = () => {
     }
   };
 
-  const formatearMensaje = (texto: string) => {
-    return texto
+  const formatInline = (text: string): string => {
+    return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br/>');
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code style="background:#f0fdf4;padding:1px 4px;border-radius:3px;font-size:0.8em">$1</code>');
+  };
+
+  const formatearMensaje = (texto: string): string => {
+    const lines = texto.split('\n');
+    const result: string[] = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Tabla Markdown — detectar bloque de tabla
+      if (line.trim().startsWith('|')) {
+        const tableLines: string[] = [];
+        while (i < lines.length && lines[i].trim().startsWith('|')) {
+          tableLines.push(lines[i]);
+          i++;
+        }
+        // Filtrar la linea separadora |---|---|
+        const dataLines = tableLines.filter(l => !/^\|[\s\-|]+\|$/.test(l.trim()));
+        if (dataLines.length > 0) {
+          let tableHtml = '<div style="overflow-x:auto;margin:8px 0"><table style="width:100%;border-collapse:collapse;font-size:0.78rem">';
+          dataLines.forEach((tl, idx) => {
+            const cells = tl.split('|').filter((_, ci) => ci > 0 && ci < tl.split('|').length - 1);
+            const tag = idx === 0 ? 'th' : 'td';
+            const rowStyle = idx === 0
+              ? 'background:#15803d;color:#fff'
+              : idx % 2 === 0 ? 'background:#f0fdf4' : 'background:#fff';
+            tableHtml += `<tr style="${rowStyle}">`;
+            cells.forEach(c => {
+              tableHtml += `<${tag} style="padding:5px 8px;border:1px solid #d1fae5;text-align:left">${formatInline(c.trim())}</${tag}>`;
+            });
+            tableHtml += '</tr>';
+          });
+          tableHtml += '</table></div>';
+          result.push(tableHtml);
+        }
+        continue;
+      }
+
+      // Headers ## y ###
+      if (line.startsWith('### ')) {
+        result.push(`<div style="font-weight:700;color:#15803d;font-size:0.82rem;margin:10px 0 4px">${formatInline(line.slice(4))}</div>`);
+        i++;
+        continue;
+      }
+      if (line.startsWith('## ')) {
+        result.push(`<div style="font-weight:700;color:#15803d;font-size:0.88rem;margin:12px 0 4px;border-bottom:1px solid #d1fae5;padding-bottom:3px">${formatInline(line.slice(3))}</div>`);
+        i++;
+        continue;
+      }
+      if (line.startsWith('# ')) {
+        result.push(`<div style="font-weight:700;color:#15803d;font-size:0.95rem;margin:12px 0 6px">${formatInline(line.slice(2))}</div>`);
+        i++;
+        continue;
+      }
+
+      // Lista con guion o asterisco
+      if (/^[-*] /.test(line.trim())) {
+        result.push(`<div style="display:flex;gap:6px;margin:2px 0"><span style="color:#15803d;flex-shrink:0">•</span><span>${formatInline(line.trim().slice(2))}</span></div>`);
+        i++;
+        continue;
+      }
+
+      // Linea divisora ---
+      if (/^---+$/.test(line.trim())) {
+        result.push('<hr style="border:none;border-top:1px solid #d1fae5;margin:8px 0"/>');
+        i++;
+        continue;
+      }
+
+      // Linea vacia
+      if (line.trim() === '') {
+        result.push('<div style="height:6px"></div>');
+        i++;
+        continue;
+      }
+
+      // Texto normal
+      result.push(`<div style="margin:1px 0">${formatInline(line)}</div>`);
+      i++;
+    }
+
+    return result.join('');
   };
 
   if (!abierto) {
