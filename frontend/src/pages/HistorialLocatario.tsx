@@ -151,6 +151,110 @@ const HistorialLocatario: React.FC = () => {
 
   const localInfo = locales.find(l => l.id === localSeleccionado);
 
+  const imprimirHistorial = () => {
+    const localNombre = localInfo?.nombre || 'Locatario';
+    const plazaNombre = plazas.find(p => p.id === plazaSeleccionada)?.nombre || '';
+    const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+    const colorFondoImp = (tipo: string) => {
+      const m: Record<string, string> = {
+        INFRACCION: '#fef2f2', ALERTA_CUMPLIMIENTO: '#fff7ed',
+        MANIFIESTO: '#eff6ff', CERTIFICADO: '#f0fdf4',
+        ANOMALIA: '#fdf4ff', MANUAL: '#f9fafb',
+      };
+      return m[tipo] || '#f9fafb';
+    };
+
+    const colorBordeImp = (tipo: string) => {
+      const m: Record<string, string> = {
+        INFRACCION: '#fca5a5', ALERTA_CUMPLIMIENTO: '#fed7aa',
+        MANIFIESTO: '#bfdbfe', CERTIFICADO: '#bbf7d0',
+        ANOMALIA: '#e9d5ff', MANUAL: '#e5e7eb',
+      };
+      return m[tipo] || '#e5e7eb';
+    };
+
+    const iconoImp = (tipo: string) => {
+      const m: Record<string, string> = {
+        INFRACCION: '⚠️', ALERTA_CUMPLIMIENTO: '📉', MANIFIESTO: '📄',
+        CERTIFICADO: '🏆', ANOMALIA: '🔍', MANUAL: '📝',
+      };
+      return m[tipo] || '📌';
+    };
+
+    const eventosHTML = eventos.map(e => `
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:${colorFondoImp(e.tipo_origen)};border:2px solid ${colorBordeImp(e.tipo_origen)};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">
+          ${iconoImp(e.tipo_origen)}
+        </div>
+        <div style="flex:1;background:${colorFondoImp(e.tipo_origen)};border:1px solid ${colorBordeImp(e.tipo_origen)};border-radius:8px;padding:10px 14px">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+              ${e.tipo_nota_manual || e.tipo_origen.replace(/_/g, ' ')}
+            </span>
+            <span style="font-size:11px;color:#9ca3af">
+              ${new Date(e.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+            </span>
+          </div>
+          <p style="margin:0;font-size:13px;color:#374151;line-height:1.5">${e.descripcion}</p>
+          ${e.usuarios?.nombre ? `<div style="font-size:11px;color:#9ca3af;margin-top:4px">Por: ${e.usuarios.nombre}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    const ventana = window.open('', '_blank');
+    if (!ventana) return;
+
+    ventana.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial — ${localNombre}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:Arial,sans-serif; font-size:13px; color:#1a1a1a; padding:40px; }
+    .header { border-bottom:3px solid #15803d; padding-bottom:16px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-end; }
+    .header h1 { font-size:22px; color:#15803d; font-weight:700; }
+    .header h2 { font-size:13px; color:#555; font-weight:400; margin-top:4px; }
+    .header-right { text-align:right; font-size:11px; color:#888; line-height:1.8; }
+    .meta { background:#f0fdf4; border:1px solid #d1fae5; border-radius:8px; padding:12px 16px; margin-bottom:24px; display:flex; gap:24px; flex-wrap:wrap; }
+    .meta-item { font-size:12px; color:#374151; }
+    .meta-item strong { color:#15803d; display:block; font-size:16px; font-weight:700; }
+    .timeline { position:relative; padding-left:8px; }
+    .footer { margin-top:32px; border-top:1px solid #d1fae5; padding-top:12px; display:flex; justify-content:space-between; font-size:10px; color:#aaa; }
+    @media print { body { padding:20px; } @page { margin:1.5cm; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Historial de Locatario</h1>
+      <h2>${localNombre} · ${plazaNombre}</h2>
+    </div>
+    <div class="header-right">
+      ${fecha}<br/>${hora}<br/>Acrux Bio — Elefantes Verdes
+    </div>
+  </div>
+  <div class="meta">
+    <div class="meta-item"><strong>${eventos.length}</strong>Eventos totales</div>
+    <div class="meta-item"><strong>${eventos.filter(e => e.tipo_origen === 'INFRACCION').length}</strong>Infracciones</div>
+    <div class="meta-item"><strong>${eventos.filter(e => e.tipo_origen === 'ALERTA_CUMPLIMIENTO').length}</strong>Alertas</div>
+    <div class="meta-item"><strong>${eventos.filter(e => e.tipo_origen === 'MANUAL').length}</strong>Notas manuales</div>
+  </div>
+  <div class="timeline">
+    ${eventosHTML}
+  </div>
+  <div class="footer">
+    <span>Acrux Bio · Sistema de Trazabilidad Ambiental</span>
+    <span>Elefantes Verdes / Estrategias Ambientales · Confidencial</span>
+  </div>
+  <script>window.onload = () => { window.print(); }</script>
+</body>
+</html>`);
+    ventana.document.close();
+  };
+
   return (
     <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
       <div style={{ marginBottom: '1.5rem' }}>
@@ -197,10 +301,16 @@ const HistorialLocatario: React.FC = () => {
             <div style={{ fontWeight: 600, color: '#111827' }}>{localInfo.nombre}</div>
             <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{localInfo.giro} · {eventos.length} eventos registrados</div>
           </div>
-          <button onClick={() => setModalNota(true)}
-            style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#16a34a', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>
-            + Agregar nota
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={imprimirHistorial}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #d1fae5', background: '#f0fdf4', color: '#15803d', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>
+              🖨️ Imprimir
+            </button>
+            <button onClick={() => setModalNota(true)}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#16a34a', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>
+              + Agregar nota
+            </button>
+          </div>
         </div>
       )}
 

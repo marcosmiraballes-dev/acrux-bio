@@ -369,6 +369,20 @@ export class InfraccionService {
 
     if (error) throw error;
 
+    // Registrar en historial_comunicacion
+    try {
+      const tipoAviso = this.getTipoAvisoById(data.tipo_aviso_id);
+      await supabase.from('historial_comunicacion').insert({
+        local_id: data.local_id,
+        tipo_origen: 'INFRACCION',
+        tipo_nota_manual: null,
+        descripcion: `${tipoAviso?.tipo || 'Aviso'} aplicado (${data.nro_aviso}): ${data.descripcion_falta}`,
+        coordinador_id: createdBy,
+      });
+    } catch (historialError) {
+      console.error('⚠️ Error registrando infracción en historial:', historialError);
+    }
+
     // Enriquecer respuesta
     let locatarioData = null;
 
@@ -506,6 +520,19 @@ export class InfraccionService {
       .single();
 
     if (error) throw error;
+
+    // Registrar resolución en historial_comunicacion
+    try {
+      await supabase.from('historial_comunicacion').insert({
+        local_id: data.local_id,
+        tipo_origen: 'INFRACCION',
+        tipo_nota_manual: 'RESOLUCION',
+        descripcion: `Infracción resuelta (${data.nro_aviso}): ${input.notas || 'Situación corregida por el locatario.'}`,
+        coordinador_id: resueltoBy,
+      });
+    } catch (historialError) {
+      console.error('⚠️ Error registrando resolución en historial:', historialError);
+    }
 
     let locatarioData = null;
 
