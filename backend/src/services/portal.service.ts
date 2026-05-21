@@ -1,8 +1,9 @@
 import { supabase } from '../config/supabase';
+import { generateToken } from '../utils/jwt';
 
 export class PortalService {
   /**
-   * Validar código de acceso y retornar datos del local
+   * Validar código de acceso y retornar datos del local (portal GoDaddy)
    */
   async login(codigoAcceso: string): Promise<any> {
     const { data, error } = await supabase
@@ -22,6 +23,42 @@ export class PortalService {
       return null;
     }
     return data;
+  }
+
+  /**
+   * Login del locatario con PIN — devuelve JWT para Acrux Bio
+   */
+  async loginLocatario(pin: string): Promise<any> {
+    const { data, error } = await supabase
+      .from('locales')
+      .select(`
+        id,
+        nombre,
+        giro,
+        codigo_acceso,
+        plazas (id, nombre)
+      `)
+      .eq('codigo_acceso', pin)
+      .eq('activo', true)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const token = generateToken({
+      id: data.id,
+      email: `locatario-${data.id}@acruxbio.local`,
+      rol: 'LOCATARIO'
+    });
+
+    return {
+      token,
+      local_id: data.id,
+      nombre: data.nombre,
+      giro: data.giro,
+      plaza: Array.isArray(data.plazas) ? data.plazas[0]?.nombre : (data.plazas as any)?.nombre || null
+    };
   }
 
   /**
@@ -56,7 +93,6 @@ export class PortalService {
       throw new Error(`Error al obtener recolecciones: ${error.message}`);
     }
 
-    // Calcular totales por tipo de residuo
     const totalesPorTipo: Record<string, number> = {};
     (data || []).forEach((rec: any) => {
       rec.detalle_recolecciones?.forEach((det: any) => {
@@ -114,21 +150,18 @@ export class PortalService {
 
     const registros = data || [];
 
-    // Calcular totales
     const total_kilos = registros.reduce((acc, r) => acc + Number(r.kilos), 0);
     const kilos_por_tipo: Record<string, number> = {};
     registros.forEach((r) => {
       kilos_por_tipo[r.tipo_residuo] = (kilos_por_tipo[r.tipo_residuo] || 0) + Number(r.kilos);
     });
 
-    // Calcular meta mensual: promedio de los últimos 3 meses vs mes actual
     const ahora = new Date();
     const inicioMesActual = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString();
     const kilosMesActual = registros
       .filter((r) => r.fecha_registro >= inicioMesActual)
       .reduce((acc, r) => acc + Number(r.kilos), 0);
 
-    // Calcular cumplimiento: % de semanas del mes con al menos 1 registro
     const semanasConRegistro = new Set(
       registros
         .filter((r) => r.fecha_registro >= inicioMesActual)

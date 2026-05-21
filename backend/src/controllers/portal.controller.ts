@@ -3,7 +3,7 @@ import { portalService } from '../services/portal.service';
 
 export class PortalController {
   /**
-   * Login del locatario con código de acceso
+   * Login del locatario con código de acceso (portal GoDaddy)
    */
   async login(req: Request, res: Response): Promise<void> {
     try {
@@ -30,6 +30,31 @@ export class PortalController {
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * Login del locatario con PIN — devuelve JWT para Acrux Bio
+   */
+  async loginLocatario(req: Request, res: Response): Promise<void> {
+    try {
+      const { pin } = req.body;
+
+      if (!pin) {
+        res.status(400).json({ success: false, error: 'PIN requerido' });
+        return;
+      }
+
+      const result = await portalService.loginLocatario(pin.trim().toUpperCase());
+
+      if (!result) {
+        res.status(401).json({ success: false, error: 'PIN inválido' });
+        return;
+      }
+
+      res.json({ success: true, ...result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 
@@ -62,18 +87,20 @@ export class PortalController {
    */
   async registrarAutoservicio(req: Request, res: Response): Promise<void> {
     try {
-      const { local_id, tipo_residuo, kilos, observaciones } = req.body;
+      // Obtener local_id del JWT (locatario autenticado en Acrux Bio)
+      const local_id = req.user?.id;
+      const { tipo_residuo, kilos, observaciones } = req.body;
 
       if (!local_id) {
-        res.status(400).json({ error: 'local_id requerido' });
+        res.status(400).json({ success: false, error: 'No autenticado' });
         return;
       }
       if (!tipo_residuo) {
-        res.status(400).json({ error: 'tipo_residuo requerido' });
+        res.status(400).json({ success: false, error: 'tipo_residuo requerido' });
         return;
       }
       if (!kilos || Number(kilos) <= 0) {
-        res.status(400).json({ error: 'kilos debe ser mayor a 0' });
+        res.status(400).json({ success: false, error: 'kilos debe ser mayor a 0' });
         return;
       }
 
@@ -86,27 +113,27 @@ export class PortalController {
 
       res.status(201).json({ success: true, data });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 
   /**
-   * Obtener historial de autoservicio del local
+   * Obtener historial de autoservicio del local autenticado
    */
   async getHistorialAutoservicio(req: Request, res: Response): Promise<void> {
     try {
-      const { local_id } = req.query;
+      const local_id = req.user?.id || (req.query.local_id as string);
 
       if (!local_id) {
-        res.status(400).json({ error: 'local_id requerido' });
+        res.status(400).json({ success: false, error: 'local_id requerido' });
         return;
       }
 
-      const result = await portalService.getHistorialAutoservicio(local_id as string);
+      const result = await portalService.getHistorialAutoservicio(local_id);
 
       res.json({ success: true, ...result });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 }
