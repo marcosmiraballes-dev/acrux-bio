@@ -38,6 +38,7 @@ import ClientesFacturacion from './pages/ClientesFacturacion';
 import CobrosFacturacion from './pages/CobrosFacturacion';
 import AlertasCumplimiento from './pages/AlertasCumplimiento';
 import HistorialLocatario from './pages/HistorialLocatario';
+import PanelLocatario from './pages/PanelLocatario';
 import InformesOperativos from './pages/InformesOperativos';
 
 // Wrapper component que decide qué layout usar
@@ -296,6 +297,13 @@ function App() {
           } />
 
           {/* Rutas protegidas - CAPTURADOR */}
+          {/* Panel Locatario — sin layout del sistema */}
+          <Route path="/panel-locatario" element={
+            <ProtectedRoute allowedRoles={['LOCATARIO']}>
+              <PanelLocatario />
+            </ProtectedRoute>
+          } />
+
           <Route path="/panel-capturador" element={
             <ProtectedRoute allowedRoles={['CAPTURADOR']}>
               <LayoutWrapper><PanelCapturador /></LayoutWrapper>

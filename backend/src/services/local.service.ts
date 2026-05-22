@@ -67,14 +67,20 @@ export class LocalService {
    * Crear un nuevo local
    */
   async create(input: any): Promise<any> {
+    const { pin_tablet, ...localData } = input;
+
     const { data, error } = await supabase
       .from('locales')
-      .insert(input)
+      .insert(localData)
       .select()
       .single();
 
     if (error) {
       throw new Error(`Error creando local: ${error.message}`);
+    }
+
+    if (pin_tablet && pin_tablet.trim()) {
+      await this.upsertUsuarioLocatario(data.id, data.nombre, pin_tablet.trim());
     }
 
     return data;
@@ -84,10 +90,12 @@ export class LocalService {
    * Actualizar un local existente
    */
   async update(id: string, input: any): Promise<any> {
+    const { pin_tablet, ...localData } = input;
+
     const { data, error } = await supabase
       .from('locales')
       .update({
-        ...input,
+        ...localData,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -100,6 +108,14 @@ export class LocalService {
 
     if (!data) {
       throw new Error('Local no encontrado');
+    }
+
+    if (pin_tablet !== undefined) {
+      if (pin_tablet.trim()) {
+        await this.upsertUsuarioLocatario(id, data.nombre, pin_tablet.trim());
+      } else {
+        await this.desactivarUsuarioLocatario(id);
+      }
     }
 
     return data;
@@ -173,5 +189,41 @@ export class LocalService {
     }
 
     return data || [];
+  }
+
+  private async upsertUsuarioLocatario(localId: string, nombre: string, pin: string): Promise<void> {
+    const { data: existente } = await supabase
+      .from('usuarios')
+      .select('id')
+      .eq('local_id', localId)
+      .eq('rol', 'LOCATARIO')
+      .single();
+
+    if (existente) {
+      await supabase
+        .from('usuarios')
+        .update({ pin, activo: true, nombre, updated_at: new Date().toISOString() })
+        .eq('id', existente.id);
+    } else {
+      await supabase
+        .from('usuarios')
+        .insert({
+          nombre,
+          email: `local-${localId}@acruxbio.local`,
+          password_hash: 'no-aplica',
+          rol: 'LOCATARIO',
+          activo: true,
+          pin,
+          local_id: localId
+        });
+    }
+  }
+
+  private async desactivarUsuarioLocatario(localId: string): Promise<void> {
+    await supabase
+      .from('usuarios')
+      .update({ activo: false, updated_at: new Date().toISOString() })
+      .eq('local_id', localId)
+      .eq('rol', 'LOCATARIO');
   }
 }

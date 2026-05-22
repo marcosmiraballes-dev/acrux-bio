@@ -7,8 +7,10 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modoLocatario, setModoLocatario] = useState(false);
+  const [pin, setPin] = useState('');
   
-  const { login, user, isAuthenticated } = useAuth();
+  const { login, loginPin, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // Efecto para redirigir cuando el usuario esté autenticado
@@ -32,6 +34,9 @@ const Login: React.FC = () => {
           break;
         case 'FINANCIERO':
           navigate('/facturacion/clientes', { replace: true });
+          break;
+        case 'LOCATARIO':
+          navigate('/panel-locatario', { replace: true });
           break;
         default:
           navigate('/dashboard', { replace: true });
@@ -66,6 +71,23 @@ const Login: React.FC = () => {
     }
   };
 
+  const handlePinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    if (!pin || pin.length < 4) {
+      setError('Ingresá tu PIN de acceso');
+      setLoading(false);
+      return;
+    }
+    try {
+      await loginPin(pin);
+    } catch (err: any) {
+      setError(err.message || 'PIN inválido');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
       <div className="max-w-md w-full">
@@ -86,9 +108,28 @@ const Login: React.FC = () => {
 
         {/* Card de Login */}
         <div className="card">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            Iniciar Sesión
-          </h2>
+          <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-6">
+            <button
+              type="button"
+              onClick={() => { setModoLocatario(false); setError(''); }}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${!modoLocatario ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
+            >
+              Acceso Staff
+            </button>
+            <button
+              type="button"
+              onClick={() => { setModoLocatario(true); setError(''); }}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${modoLocatario ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
+            >
+              Acceso Locatario
+            </button>
+          </div>
+
+          {!modoLocatario ? (
+            <>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                Iniciar Sesión
+              </h2>
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -96,7 +137,7 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
               <label htmlFor="email" className="label">
@@ -149,7 +190,33 @@ const Login: React.FC = () => {
                 'Iniciar Sesión'
               )}
             </button>
-          </form>
+              </form>
+            </>
+          ) : (
+            <form onSubmit={handlePinSubmit} className="space-y-5">
+              <div>
+                <label className="label">PIN de acceso</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="input text-center text-3xl tracking-widest"
+                  placeholder="••••"
+                  maxLength={10}
+                  disabled={loading}
+                  autoFocus
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary w-full disabled:opacity-50"
+              >
+                {loading ? 'Verificando...' : 'Ingresar con PIN'}
+              </button>
+            </form>
+          )}
 
           {/* Footer */}
           <div className="mt-6 text-center text-sm text-gray-500">

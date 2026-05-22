@@ -52,4 +52,29 @@ router.post(
   }
 );
 
+/**
+ * POST /api/auth/login-pin
+ * Login de locatario por PIN
+ */
+router.post('/login-pin', async (req, res) => {
+  try {
+    const { pin } = req.body;
+    if (!pin) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'PIN requerido' 
+      });
+    }
+    const authService = new AuthController().authService || new (require('../services/auth.service').AuthService)();
+    const result = await authService.loginPin(pin);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    res.status(401).json({ 
+      success: false, 
+      error: 'PIN inválido',
+      message: error.message 
+    });
+  }
+});
+
 export default router;

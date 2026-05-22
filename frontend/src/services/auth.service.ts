@@ -46,4 +46,10 @@ export const authService = {
   isAuthenticated: (): boolean => {
     return !!localStorage.getItem('acrux_token');
   },
+
+  // Login por PIN (locatario)
+  loginPin: async (pin: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/login-pin', { pin });
+    return response.data;
+  },
 };

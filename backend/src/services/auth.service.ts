@@ -31,11 +31,12 @@ export class AuthService {
     const token = generateToken({
       id: usuario.id,
       email: usuario.email,
-      rol: usuario.rol
+      rol: usuario.rol,
+      local_id: usuario.local_id
     });
 
     // Retornar usuario y token (sin password)
-    const { password_hash, ...usuarioSinPassword } = usuario;
+    const { password_hash, pin, ...usuarioSinPassword } = usuario;
 
     return {
       token,
@@ -111,5 +112,35 @@ export class AuthService {
     }
 
     return usuario;
+  }
+
+  /**
+   * Login de locatario por PIN
+   */
+  async loginPin(pin: string): Promise<any> {
+    const { data: usuario, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('pin', pin)
+      .eq('rol', 'LOCATARIO')
+      .eq('activo', true)
+      .single();
+
+    if (error || !usuario) {
+      throw new Error('PIN inválido');
+    }
+
+    const token = generateToken({
+      id: usuario.id,
+      email: usuario.email,
+      rol: usuario.rol
+    });
+
+    const { password_hash, ...usuarioSinPassword } = usuario;
+
+    return {
+      token,
+      usuario: usuarioSinPassword
+    };
   }
 }

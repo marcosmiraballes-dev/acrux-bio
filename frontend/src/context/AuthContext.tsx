@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  loginPin: (pin: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -115,12 +116,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const loginPin = async (pin: string) => {
+    try {
+      const response = await authService.loginPin(pin);
+      const { token, usuario } = response as any;
+      authService.saveAuth(token, usuario);
+      setUser(usuario);
+      resetInactivityTimer();
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'PIN inválido');
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
     isAuthenticated: !!user,
+    loginPin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -34,6 +34,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
     codigo_postal: '',
     encargado_entrega: '',
     codigo_acceso: '',
+    pin_tablet: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
     contacto: false,
     recoleccion: false,
     portal: false,
+    tablet: false,
   });
 
   const toggleAcordeon = (seccion: keyof typeof acordeon) => {
@@ -74,6 +76,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_postal: (local as any).codigo_postal || '',
         encargado_entrega: (local as any).encargado_entrega || '',
         codigo_acceso: (local as any).codigo_acceso || '',
+        pin_tablet: (local as any).pin_tablet || '',
       });
     } else {
       setFormData({
@@ -92,6 +95,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_postal: '',
         encargado_entrega: '',
         codigo_acceso: '',
+        pin_tablet: '',
       });
     }
     setErrors({});
@@ -164,6 +168,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_postal: formData.codigo_postal.trim() || undefined,
         encargado_entrega: formData.encargado_entrega.trim() || undefined,
         codigo_acceso: formData.codigo_acceso.trim().toUpperCase() || undefined,
+        pin_tablet: formData.pin_tablet.trim() || '',
       } as any);
       onClose();
     } catch (error) {
@@ -326,6 +331,56 @@ const LocalModal: React.FC<LocalModalProps> = ({
                 {!formData.codigo_acceso && (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-500">
                     🔒 Sin código asignado — el locatario no puede acceder al portal
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* SECCIÓN: ACCESO TABLET */}
+          <div className="border border-blue-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAcordeon('tablet')}
+              className="w-full px-4 py-3 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors"
+              disabled={loading}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📱</span>
+                <span className="font-semibold text-gray-700">Acceso Tablet</span>
+                <span className="text-xs text-gray-500">(PIN para registro de residuos)</span>
+              </div>
+              <span className="text-gray-500">{acordeon.tablet ? '▼' : '▶'}</span>
+            </button>
+
+            {acordeon.tablet && (
+              <div className="p-4 bg-white space-y-3">
+                <div>
+                  <label className="label">PIN de acceso</label>
+                  <input
+                    type="text"
+                    value={formData.pin_tablet}
+                    onChange={(e) => setFormData({ ...formData, pin_tablet: e.target.value.replace(/\D/g, '') })}
+                    className="input"
+                    placeholder="Ej: 1234"
+                    maxLength={6}
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    PIN numérico de 4 a 6 dígitos. El locatario lo usa para entrar al panel de registro en la tablet.
+                    Dejá vacío si no tiene acceso.
+                  </p>
+                </div>
+
+                {formData.pin_tablet && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                    📱 PIN asignado — el locatario puede registrar residuos desde la tablet
+                  </div>
+                )}
+
+                {!formData.pin_tablet && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-500">
+                    🔒 Sin PIN asignado — el locatario no puede acceder a la tablet
                   </div>
                 )}
               </div>
