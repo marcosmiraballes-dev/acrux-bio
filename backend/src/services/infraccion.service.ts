@@ -121,7 +121,7 @@ export class InfraccionService {
         locatarioData = {
           id: infraccion.locatario_id,
           local_id: infraccion.local_id,
-          codigo_local: local?.codigo_local || null,
+          codigo_local: locatariosMap.get(infraccion.locatario_id)?.codigo_local || null,
           nombre_comercial: local?.nombre || '',
           plaza_id: local?.plaza_id,
           plaza: plaza ? { id: plaza.id, nombre: plaza.nombre } : null
