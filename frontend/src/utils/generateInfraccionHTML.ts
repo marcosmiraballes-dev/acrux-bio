@@ -233,7 +233,7 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
       </div>
       <div class="info-row">
         <span class="info-label">Local:</span>
-        <span class="info-value">${data.locatario.codigo_local}</span>
+        <span class="info-value">${data.locatario.codigo_local || '-'}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Nombre Comercial:</span>
