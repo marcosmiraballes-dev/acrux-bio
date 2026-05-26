@@ -2,29 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
-interface Plaza {
-  id: string;
-  nombre: string;
-}
-
-interface Local {
-  id: string;
-  nombre: string;
-  plaza_id: string;
-}
+interface Plaza { id: string; nombre: string; }
+interface Local { id: string; nombre: string; plaza_id: string; }
 
 const ReportesDirector: React.FC = () => {
   const { user } = useAuth();
   const [plazas, setPlazas] = useState<Plaza[]>([]);
   const [locales, setLocales] = useState<Local[]>([]);
   const [localesFiltrados, setLocalesFiltrados] = useState<Local[]>([]);
-  
-  // Filtros
   const [selectedPlaza, setSelectedPlaza] = useState<string>('');
   const [selectedLocal, setSelectedLocal] = useState<string>('');
   const [fechaDesde, setFechaDesde] = useState<string>('');
   const [fechaHasta, setFechaHasta] = useState<string>('');
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [tipoPeriodo, setTipoPeriodo] = useState<'anual' | 'mensual'>('anual');
@@ -35,256 +24,139 @@ const ReportesDirector: React.FC = () => {
   const [localesFiltradosCert, setLocalesFiltradosCert] = useState<Local[]>([]);
   const [loadingCert, setLoadingCert] = useState(false);
   const [errorCert, setErrorCert] = useState('');
+  const [selectedPlazaCertPlaza, setSelectedPlazaCertPlaza] = useState<string>('');
+  const [tipoPeriodoCertPlaza, setTipoPeriodoCertPlaza] = useState<'anual' | 'mensual'>('anual');
+  const [anoCertPlaza, setAnoCertPlaza] = useState<string>(new Date().getFullYear().toString());
+  const [mesCertPlaza, setMesCertPlaza] = useState<string>('');
+  const [loadingCertPlaza, setLoadingCertPlaza] = useState(false);
+  const [errorCertPlaza, setErrorCertPlaza] = useState('');
+
+  useEffect(() => { loadPlazas(); loadLocales(); }, []);
 
   useEffect(() => {
-    loadPlazas();
-    loadLocales();
-  }, []);
-
-  useEffect(() => {
-    // Filtrar locales por plaza seleccionada
-    if (selectedPlaza) {
-      setLocalesFiltrados(locales.filter(l => l.plaza_id === selectedPlaza));
-      setSelectedLocal(''); // Reset local cuando cambia plaza
-    } else {
-      setLocalesFiltrados(locales);
-    }
+    if (selectedPlaza) { setLocalesFiltrados(locales.filter(l => l.plaza_id === selectedPlaza)); setSelectedLocal(''); }
+    else setLocalesFiltrados(locales);
   }, [selectedPlaza, locales]);
 
   useEffect(() => {
-    if (selectedPlazaCert) {
-      setLocalesFiltradosCert(locales.filter(l => l.plaza_id === selectedPlazaCert));
-      setSelectedLocalCert('');
-    } else {
-      setLocalesFiltradosCert(locales);
-    }
+    if (selectedPlazaCert) { setLocalesFiltradosCert(locales.filter(l => l.plaza_id === selectedPlazaCert)); setSelectedLocalCert(''); }
+    else setLocalesFiltradosCert(locales);
   }, [selectedPlazaCert, locales]);
 
   const loadPlazas = async () => {
-    try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
-    } catch (err) {
-      console.error('Error cargando plazas:', err);
-    }
+    try { const r = await api.get('/plazas'); setPlazas(r.data.data || []); } catch {}
   };
 
   const loadLocales = async () => {
-    try {
-      const response = await api.get('/locales');
-      setLocales(response.data.data || []);
-      setLocalesFiltrados(response.data.data || []);
-    } catch (err) {
-      console.error('Error cargando locales:', err);
-    }
+    try { const r = await api.get('/locales'); setLocales(r.data.data || []); setLocalesFiltrados(r.data.data || []); } catch {}
   };
 
   const handleGenerarBitacora = async () => {
+    if (!selectedLocal) { setError('Por favor selecciona un locatario'); return; }
+    if (!fechaDesde || !fechaHasta) { setError('Por favor selecciona las fechas'); return; }
+    setLoading(true); setError('');
     try {
-      // Validaciones
-      if (!selectedLocal) {
-        setError('Por favor selecciona un locatario');
-        return;
-      }
-      if (!fechaDesde || !fechaHasta) {
-        setError('Por favor selecciona las fechas');
-        return;
-      }
-      
-      setLoading(true);
-      setError('');
-      
-      const params: any = {
-        local_id: selectedLocal,
-        fecha_desde: fechaDesde,
-        fecha_hasta: fechaHasta
-      };
-
-      console.log('📋 Generando bitácora con params:', params);
-      
-      // Usar arraybuffer para mejor manejo del archivo
-      const response = await api.get('/bitacoras/locatario', {
-        params: params,
-        responseType: 'arraybuffer'
-      });
-
-      console.log('📄 Bitácora recibida:', response.data.byteLength, 'bytes');
-
-      // Crear blob desde arraybuffer
-      const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      
-      // Obtener nombre del local para el archivo
+      const response = await api.get('/bitacoras/locatario', { params: { local_id: selectedLocal, fecha_desde: fechaDesde, fecha_hasta: fechaHasta }, responseType: 'arraybuffer' });
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const local = locales.find(l => l.id === selectedLocal);
-      const nombreArchivo = `bitacora-${local?.nombre.replace(/\s+/g, '-') || 'locatario'}-${Date.now()}.xlsx`;
-      
-      // Crear URL y descargar
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      link.download = nombreArchivo;
-      
-      document.body.appendChild(link);
-      link.click();
-      
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        console.log('✅ Bitácora descargada exitosamente');
-      }, 100);
-      
-      setError('');
-    } catch (err: any) {
-      console.error('❌ Error generando bitácora:', err);
-      setError('Error al generar la bitácora. Por favor, intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
+      link.href = url; link.download = `bitacora-${local?.nombre.replace(/\s+/g,'-') || 'locatario'}-${Date.now()}.xlsx`;
+      document.body.appendChild(link); link.click();
+      setTimeout(() => { document.body.removeChild(link); window.URL.revokeObjectURL(url); }, 100);
+    } catch { setError('Error al generar la bitácora. Por favor, intenta de nuevo.'); }
+    finally { setLoading(false); }
   };
 
-  const handleLimpiar = () => {
-    setSelectedPlaza('');
-    setSelectedLocal('');
-    setFechaDesde('');
-    setFechaHasta('');
-    setError('');
-  };
+  const handleLimpiar = () => { setSelectedPlaza(''); setSelectedLocal(''); setFechaDesde(''); setFechaHasta(''); setError(''); };
 
   const handleGenerarCertificado = async () => {
     if (!selectedLocalCert) { setErrorCert('Por favor selecciona un locatario'); return; }
     if (!anoCert) { setErrorCert('Por favor selecciona el año'); return; }
     if (tipoPeriodo === 'mensual' && !mesCert) { setErrorCert('Por favor selecciona el mes'); return; }
-    setLoadingCert(true);
-    setErrorCert('');
+    setLoadingCert(true); setErrorCert('');
     try {
       const params: any = { local_id: selectedLocalCert, anio: anoCert, tipo: tipoPeriodo };
       if (tipoPeriodo === 'mensual') params.mes = mesCert;
       const response = await api.get('/certificados/reciclaje', { params, responseType: 'blob' });
       const local = locales.find(l => l.id === selectedLocalCert);
       const periodo = tipoPeriodo === 'anual' ? anoCert : `${mesCert}-${anoCert}`;
-      const nombreArchivo = `certificado-${local?.nombre.replace(/\s+/g, '-') || 'locatario'}-${periodo}.html`;
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/html' }));
       const link = document.createElement('a');
-      link.href = url;
-      link.download = nombreArchivo;
-      document.body.appendChild(link);
-      link.click();
+      link.href = url; link.download = `certificado-${local?.nombre.replace(/\s+/g,'-') || 'locatario'}-${periodo}.html`;
+      document.body.appendChild(link); link.click();
       setTimeout(() => { document.body.removeChild(link); window.URL.revokeObjectURL(url); }, 100);
-    } catch (err: any) {
-      setErrorCert('Error al generar el certificado. Por favor, intenta de nuevo.');
-    } finally {
-      setLoadingCert(false);
-    }
+    } catch { setErrorCert('Error al generar el certificado. Por favor, intenta de nuevo.'); }
+    finally { setLoadingCert(false); }
+  };
+
+  const handleGenerarCertificadoPlaza = async () => {
+    if (!selectedPlazaCertPlaza) { setErrorCertPlaza('Por favor selecciona una plaza'); return; }
+    if (!anoCertPlaza) { setErrorCertPlaza('Por favor selecciona el año'); return; }
+    if (tipoPeriodoCertPlaza === 'mensual' && !mesCertPlaza) { setErrorCertPlaza('Por favor selecciona el mes'); return; }
+    setLoadingCertPlaza(true); setErrorCertPlaza('');
+    try {
+      const params: any = { plaza_id: selectedPlazaCertPlaza, anio: anoCertPlaza, tipo: tipoPeriodoCertPlaza };
+      if (tipoPeriodoCertPlaza === 'mensual') params.mes = mesCertPlaza;
+      const response = await api.get('/certificados/plaza', { params, responseType: 'blob' });
+      const plaza = plazas.find(p => p.id === selectedPlazaCertPlaza);
+      const periodo = tipoPeriodoCertPlaza === 'anual' ? anoCertPlaza : `${mesCertPlaza}-${anoCertPlaza}`;
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/html' }));
+      const link = document.createElement('a');
+      link.href = url; link.download = `certificado-plaza-${plaza?.nombre.replace(/\s+/g,'-') || 'plaza'}-${periodo}.html`;
+      document.body.appendChild(link); link.click();
+      setTimeout(() => { document.body.removeChild(link); window.URL.revokeObjectURL(url); }, 100);
+    } catch { setErrorCertPlaza('Error al generar el certificado. Por favor, intenta de nuevo.'); }
+    finally { setLoadingCertPlaza(false); }
   };
 
   return (
     <div className="pb-8">
-      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">📋 Reportes y Bitácoras</h1>
-        <p className="text-gray-600 mt-1">Bienvenida, {user?.nombre} - Generación de Reportes</p>
+        <h1 className="text-3xl font-bold text-gray-800">📋 Reportes y Certificados</h1>
+        <p className="text-gray-600 mt-1">Bienvenido, {user?.nombre}</p>
       </div>
 
-      {/* Card Principal */}
+      {/* CARD 1 — Bitácora */}
       <div className="card">
         <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
-          <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center text-2xl">
-            📊
-          </div>
+          <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center text-2xl">📊</div>
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Bitácora de Locatario</h2>
             <p className="text-sm text-gray-600">Genera el reporte detallado de recolecciones por local</p>
           </div>
         </div>
-
-        {/* Formulario de Filtros */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Plaza */}
           <div>
             <label className="label">Plaza</label>
-            <select 
-              value={selectedPlaza} 
-              onChange={(e) => setSelectedPlaza(e.target.value)} 
-              className="input"
-              disabled={loading}
-            >
+            <select value={selectedPlaza} onChange={(e) => setSelectedPlaza(e.target.value)} className="input" disabled={loading}>
               <option value="">Todas las plazas</option>
-              {plazas.filter(p => p.nombre).map((plaza) => (
-                <option key={plaza.id} value={plaza.id}>{plaza.nombre}</option>
-              ))}
+              {plazas.filter(p => p.nombre).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
             </select>
           </div>
-
-          {/* Locatario */}
           <div>
             <label className="label">Locatario *</label>
-            <select 
-              value={selectedLocal} 
-              onChange={(e) => setSelectedLocal(e.target.value)} 
-              className="input"
-              disabled={loading}
-            >
+            <select value={selectedLocal} onChange={(e) => setSelectedLocal(e.target.value)} className="input" disabled={loading}>
               <option value="">Selecciona un locatario</option>
-              {localesFiltrados.filter(l => l.nombre).map((local) => (
-                <option key={local.id} value={local.id}>{local.nombre}</option>
-              ))}
+              {localesFiltrados.filter(l => l.nombre).map(l => <option key={l.id} value={l.id}>{l.nombre}</option>)}
             </select>
           </div>
-
-          {/* Fecha Desde */}
           <div>
             <label className="label">Fecha Desde *</label>
-            <input 
-              type="date" 
-              value={fechaDesde} 
-              onChange={(e) => setFechaDesde(e.target.value)} 
-              className="input"
-              disabled={loading}
-            />
+            <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className="input" disabled={loading} />
           </div>
-
-          {/* Fecha Hasta */}
           <div>
             <label className="label">Fecha Hasta *</label>
-            <input 
-              type="date" 
-              value={fechaHasta} 
-              onChange={(e) => setFechaHasta(e.target.value)} 
-              className="input"
-              disabled={loading}
-            />
+            <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className="input" disabled={loading} />
           </div>
         </div>
-
-        {/* Botones */}
         <div className="flex items-center space-x-3">
-          <button 
-            onClick={handleGenerarBitacora}
-            disabled={loading}
-            className="btn btn-primary flex items-center space-x-2"
-          >
-            <span>📥</span>
-            <span>{loading ? 'Generando...' : 'Generar Bitácora'}</span>
+          <button onClick={handleGenerarBitacora} disabled={loading} className="btn btn-primary flex items-center space-x-2">
+            <span>📥</span><span>{loading ? 'Generando...' : 'Generar Bitácora'}</span>
           </button>
-          
-          <button 
-            onClick={handleLimpiar}
-            disabled={loading}
-            className="btn btn-secondary"
-          >
-            Limpiar
-          </button>
+          <button onClick={handleLimpiar} disabled={loading} className="btn btn-secondary">Limpiar</button>
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mt-4 card bg-red-50 border-red-200">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
-        {/* Info */}
+        {error && <div className="mt-4 card bg-red-50 border-red-200"><p className="text-red-700">{error}</p></div>}
         <div className="mt-6 card bg-blue-50 border-blue-200">
           <div className="flex items-start space-x-3">
             <span className="text-2xl">ℹ️</span>
@@ -301,6 +173,7 @@ const ReportesDirector: React.FC = () => {
         </div>
       </div>
 
+      {/* CARD 2 — Certificado Locatario */}
       <div className="card mt-6">
         <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
           <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-2xl">🏆</div>
@@ -309,36 +182,29 @@ const ReportesDirector: React.FC = () => {
             <p className="text-sm text-gray-600">Genera el certificado de impacto ambiental por locatario</p>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div>
             <label className="label">Plaza</label>
             <select value={selectedPlazaCert} onChange={(e) => setSelectedPlazaCert(e.target.value)} className="input" disabled={loadingCert}>
               <option value="">Todas las plazas</option>
-              {plazas.filter(p => p.nombre).map((plaza) => (
-                <option key={plaza.id} value={plaza.id}>{plaza.nombre}</option>
-              ))}
+              {plazas.filter(p => p.nombre).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
             </select>
           </div>
           <div>
             <label className="label">Locatario *</label>
             <select value={selectedLocalCert} onChange={(e) => setSelectedLocalCert(e.target.value)} className="input" disabled={loadingCert}>
               <option value="">Selecciona un locatario</option>
-              {localesFiltradosCert.filter(l => l.nombre).map((local) => (
-                <option key={local.id} value={local.id}>{local.nombre}</option>
-              ))}
+              {localesFiltradosCert.filter(l => l.nombre).map(l => <option key={l.id} value={l.id}>{l.nombre}</option>)}
             </select>
           </div>
           <div>
             <label className="label">Período *</label>
             <div className="flex gap-4 mt-1">
               <label className="flex items-center gap-1 text-sm cursor-pointer">
-                <input type="radio" name="tipoPeriodo" value="anual" checked={tipoPeriodo === 'anual'} onChange={() => setTipoPeriodo('anual')} />
-                Anual
+                <input type="radio" name="tipoPeriodo" value="anual" checked={tipoPeriodo === 'anual'} onChange={() => setTipoPeriodo('anual')} /> Anual
               </label>
               <label className="flex items-center gap-1 text-sm cursor-pointer">
-                <input type="radio" name="tipoPeriodo" value="mensual" checked={tipoPeriodo === 'mensual'} onChange={() => setTipoPeriodo('mensual')} />
-                Mensual
+                <input type="radio" name="tipoPeriodo" value="mensual" checked={tipoPeriodo === 'mensual'} onChange={() => setTipoPeriodo('mensual')} /> Mensual
               </label>
             </div>
           </div>
@@ -349,7 +215,6 @@ const ReportesDirector: React.FC = () => {
             </select>
           </div>
         </div>
-
         {tipoPeriodo === 'mensual' && (
           <div className="mb-6 w-48">
             <label className="label">Mes *</label>
@@ -361,21 +226,13 @@ const ReportesDirector: React.FC = () => {
             </select>
           </div>
         )}
-
         <div className="flex items-center space-x-3">
           <button onClick={handleGenerarCertificado} disabled={loadingCert} className="btn btn-primary flex items-center space-x-2">
-            <span>🏆</span>
-            <span>{loadingCert ? 'Generando...' : 'Generar Certificado'}</span>
+            <span>🏆</span><span>{loadingCert ? 'Generando...' : 'Generar Certificado'}</span>
           </button>
           <button onClick={() => { setSelectedPlazaCert(''); setSelectedLocalCert(''); setAnoCert(new Date().getFullYear().toString()); setMesCert(''); setTipoPeriodo('anual'); setErrorCert(''); }} disabled={loadingCert} className="btn btn-secondary">Limpiar</button>
         </div>
-
-        {errorCert && (
-          <div className="mt-4 card bg-red-50 border-red-200">
-            <p className="text-red-700">{errorCert}</p>
-          </div>
-        )}
-
+        {errorCert && <div className="mt-4 card bg-red-50 border-red-200"><p className="text-red-700">{errorCert}</p></div>}
         <div className="mt-6 card bg-green-50 border-green-200">
           <div className="flex items-start space-x-3">
             <span className="text-2xl">ℹ️</span>
@@ -391,6 +248,76 @@ const ReportesDirector: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* CARD 3 — Certificado Plaza */}
+      <div className="card mt-6">
+        <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
+          <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-2xl">🏢</div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Certificado de Reciclaje — Plaza</h2>
+            <p className="text-sm text-gray-600">Genera el certificado de impacto ambiental consolidado por plaza</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label className="label">Plaza *</label>
+            <select value={selectedPlazaCertPlaza} onChange={(e) => setSelectedPlazaCertPlaza(e.target.value)} className="input" disabled={loadingCertPlaza}>
+              <option value="">Selecciona una plaza</option>
+              {plazas.filter(p => p.nombre).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label">Período *</label>
+            <div className="flex gap-4 mt-1">
+              <label className="flex items-center gap-1 text-sm cursor-pointer">
+                <input type="radio" name="tipoPeriodoCertPlaza" value="anual" checked={tipoPeriodoCertPlaza === 'anual'} onChange={() => setTipoPeriodoCertPlaza('anual')} /> Anual
+              </label>
+              <label className="flex items-center gap-1 text-sm cursor-pointer">
+                <input type="radio" name="tipoPeriodoCertPlaza" value="mensual" checked={tipoPeriodoCertPlaza === 'mensual'} onChange={() => setTipoPeriodoCertPlaza('mensual')} /> Mensual
+              </label>
+            </div>
+          </div>
+          <div>
+            <label className="label">Año *</label>
+            <select value={anoCertPlaza} onChange={(e) => setAnoCertPlaza(e.target.value)} className="input" disabled={loadingCertPlaza}>
+              {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        </div>
+        {tipoPeriodoCertPlaza === 'mensual' && (
+          <div className="mb-6 w-48">
+            <label className="label">Mes *</label>
+            <select value={mesCertPlaza} onChange={(e) => setMesCertPlaza(e.target.value)} className="input" disabled={loadingCertPlaza}>
+              <option value="">Selecciona mes</option>
+              {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m, i) => (
+                <option key={m} value={m}>{new Date(2000, i, 1).toLocaleDateString('es-MX', { month: 'long' })}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="flex items-center space-x-3">
+          <button onClick={handleGenerarCertificadoPlaza} disabled={loadingCertPlaza} className="btn btn-primary flex items-center space-x-2">
+            <span>🏢</span><span>{loadingCertPlaza ? 'Generando...' : 'Generar Certificado Plaza'}</span>
+          </button>
+          <button onClick={() => { setSelectedPlazaCertPlaza(''); setAnoCertPlaza(new Date().getFullYear().toString()); setMesCertPlaza(''); setTipoPeriodoCertPlaza('anual'); setErrorCertPlaza(''); }} disabled={loadingCertPlaza} className="btn btn-secondary">Limpiar</button>
+        </div>
+        {errorCertPlaza && <div className="mt-4 card bg-red-50 border-red-200"><p className="text-red-700">{errorCertPlaza}</p></div>}
+        <div className="mt-6 card bg-emerald-50 border-emerald-200">
+          <div className="flex items-start space-x-3">
+            <span className="text-2xl">ℹ️</span>
+            <div>
+              <h3 className="text-sm font-semibold text-emerald-800 mb-1">Información</h3>
+              <ul className="text-sm text-emerald-700 space-y-1">
+                <li>• Selecciona la plaza y el período deseado</li>
+                <li>• El certificado consolida todos los locatarios de la plaza</li>
+                <li>• Incluye total de CO₂, locatarios participantes y equivalencias</li>
+                <li>• Metodología EPA WARM v16 · Factor SEMARNAT/RENE 2026</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
