@@ -23,6 +23,8 @@ interface InfoLocal {
   plaza: { id: string; nombre: string; ciudad: string };
 }
 
+interface Sector { id: string; nombre: string; icono: string; }
+
 const EMOJIS: Record<string, string> = {
   'Orgánico': '🌿',
   'Inorgánico': '🗑️',
@@ -59,16 +61,20 @@ const PanelLocatario = () => {
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  const [sectores, setSectores] = useState<Sector[]>([]);
+  const [sectorSeleccionado, setSectorSeleccionado] = useState<Sector | null>(null);
 
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const [infoRes, tiposRes] = await Promise.all([
+        const [infoRes, tiposRes, sectoresRes] = await Promise.all([
           api.get('/locatario/info'),
-          api.get('/locatario/tipos-residuos')
+          api.get('/locatario/tipos-residuos'),
+          api.get('/locatario/sectores')
         ]);
         setInfoLocal(infoRes.data.data);
         setTiposResiduos(ordenarResiduos(tiposRes.data.data));
+        setSectores(sectoresRes.data.data || []);
       } catch (err) {
         setMensaje({ tipo: 'error', texto: 'Error al cargar datos' });
       } finally {
@@ -112,15 +118,14 @@ const PanelLocatario = () => {
     setGuardando(true);
     try {
       await api.post('/locatario/registro', {
-        detalles: detalles.map(d => ({
-          tipo_residuo_id: d.tipo_residuo_id,
-          kilos: d.kilos
-        }))
+        sectorId: sectorSeleccionado?.id || null,
+        detalles: detalles.map(d => ({ tipo_residuo_id: d.tipo_residuo_id, kilos: d.kilos }))
       });
       setMensaje({ tipo: 'ok', texto: `✓ Registro guardado — ${totalKilos.toFixed(1)} kg` });
       setDetalles([]);
       setSeleccionado(null);
       setKilos('');
+      setSectorSeleccionado(null);
     } catch (err) {
       setMensaje({ tipo: 'error', texto: 'Error al guardar el registro' });
     } finally {
@@ -143,6 +148,44 @@ const PanelLocatario = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-3"></div>
           <p className="text-gray-500 text-sm">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (sectores.length > 0 && !sectorSeleccionado) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-emerald-800 text-white px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <img src="/logo-blanco.png" alt="Elefantes Verdes" className="h-10 w-auto" />
+            <div>
+              <p className="text-emerald-200 text-xs font-medium">Elefantes Verdes</p>
+              <h1 className="font-semibold text-base leading-tight">Registro de residuos</h1>
+              <p className="text-emerald-300 text-xs">{new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+            </div>
+          </div>
+          <div className="text-right flex flex-col items-end gap-1">
+            <p className="text-sm font-medium leading-tight">{infoLocal?.plaza?.nombre}</p>
+            <p className="text-emerald-200 text-xs">{infoLocal?.nombre}</p>
+            <button onClick={logout} className="mt-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">Salir</button>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+          <div className="text-center">
+            <p className="text-gray-500 text-sm mb-1">Bienvenido</p>
+            <h2 className="text-xl font-bold text-gray-800">{infoLocal?.nombre}</h2>
+            <p className="text-gray-400 text-sm mt-1">¿Desde qué área vas a registrar residuos?</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+            {sectores.map(sector => (
+              <button key={sector.id} onClick={() => setSectorSeleccionado(sector)}
+                className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex flex-col items-center gap-3 active:scale-95 transition-all hover:border-emerald-400 hover:shadow-md">
+                <span className="text-5xl">{sector.icono}</span>
+                <span className="text-sm font-semibold text-gray-700 text-center leading-tight">{sector.nombre}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );

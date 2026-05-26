@@ -44,13 +44,25 @@ router.get('/tipos-residuos', authenticate, soloLocatario, async (req: Request, 
   }
 });
 
+router.get('/sectores', authenticate, soloLocatario, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const localId = await getLocalId(user.id);
+    if (!localId) return res.status(400).json({ success: false, error: 'Local no asignado' });
+    const data = await service.getSectores(localId);
+    res.json({ success: true, data });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 router.post('/registro', authenticate, soloLocatario, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const localId = await getLocalId(user.id);
     if (!localId) return res.status(400).json({ success: false, error: 'Local no asignado' });
-    const { detalles } = req.body;
-    const result = await service.registrarResiduos(user.id, localId, detalles);
+    const { detalles, sectorId } = req.body;
+    const result = await service.registrarResiduos(user.id, localId, detalles, sectorId);
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });

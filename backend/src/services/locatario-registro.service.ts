@@ -7,7 +7,7 @@ interface DetalleRegistro {
 
 export class LocatarioRegistroService {
 
-  async registrarResiduos(usuarioId: string, localId: string, detalles: DetalleRegistro[]): Promise<any> {
+  async registrarResiduos(usuarioId: string, localId: string, detalles: DetalleRegistro[], sectorId?: string): Promise<any> {
     if (!detalles || detalles.length === 0) {
       throw new Error('Debe incluir al menos un tipo de residuo');
     }
@@ -42,6 +42,16 @@ export class LocatarioRegistroService {
     const fecha = ahora.toISOString().split('T')[0];
     const hora = ahora.toTimeString().split(' ')[0];
 
+    let notaRegistro = 'Autoservicio locatario';
+    if (sectorId) {
+      const { data: sector } = await supabase
+        .from('sectores_local')
+        .select('nombre')
+        .eq('id', sectorId)
+        .single();
+      if (sector) notaRegistro = `Autoservicio · ${sector.nombre}`;
+    }
+
     // Crear recolección principal
     const { data: recoleccion, error: recError } = await supabase
       .from('recolecciones')
@@ -53,7 +63,8 @@ export class LocatarioRegistroService {
         hora_recoleccion: hora,
         total_kilos: totalKilos,
         co2_evitado: totalCo2,
-        notas: 'Registro autoservicio locatario'
+        notas: notaRegistro,
+        sector_id: sectorId || null
       })
       .select()
       .single();
@@ -108,5 +119,16 @@ export class LocatarioRegistroService {
 
     if (error) throw new Error('Error al obtener tipos de residuos');
     return data;
+  }
+
+  async getSectores(localId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('sectores_local')
+      .select('id, nombre, icono, orden')
+      .eq('local_id', localId)
+      .eq('activo', true)
+      .order('orden');
+    if (error) throw new Error('Error al obtener sectores: ' + error.message);
+    return data || [];
   }
 }

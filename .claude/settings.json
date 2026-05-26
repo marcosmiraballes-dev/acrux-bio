@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls ~/Downloads/*.ts ~/Downloads/*.tsx 2>/dev/null)",
+      "Read(//home/marcosm/**)",
+      "Bash(npx tsc *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(npm run *)"
+    ]
+  }
+}
