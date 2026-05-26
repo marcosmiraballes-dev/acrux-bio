@@ -87,7 +87,7 @@ export class InfraccionService {
 
     // Obtener locales directamente
     const { data: locales } = localIds.length > 0
-      ? await supabase.from('locales').select('id, nombre, plaza_id, codigo_local').in('id', localIds)
+      ? await supabase.from('locales').select('id, nombre, plaza_id, numero_local').in('id', localIds)
       : { data: [] };
 
     // Fallback: locatarios_infracciones para registros sin local_id
@@ -121,7 +121,7 @@ export class InfraccionService {
         locatarioData = {
           id: infraccion.locatario_id,
           local_id: infraccion.local_id,
-          codigo_local: locatariosMap.get(infraccion.locatario_id)?.codigo_local || null,
+          codigo_local: local?.numero_local || locatariosMap.get(infraccion.locatario_id)?.codigo_local || null,
           nombre_comercial: local?.nombre || '',
           plaza_id: local?.plaza_id,
           plaza: plaza ? { id: plaza.id, nombre: plaza.nombre } : null
