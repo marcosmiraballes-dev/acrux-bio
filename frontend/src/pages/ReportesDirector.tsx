@@ -27,6 +27,14 @@ const ReportesDirector: React.FC = () => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tipoPeriodo, setTipoPeriodo] = useState<'anual' | 'mensual'>('anual');
+  const [anoCert, setAnoCert] = useState<string>(new Date().getFullYear().toString());
+  const [mesCert, setMesCert] = useState<string>('');
+  const [selectedLocalCert, setSelectedLocalCert] = useState<string>('');
+  const [selectedPlazaCert, setSelectedPlazaCert] = useState<string>('');
+  const [localesFiltradosCert, setLocalesFiltradosCert] = useState<Local[]>([]);
+  const [loadingCert, setLoadingCert] = useState(false);
+  const [errorCert, setErrorCert] = useState('');
 
   useEffect(() => {
     loadPlazas();
@@ -42,6 +50,15 @@ const ReportesDirector: React.FC = () => {
       setLocalesFiltrados(locales);
     }
   }, [selectedPlaza, locales]);
+
+  useEffect(() => {
+    if (selectedPlazaCert) {
+      setLocalesFiltradosCert(locales.filter(l => l.plaza_id === selectedPlazaCert));
+      setSelectedLocalCert('');
+    } else {
+      setLocalesFiltradosCert(locales);
+    }
+  }, [selectedPlazaCert, locales]);
 
   const loadPlazas = async () => {
     try {
@@ -132,6 +149,33 @@ const ReportesDirector: React.FC = () => {
     setFechaDesde('');
     setFechaHasta('');
     setError('');
+  };
+
+  const handleGenerarCertificado = async () => {
+    if (!selectedLocalCert) { setErrorCert('Por favor selecciona un locatario'); return; }
+    if (!anoCert) { setErrorCert('Por favor selecciona el año'); return; }
+    if (tipoPeriodo === 'mensual' && !mesCert) { setErrorCert('Por favor selecciona el mes'); return; }
+    setLoadingCert(true);
+    setErrorCert('');
+    try {
+      const params: any = { local_id: selectedLocalCert, anio: anoCert, tipo: tipoPeriodo };
+      if (tipoPeriodo === 'mensual') params.mes = mesCert;
+      const response = await api.get('/certificados/reciclaje', { params, responseType: 'blob' });
+      const local = locales.find(l => l.id === selectedLocalCert);
+      const periodo = tipoPeriodo === 'anual' ? anoCert : `${mesCert}-${anoCert}`;
+      const nombreArchivo = `certificado-${local?.nombre.replace(/\s+/g, '-') || 'locatario'}-${periodo}.html`;
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/html' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => { document.body.removeChild(link); window.URL.revokeObjectURL(url); }, 100);
+    } catch (err: any) {
+      setErrorCert('Error al generar el certificado. Por favor, intenta de nuevo.');
+    } finally {
+      setLoadingCert(false);
+    }
   };
 
   return (
@@ -251,6 +295,97 @@ const ReportesDirector: React.FC = () => {
                 <li>• El reporte incluirá todas las recolecciones del periodo</li>
                 <li>• Se descargará un archivo Excel con el formato oficial</li>
                 <li>• El archivo incluye el logo de Elefantes Verdes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card mt-6">
+        <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
+          <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-2xl">🏆</div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Certificado de Reciclaje</h2>
+            <p className="text-sm text-gray-600">Genera el certificado de impacto ambiental por locatario</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div>
+            <label className="label">Plaza</label>
+            <select value={selectedPlazaCert} onChange={(e) => setSelectedPlazaCert(e.target.value)} className="input" disabled={loadingCert}>
+              <option value="">Todas las plazas</option>
+              {plazas.filter(p => p.nombre).map((plaza) => (
+                <option key={plaza.id} value={plaza.id}>{plaza.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Locatario *</label>
+            <select value={selectedLocalCert} onChange={(e) => setSelectedLocalCert(e.target.value)} className="input" disabled={loadingCert}>
+              <option value="">Selecciona un locatario</option>
+              {localesFiltradosCert.filter(l => l.nombre).map((local) => (
+                <option key={local.id} value={local.id}>{local.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Período *</label>
+            <div className="flex gap-4 mt-1">
+              <label className="flex items-center gap-1 text-sm cursor-pointer">
+                <input type="radio" name="tipoPeriodo" value="anual" checked={tipoPeriodo === 'anual'} onChange={() => setTipoPeriodo('anual')} />
+                Anual
+              </label>
+              <label className="flex items-center gap-1 text-sm cursor-pointer">
+                <input type="radio" name="tipoPeriodo" value="mensual" checked={tipoPeriodo === 'mensual'} onChange={() => setTipoPeriodo('mensual')} />
+                Mensual
+              </label>
+            </div>
+          </div>
+          <div>
+            <label className="label">Año *</label>
+            <select value={anoCert} onChange={(e) => setAnoCert(e.target.value)} className="input" disabled={loadingCert}>
+              {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {tipoPeriodo === 'mensual' && (
+          <div className="mb-6 w-48">
+            <label className="label">Mes *</label>
+            <select value={mesCert} onChange={(e) => setMesCert(e.target.value)} className="input" disabled={loadingCert}>
+              <option value="">Selecciona mes</option>
+              {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m, i) => (
+                <option key={m} value={m}>{new Date(2000, i, 1).toLocaleDateString('es-MX', { month: 'long' })}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="flex items-center space-x-3">
+          <button onClick={handleGenerarCertificado} disabled={loadingCert} className="btn btn-primary flex items-center space-x-2">
+            <span>🏆</span>
+            <span>{loadingCert ? 'Generando...' : 'Generar Certificado'}</span>
+          </button>
+          <button onClick={() => { setSelectedPlazaCert(''); setSelectedLocalCert(''); setAnoCert(new Date().getFullYear().toString()); setMesCert(''); setTipoPeriodo('anual'); setErrorCert(''); }} disabled={loadingCert} className="btn btn-secondary">Limpiar</button>
+        </div>
+
+        {errorCert && (
+          <div className="mt-4 card bg-red-50 border-red-200">
+            <p className="text-red-700">{errorCert}</p>
+          </div>
+        )}
+
+        <div className="mt-6 card bg-green-50 border-green-200">
+          <div className="flex items-start space-x-3">
+            <span className="text-2xl">ℹ️</span>
+            <div>
+              <h3 className="text-sm font-semibold text-green-800 mb-1">Información</h3>
+              <ul className="text-sm text-green-700 space-y-1">
+                <li>• Selecciona el locatario y el período deseado</li>
+                <li>• El certificado incluye CO₂ evitado, equivalencias y firma</li>
+                <li>• Se descarga en formato HTML listo para imprimir o compartir</li>
+                <li>• Metodología EPA WARM v16 · Factor SEMARNAT/RENE 2026</li>
               </ul>
             </div>
           </div>

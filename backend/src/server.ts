@@ -29,6 +29,7 @@ import facturacionRoutes from './routes/facturacion.routes';
 import alertasRoutes from './routes/alertas.routes';
 import historialRoutes from './routes/historial.routes';
 import locatarioRegistroRoutes from './routes/locatario-registro.routes';
+import certificadosRoutes from './routes/certificados.routes';
 
 
 
@@ -113,6 +114,7 @@ app.use('/api/facturacion', facturacionRoutes);
 app.use('/api/alertas', alertasRoutes);
 app.use('/api/historial', historialRoutes);
 app.use('/api/locatario', locatarioRegistroRoutes);
+app.use('/api/certificados', certificadosRoutes);
 
 
 
