@@ -43,6 +43,7 @@ export interface Local {
   id: string;
   plaza_id: string;
   nombre: string;
+  numero_local?: string | null;
   giro?: string;
   contacto?: string;
   telefono?: string;

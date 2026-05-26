@@ -20,6 +20,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
   const [plazas, setPlazas] = useState<Plaza[]>([]);
   const [formData, setFormData] = useState({
     nombre: '',
+    numero_local: '',
     plaza_id: '',
     esIndependiente: false,
     giro: '',
@@ -62,6 +63,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
     if (local) {
       setFormData({
         nombre: local.nombre,
+        numero_local: (local as any).numero_local || '',
         plaza_id: local.plaza_id || '',
         esIndependiente: !local.plaza_id,
         giro: local.giro || '',
@@ -81,6 +83,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
     } else {
       setFormData({
         nombre: '',
+        numero_local: '',
         plaza_id: '',
         esIndependiente: false,
         giro: '',
@@ -155,6 +158,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
     try {
       await onSave({
         nombre: formData.nombre.trim(),
+        numero_local: formData.numero_local.trim() || undefined,
         plaza_id: formData.esIndependiente ? null : formData.plaza_id || null,
         giro: formData.giro.trim() || undefined,
         contacto: formData.contacto.trim() || undefined,
@@ -220,6 +224,19 @@ const LocalModal: React.FC<LocalModalProps> = ({
             {errors.nombre && (
               <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>
             )}
+          </div>
+
+          {/* Número de Local */}
+          <div>
+            <label className="label">Número de Local</label>
+            <input
+              type="text"
+              value={formData.numero_local}
+              onChange={(e) => setFormData({ ...formData, numero_local: e.target.value })}
+              className="input"
+              placeholder="Ej: L-12"
+              disabled={loading}
+            />
           </div>
 
           {/* Plaza o Independiente */}

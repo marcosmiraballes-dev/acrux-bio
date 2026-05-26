@@ -12,6 +12,7 @@ export const createLocalSchema = z.object({
   // ========================================
   plaza_id: z.string().uuid('Plaza ID inválido').nullable().optional(),
   nombre: z.string().min(1, 'El nombre es requerido').max(100),
+  numero_local: z.string().max(50).optional().nullable(),
   giro: z.string().max(100).optional(),
   contacto: z.string().max(100).optional(),
   telefono: z.string().max(20).optional(),
@@ -74,6 +75,7 @@ export const updateLocalSchema = z.object({
   // ========================================
   plaza_id: z.string().uuid('Plaza ID inválido').nullable().optional(),
   nombre: z.string().min(1).max(100).optional(),
+  numero_local: z.string().max(50).optional().nullable(),
   giro: z.string().max(100).optional(),
   contacto: z.string().max(100).optional(),
   telefono: z.string().max(20).optional(),
