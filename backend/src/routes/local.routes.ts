@@ -3,6 +3,8 @@ import { LocalController } from '../controllers/local.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { auditMiddleware } from '../middleware/audit.middleware'; // ⭐ AGREGADO
 
+const authenticateToken = authenticate;
+
 const router = Router();
 const localController = new LocalController();
 
@@ -23,6 +25,8 @@ router.get('/', (req, res) => localController.getAll(req, res));
  * ⭐ CON AUDITORÍA
  */
 router.post('/', authenticate, authorize('ADMIN'), auditMiddleware('locales', 'CREATE'), (req, res) => localController.create(req, res));
+
+router.get('/:id/pin-locatario', authenticateToken, localController.getPinLocatario.bind(localController));
 
 /**
  * PUT /api/locales/:id

@@ -197,15 +197,16 @@ export class LocalService {
       .select('id')
       .eq('local_id', localId)
       .eq('rol', 'LOCATARIO')
-      .single();
+      .maybeSingle();
 
     if (existente) {
-      await supabase
+      const { error } = await supabase
         .from('usuarios')
         .update({ pin, activo: true, nombre, updated_at: new Date().toISOString() })
         .eq('id', existente.id);
+      if (error) throw new Error(`Error actualizando usuario LOCATARIO: ${error.message}`);
     } else {
-      await supabase
+      const { error } = await supabase
         .from('usuarios')
         .insert({
           nombre,
@@ -216,6 +217,9 @@ export class LocalService {
           pin,
           local_id: localId
         });
+      if (error) {
+        throw new Error(`Error creando usuario LOCATARIO: ${error.message}`);
+      }
     }
   }
 
@@ -225,5 +229,17 @@ export class LocalService {
       .update({ activo: false, updated_at: new Date().toISOString() })
       .eq('local_id', localId)
       .eq('rol', 'LOCATARIO');
+  }
+
+  async getPinLocatario(localId: string): Promise<{ pin: string | null }> {
+    const { data } = await supabase
+      .from('usuarios')
+      .select('pin')
+      .eq('local_id', localId)
+      .eq('rol', 'LOCATARIO')
+      .eq('activo', true)
+      .maybeSingle();
+
+    return { pin: data?.pin || null };
   }
 }

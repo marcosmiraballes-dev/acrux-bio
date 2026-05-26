@@ -22,7 +22,7 @@ export const localService = {
   },
 
   // Actualizar local
-  update: async (id: string, data: Partial<Local>): Promise<Local> => {
+  update: async (id: string, data: Partial<Local> & { pin_tablet?: string }): Promise<Local> => {
     const response = await api.put<ApiResponse<Local>>(`/locales/${id}`, data);
     return response.data.data!;
   },

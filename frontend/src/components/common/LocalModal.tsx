@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Local, Plaza } from '../../types';
 import { plazaService } from '../../services/plaza.service';
+import api from '../../utils/api';
 
 interface LocalModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [pinTablet, setPinTablet] = useState('');
 
   const [acordeon, setAcordeon] = useState({
     legal: false,
@@ -80,6 +82,9 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_acceso: (local as any).codigo_acceso || '',
         pin_tablet: (local as any).pin_tablet || '',
       });
+      api.get(`/locales/${local.id}/pin-locatario`)
+        .then(res => setPinTablet(res.data.pin || ''))
+        .catch(() => setPinTablet(''));
     } else {
       setFormData({
         nombre: '',
@@ -100,6 +105,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_acceso: '',
         pin_tablet: '',
       });
+      setPinTablet('');
     }
     setErrors({});
   }, [local, isOpen]);
@@ -172,7 +178,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
         codigo_postal: formData.codigo_postal.trim() || undefined,
         encargado_entrega: formData.encargado_entrega.trim() || undefined,
         codigo_acceso: formData.codigo_acceso.trim().toUpperCase() || undefined,
-        pin_tablet: formData.pin_tablet.trim() || '',
+        pin_tablet: pinTablet.trim(),
       } as any);
       onClose();
     } catch (error) {
@@ -376,8 +382,8 @@ const LocalModal: React.FC<LocalModalProps> = ({
                   <label className="label">PIN de acceso</label>
                   <input
                     type="text"
-                    value={formData.pin_tablet}
-                    onChange={(e) => setFormData({ ...formData, pin_tablet: e.target.value.replace(/\D/g, '') })}
+                    value={pinTablet}
+                    onChange={(e) => setPinTablet(e.target.value)}
                     className="input"
                     placeholder="Ej: 1234"
                     maxLength={6}

@@ -201,4 +201,14 @@ export class LocalController {
       });
     }
   }
+
+  async getPinLocatario(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const result = await localService.getPinLocatario(id);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

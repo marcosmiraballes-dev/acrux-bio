@@ -79,6 +79,7 @@ export const updateLocalSchema = z.object({
   giro: z.string().max(100).optional(),
   contacto: z.string().max(100).optional(),
   telefono: z.string().max(20).optional(),
+  pin_tablet: z.string().max(10).optional().nullable(),
   email: z.string().email('Email inválido').max(100).optional(),
   direccion: z.string().optional(),
   activo: z.boolean().optional(),
