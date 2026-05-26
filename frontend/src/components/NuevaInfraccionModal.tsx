@@ -36,7 +36,9 @@ const NuevaInfraccionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
   // Form data
   const [plazaId, setPlazaId] = useState('');
   const [locatarioId, setLocatarioId] = useState('');
-  const [fechaInfraccion, setFechaInfraccion] = useState(new Date().toISOString().split('T')[0]);
+  const today = new Date();
+  const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const [fechaInfraccion, setFechaInfraccion] = useState(localDate);
   const [reglamentoId, setReglamentoId] = useState('');
   const [descripcionFalta, setDescripcionFalta] = useState('');
   const [notas, setNotas] = useState('');

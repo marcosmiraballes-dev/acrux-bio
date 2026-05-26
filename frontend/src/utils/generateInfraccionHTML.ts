@@ -108,7 +108,7 @@ export const generateInfraccionHTML = async (data: InfraccionData) => {
   const [year, month, day] = data.fecha_infraccion.split('T')[0].split('-');
   const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  const fechaObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const fechaObj = new Date(`${year}-${month}-${day}T12:00:00`);
   const diaSemana = dias[fechaObj.getDay()];
   const fechaCapitalizada = `${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}, ${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
 
