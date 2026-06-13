@@ -7,10 +7,11 @@ export class AlertasController {
 
   async generarAlertasMes(req: Request, res: Response): Promise<void> {
     try {
-      const { mes } = req.body;
+      let { mes } = req.body;
       if (!mes) {
-        res.status(400).json({ error: 'El campo mes es requerido (formato YYYY-MM-DD)' });
-        return;
+        const hoy = new Date();
+        const primerDiaMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        mes = primerDiaMesAnterior.toISOString().split('T')[0];
       }
       const resultado = await alertasService.generarAlertasMes(mes);
       res.json(resultado);
