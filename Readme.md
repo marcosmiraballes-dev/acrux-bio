@@ -219,7 +219,6 @@ npm run build  # Build producción
 
 ## 📄 Licencia
 
-Propiedad de Elefantes Verdes - Estrategias Ambientales  
 Desarrollado por Marcos Miraballes © 2025
 
 ---
