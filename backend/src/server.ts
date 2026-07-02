@@ -30,6 +30,7 @@ import alertasRoutes from './routes/alertas.routes';
 import historialRoutes from './routes/historial.routes';
 import locatarioRegistroRoutes from './routes/locatario-registro.routes';
 import certificadosRoutes from './routes/certificados.routes';
+import sectorRoutes from './routes/sector.routes';
 
 
 
@@ -115,6 +116,7 @@ app.use('/api/alertas', alertasRoutes);
 app.use('/api/historial', historialRoutes);
 app.use('/api/locatario', locatarioRegistroRoutes);
 app.use('/api/certificados', certificadosRoutes);
+app.use('/api', sectorRoutes);
 
 
 
