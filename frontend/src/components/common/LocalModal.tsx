@@ -489,8 +489,7 @@ const LocalModal: React.FC<LocalModalProps> = ({
           </div>
 
           {/* SECCIÓN: SECTORES DEL LOCAL */}
-          {local?.id && (
-            <div className="border border-amber-200 rounded-lg overflow-hidden">
+          <div className="border border-amber-200 rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={abrirCerrarSectores}
@@ -507,149 +506,156 @@ const LocalModal: React.FC<LocalModalProps> = ({
 
               {acordeon.sectores && (
                 <div className="p-4 bg-white space-y-3">
-                  {mensajeSector && (
-                    <div className={`rounded-lg border px-3 py-2 text-sm ${
-                      mensajeSector.tipo === 'ok'
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                        : 'bg-red-50 border-red-200 text-red-800'
-                    }`}>
-                      {mensajeSector.texto}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-700">Administración de sectores</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSectorEditandoId(null);
-                        setSectorForm({ nombre: '', icono: '', orden: 0 });
-                        setMostrarSectorForm(!mostrarSectorForm);
-                        setMensajeSector(null);
-                      }}
-                      className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium disabled:opacity-50"
-                      disabled={loading || guardandoSector}
-                    >
-                      + Agregar sector
-                    </button>
-                  </div>
-
-                  {mostrarSectorForm && (
-                    <div className="border border-amber-200 rounded-lg p-3 bg-amber-50">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <input
-                          type="text"
-                          value={sectorForm.nombre}
-                          onChange={(e) => setSectorForm({ ...sectorForm, nombre: e.target.value })}
-                          className="input"
-                          placeholder="Nombre del sector"
-                          disabled={guardandoSector}
-                        />
-                        <input
-                          type="text"
-                          value={sectorForm.icono}
-                          onChange={(e) => setSectorForm({ ...sectorForm, icono: e.target.value })}
-                          className="input"
-                          placeholder="Emoji"
-                          disabled={guardandoSector}
-                        />
-                        <input
-                          type="number"
-                          value={sectorForm.orden}
-                          onChange={(e) => setSectorForm({ ...sectorForm, orden: Number(e.target.value) })}
-                          className="input"
-                          placeholder="Orden"
-                          disabled={guardandoSector}
-                        />
-                      </div>
-                      <div className="flex items-center justify-end gap-2 mt-3">
-                        <button
-                          type="button"
-                          onClick={resetSectorForm}
-                          className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-sm"
-                          disabled={guardandoSector}
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={guardarSector}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50"
-                          disabled={guardandoSector}
-                        >
-                          {guardandoSector ? 'Guardando...' : (sectorEditandoId ? 'Guardar cambios' : 'Guardar sector')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {cargandoSectores ? (
-                    <p className="text-sm text-gray-500">Cargando sectores...</p>
-                  ) : sectores.length === 0 ? (
+                  {!local?.id ? (
                     <p className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                      Este local no tiene sectores configurados — el panel del locatario irá directo al registro de residuos.
+                      Guarda el local primero para poder configurar sus sectores.
                     </p>
                   ) : (
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                      <table className="min-w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="text-left px-3 py-2 font-semibold text-gray-600">Icono</th>
-                            <th className="text-left px-3 py-2 font-semibold text-gray-600">Nombre</th>
-                            <th className="text-left px-3 py-2 font-semibold text-gray-600">Orden</th>
-                            <th className="text-left px-3 py-2 font-semibold text-gray-600">Estado</th>
-                            <th className="text-left px-3 py-2 font-semibold text-gray-600">Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sectores.map((sector) => (
-                            <tr key={sector.id} className="border-t border-gray-100">
-                              <td className="px-3 py-2 text-xl">{sector.icono}</td>
-                              <td className="px-3 py-2 text-gray-800">{sector.nombre}</td>
-                              <td className="px-3 py-2 text-gray-700">{sector.orden}</td>
-                              <td className="px-3 py-2">
-                                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                                  sector.activo
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  {sector.activo ? 'Activo' : 'Inactivo'}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => editarSector(sector)}
-                                    className="px-2 py-1 rounded border border-blue-200 text-blue-700 text-xs hover:bg-blue-50"
-                                    disabled={guardandoSector}
-                                  >
-                                    Editar
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleActivoSector(sector)}
-                                    className={`px-2 py-1 rounded text-xs border ${
+                    <>
+                      {mensajeSector && (
+                        <div className={`rounded-lg border px-3 py-2 text-sm ${
+                          mensajeSector.tipo === 'ok'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                            : 'bg-red-50 border-red-200 text-red-800'
+                        }`}>
+                          {mensajeSector.texto}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-700">Administración de sectores</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSectorEditandoId(null);
+                            setSectorForm({ nombre: '', icono: '', orden: 0 });
+                            setMostrarSectorForm(!mostrarSectorForm);
+                            setMensajeSector(null);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium disabled:opacity-50"
+                          disabled={loading || guardandoSector}
+                        >
+                          + Agregar sector
+                        </button>
+                      </div>
+
+                      {mostrarSectorForm && (
+                        <div className="border border-amber-200 rounded-lg p-3 bg-amber-50">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <input
+                              type="text"
+                              value={sectorForm.nombre}
+                              onChange={(e) => setSectorForm({ ...sectorForm, nombre: e.target.value })}
+                              className="input"
+                              placeholder="Nombre del sector"
+                              disabled={guardandoSector}
+                            />
+                            <input
+                              type="text"
+                              value={sectorForm.icono}
+                              onChange={(e) => setSectorForm({ ...sectorForm, icono: e.target.value })}
+                              className="input"
+                              placeholder="Emoji"
+                              disabled={guardandoSector}
+                            />
+                            <input
+                              type="number"
+                              value={sectorForm.orden}
+                              onChange={(e) => setSectorForm({ ...sectorForm, orden: Number(e.target.value) })}
+                              className="input"
+                              placeholder="Orden"
+                              disabled={guardandoSector}
+                            />
+                          </div>
+                          <div className="flex items-center justify-end gap-2 mt-3">
+                            <button
+                              type="button"
+                              onClick={resetSectorForm}
+                              className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-sm"
+                              disabled={guardandoSector}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={guardarSector}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50"
+                              disabled={guardandoSector}
+                            >
+                              {guardandoSector ? 'Guardando...' : (sectorEditandoId ? 'Guardar cambios' : 'Guardar sector')}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {cargandoSectores ? (
+                        <p className="text-sm text-gray-500">Cargando sectores...</p>
+                      ) : sectores.length === 0 ? (
+                        <p className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                          Este local no tiene sectores configurados — el panel del locatario irá directo al registro de residuos.
+                        </p>
+                      ) : (
+                        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                          <table className="min-w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="text-left px-3 py-2 font-semibold text-gray-600">Icono</th>
+                                <th className="text-left px-3 py-2 font-semibold text-gray-600">Nombre</th>
+                                <th className="text-left px-3 py-2 font-semibold text-gray-600">Orden</th>
+                                <th className="text-left px-3 py-2 font-semibold text-gray-600">Estado</th>
+                                <th className="text-left px-3 py-2 font-semibold text-gray-600">Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sectores.map((sector) => (
+                                <tr key={sector.id} className="border-t border-gray-100">
+                                  <td className="px-3 py-2 text-xl">{sector.icono}</td>
+                                  <td className="px-3 py-2 text-gray-800">{sector.nombre}</td>
+                                  <td className="px-3 py-2 text-gray-700">{sector.orden}</td>
+                                  <td className="px-3 py-2">
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                                       sector.activo
-                                        ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
-                                        : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-                                    }`}
-                                    disabled={guardandoSector}
-                                  >
-                                    {sector.activo ? 'Desactivar' : 'Activar'}
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}>
+                                      {sector.activo ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-2">
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => editarSector(sector)}
+                                        className="px-2 py-1 rounded border border-blue-200 text-blue-700 text-xs hover:bg-blue-50"
+                                        disabled={guardandoSector}
+                                      >
+                                        Editar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleActivoSector(sector)}
+                                        className={`px-2 py-1 rounded text-xs border ${
+                                          sector.activo
+                                            ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
+                                            : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+                                        }`}
+                                        disabled={guardandoSector}
+                                      >
+                                        {sector.activo ? 'Desactivar' : 'Activar'}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
             </div>
-          )}
 
           {/* SECCIÓN: ACCESO TABLET */}
           <div className="border border-blue-200 rounded-lg overflow-hidden">
