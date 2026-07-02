@@ -63,6 +63,7 @@ const PanelLocatario = () => {
   const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [sectorSeleccionado, setSectorSeleccionado] = useState<Sector | null>(null);
+  const [aplicaPasoSector, setAplicaPasoSector] = useState(false);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -74,7 +75,9 @@ const PanelLocatario = () => {
         ]);
         setInfoLocal(infoRes.data.data);
         setTiposResiduos(ordenarResiduos(tiposRes.data.data));
-        setSectores(sectoresRes.data.data || []);
+        const sectoresData = Array.isArray(sectoresRes.data.data) ? sectoresRes.data.data : [];
+        setSectores(sectoresData);
+        setAplicaPasoSector(sectoresData.length > 0);
       } catch (err) {
         setMensaje({ tipo: 'error', texto: 'Error al cargar datos' });
       } finally {
@@ -125,7 +128,9 @@ const PanelLocatario = () => {
       setDetalles([]);
       setSeleccionado(null);
       setKilos('');
-      setSectorSeleccionado(null);
+      if (aplicaPasoSector) {
+        setSectorSeleccionado(null);
+      }
     } catch (err) {
       setMensaje({ tipo: 'error', texto: 'Error al guardar el registro' });
     } finally {
@@ -153,7 +158,7 @@ const PanelLocatario = () => {
     );
   }
 
-  if (sectores.length > 0 && !sectorSeleccionado) {
+  if (aplicaPasoSector && !sectorSeleccionado) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <div className="bg-emerald-800 text-white px-4 py-3 flex justify-between items-center">
