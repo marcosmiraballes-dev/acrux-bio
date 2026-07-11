@@ -7,7 +7,8 @@ export const createTipoResiduoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(50),
   descripcion: z.string().optional(),
   factor_co2: z.number().min(0, 'El factor CO2 debe ser positivo').max(100),
-  activo: z.boolean().optional().default(true)
+  activo: z.boolean().optional().default(true),
+  icono: z.string().max(10).optional()
 });
 
 /**
@@ -17,7 +18,8 @@ export const updateTipoResiduoSchema = z.object({
   nombre: z.string().min(1).max(50).optional(),
   descripcion: z.string().optional(),
   factor_co2: z.number().min(0).max(100).optional(),
-  activo: z.boolean().optional()
+  activo: z.boolean().optional(),
+  icono: z.string().max(10).optional()
 });
 
 /**

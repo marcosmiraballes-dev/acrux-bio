@@ -22,6 +22,7 @@ const TipoResiduoModal: React.FC<TipoResiduoModalProps> = ({
     factor_co2: '',
     unidad: 'kg',
     color_hex: '#10B981',
+    icono: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ const TipoResiduoModal: React.FC<TipoResiduoModalProps> = ({
         factor_co2: tipoResiduo.factor_co2.toString(),
         unidad: tipoResiduo.unidad || 'kg',
         color_hex: tipoResiduo.color_hex || '#10B981',
+        icono: tipoResiduo.icono || '',
       });
     } else {
       // Reset form
@@ -44,6 +46,7 @@ const TipoResiduoModal: React.FC<TipoResiduoModalProps> = ({
         factor_co2: '',
         unidad: 'kg',
         color_hex: '#10B981',
+        icono: '',
       });
     }
     setErrors({});
@@ -79,6 +82,7 @@ const TipoResiduoModal: React.FC<TipoResiduoModalProps> = ({
         factor_co2: parseFloat(formData.factor_co2),
         unidad: formData.unidad,
         color_hex: formData.color_hex,
+        icono: formData.icono.trim(),
       });
       onClose();
     } catch (error) {
@@ -185,6 +189,22 @@ const TipoResiduoModal: React.FC<TipoResiduoModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, color_hex: e.target.value })}
                 className="input flex-1"
                 placeholder="#10B981"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Icono */}
+          <div>
+            <label className="label">Icono (emoji)</label>
+            <div className="flex items-center space-x-3">
+              <span className="text-3xl">{formData.icono || '♻️'}</span>
+              <input
+                type="text"
+                value={formData.icono}
+                onChange={(e) => setFormData({ ...formData, icono: e.target.value })}
+                className="input flex-1"
+                placeholder="Ej: 🍎"
                 disabled={loading}
               />
             </div>

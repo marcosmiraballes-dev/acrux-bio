@@ -62,6 +62,7 @@ export interface TipoResiduo {
   factor_co2: number;
   unidad?: string;
   color_hex?: string;
+  icono?: string;
   activo: boolean;
   created_at?: string;
   updated_at?: string;
