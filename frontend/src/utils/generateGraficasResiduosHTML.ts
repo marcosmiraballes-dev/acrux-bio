@@ -6,27 +6,13 @@ interface GraficasResiduosHTMLData {
   };
   statsByTipo: Array<{
     tipo_residuo_nombre: string;
+    tipo_residuo_icono: string;
     total_kilos: number;
     co2_evitado: number;
   }>;
   plazaSeleccionada?: string;
   userName?: string;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 const COLORS_CHART = [
   '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -503,7 +489,7 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
             </thead>
             <tbody>
               ${materialesConPorcentaje.map((material, index) => 
-                '<tr><td><span class="color-indicator" style="background: ' + COLORS_CHART[index % COLORS_CHART.length] + ';"></span></td><td><div class="material-name"><span class="material-emoji">' + (EMOJI_MAP[material.tipo_residuo_nombre] || '♻️') + '</span><span><strong>' + material.tipo_residuo_nombre + '</strong></span></div></td><td class="text-right"><strong>' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + '</strong></td><td class="text-right"><span class="percentage-badge">' + material.porcentaje + '%</span></td></tr>'
+                '<tr><td><span class="color-indicator" style="background: ' + COLORS_CHART[index % COLORS_CHART.length] + ';"></span></td><td><div class="material-name"><span class="material-emoji">' + (material.tipo_residuo_icono || '♻️') + '</span><span><strong>' + material.tipo_residuo_nombre + '</strong></span></div></td><td class="text-right"><strong>' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + '</strong></td><td class="text-right"><span class="percentage-badge">' + material.porcentaje + '%</span></td></tr>'
               ).join('')}
             </tbody>
           </table>
@@ -550,7 +536,7 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       <div class="materials-grid">
         ${materialesConPorcentaje.slice(0, 11).map((material, index) => {
           const color = COLORS_CHART[index % COLORS_CHART.length];
-          const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+          const emoji = material.tipo_residuo_icono || '♻️';
           
           return '<div class="material-card" style="--color: ' + color + ';"><div class="material-icon">' + emoji + '</div><div class="material-card-name">' + material.tipo_residuo_nombre + '</div><div class="material-percentage">' + material.porcentaje + '%</div><div class="material-kilos">' + material.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>';
         }).join('')}

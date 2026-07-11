@@ -6,6 +6,7 @@ interface DirectorHTMLData {
   };
   statsByTipo: Array<{
     tipo_residuo_nombre: string;
+    tipo_residuo_icono: string;
     total_kilos: number;
     co2_evitado: number;
   }>;
@@ -32,21 +33,6 @@ interface DirectorHTMLData {
   plazaSeleccionada?: string;
   userName?: string;
 }
-
-// ✅ CORREGIDO: Mapeo de emojis con Vidrio correcto
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 export const generateDirectorHTML = (data: DirectorHTMLData) => {
   const fechaGeneracion = new Date().toLocaleDateString('es-MX', {
@@ -592,7 +578,7 @@ export const generateDirectorHTML = (data: DirectorHTMLData) => {
       ${materialesConPorcentaje.map((material, index) => {
         const colors = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#6366f1'];
         const color = colors[index % colors.length];
-        const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+        const emoji = material.tipo_residuo_icono || '♻️';
         const maxPorcentaje = parseFloat(materialesConPorcentaje[0].porcentaje);
         const barWidth = (parseFloat(material.porcentaje) / maxPorcentaje) * 100;
         

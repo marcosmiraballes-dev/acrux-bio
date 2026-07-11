@@ -17,6 +17,7 @@ interface Local {
 
 interface PorTipo {
   tipo_nombre: string;
+  tipo_icono: string;
   total_kilos: number;
   co2_evitado: number;
 }
@@ -39,21 +40,6 @@ interface ComparacionData {
   periodo2: Periodo;
   variacion: Variacion;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍾',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '📦',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 const GraficaPorLugar: React.FC = () => {
   const { user } = useAuth();
@@ -172,6 +158,7 @@ const GraficaPorLugar: React.FC = () => {
       
       return {
         nombre: tipo.tipo_nombre,
+        icono: tipo.tipo_icono,
         periodo1_kilos: tipo.total_kilos,
         periodo2_kilos: kilos2,
         variacion: variacion
@@ -539,7 +526,7 @@ const GraficaPorLugar: React.FC = () => {
                 return (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xl">{EMOJI_MAP[material.nombre] || '♻️'}</span>
+                      <span className="text-xl">{material.icono || '♻️'}</span>
                       <span className="font-semibold text-gray-700">{material.nombre}</span>
                     </div>
                     
@@ -599,7 +586,7 @@ const GraficaPorLugar: React.FC = () => {
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center space-x-2">
-                          <span className="text-2xl">{EMOJI_MAP[material.nombre] || '♻️'}</span>
+                          <span className="text-2xl">{material.icono || '♻️'}</span>
                           <span className="font-medium text-gray-800">{material.nombre}</span>
                         </div>
                       </td>

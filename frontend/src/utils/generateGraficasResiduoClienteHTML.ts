@@ -1,6 +1,7 @@
 interface GraficasResiduoClienteHTMLData {
   materialSeleccionado: {
     nombre: string;
+    icono: string;
     total_kilos: number;
     co2_evitado: number;
     recolecciones: number;
@@ -17,21 +18,6 @@ interface GraficasResiduoClienteHTMLData {
   plazaSeleccionada?: string;
   userName?: string;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 // Tips de reciclaje por material
 const TIPS_RECICLAJE: { [key: string]: { si: string[]; no: string[]; dato: string } } = {
@@ -69,7 +55,7 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
     day: 'numeric'
   });
 
-  const emoji = EMOJI_MAP[data.materialSeleccionado.nombre] || '♻️';
+  const emoji = data.materialSeleccionado.icono || '♻️';
   const co2Toneladas = data.materialSeleccionado.co2_evitado / 1000;
   const tips = TIPS_RECICLAJE[data.materialSeleccionado.nombre] || {
     si: ['Material limpio', 'Seco', 'Sin residuos', 'Separado'],

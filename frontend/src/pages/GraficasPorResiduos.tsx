@@ -20,24 +20,10 @@ interface Stats {
 interface StatsByTipo {
   tipo_residuo_id: string;
   tipo_residuo_nombre: string;
+  tipo_residuo_icono: string;
   total_kilos: number;
   co2_evitado: number;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍾',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 // Colores para PieChart y grid
 const COLORS_CHART = [
@@ -284,7 +270,7 @@ const GraficasPorResiduos: React.FC = () => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xl">{EMOJI_MAP[material.tipo_residuo_nombre] || '♻️'}</span>
+                            <span className="text-xl">{material.tipo_residuo_icono || '♻️'}</span>
                             <span className="font-medium text-gray-800">{material.tipo_residuo_nombre}</span>
                           </div>
                         </td>
@@ -357,7 +343,7 @@ const GraficasPorResiduos: React.FC = () => {
                   >
                     <div className="text-center">
                       <div className="text-4xl mb-2">
-                        {EMOJI_MAP[tipo.tipo_residuo_nombre] || '♻️'}
+                        {tipo.tipo_residuo_icono || '♻️'}
                       </div>
                       <h3 className="font-semibold text-gray-800 text-sm mb-2">
                         {tipo.tipo_residuo_nombre}

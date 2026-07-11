@@ -7,6 +7,7 @@ interface TipoResiduo {
   nombre: string;
   factor_co2: number;
   color_hex: string;
+  icono: string;
 }
 
 interface DetalleRegistro {
@@ -25,21 +26,7 @@ interface InfoLocal {
 
 interface Sector { id: string; nombre: string; icono: string; }
 
-const EMOJIS: Record<string, string> = {
-  'Orgánico': '🌿',
-  'Inorgánico': '🗑️',
-  'PET': '🥤',
-  'Cartón': '📦',
-  'Aluminio': '🥫',
-  'Archivo': '📄',
-  'Tetra Pak': '🧃',
-  'Plástico Duro': '🪣',
-  'Playo': '🛍️',
-  'Vidrio': '🫙',
-  'Chatarra': '⚙️',
-};
-
-const getEmoji = (nombre: string) => EMOJIS[nombre] || '♻️';
+const getEmoji = (tipo: TipoResiduo) => tipo.icono || '♻️';
 
 const ORDEN_PREFERIDO = ['Orgánico', 'Inorgánico'];
 
@@ -103,7 +90,7 @@ const PanelLocatario = () => {
         nombre: seleccionado.nombre,
         kilos: kg,
         color_hex: seleccionado.color_hex,
-        emoji: getEmoji(seleccionado.nombre)
+        emoji: getEmoji(seleccionado)
       }];
     });
     setSeleccionado(null);
@@ -253,7 +240,7 @@ const PanelLocatario = () => {
                     background: isActive ? tipo.color_hex + '18' : tieneKilos ? 'white' : '#f9fafb'
                   }}
                 >
-                  <div className="text-3xl mb-1">{getEmoji(tipo.nombre)}</div>
+                  <div className="text-3xl mb-1">{getEmoji(tipo)}</div>
                   <p className="text-xs font-semibold text-gray-800 leading-tight">{tipo.nombre}</p>
                   <p className="text-xs mt-0.5" style={{ color: tieneKilos ? tipo.color_hex : '#9ca3af' }}>
                     {tieneKilos ? tieneKilos.kilos.toFixed(1) + ' kg' : '—'}
@@ -268,7 +255,7 @@ const PanelLocatario = () => {
         {seleccionado && (
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-xs text-gray-500 mb-2">
-              {getEmoji(seleccionado.nombre)} Kilos de{' '}
+              {getEmoji(seleccionado)} Kilos de{' '}
               <span className="font-semibold" style={{ color: seleccionado.color_hex }}>
                 {seleccionado.nombre}
               </span>

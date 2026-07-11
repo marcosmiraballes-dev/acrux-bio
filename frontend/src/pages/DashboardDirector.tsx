@@ -18,6 +18,7 @@ interface Stats {
 
 interface StatsByTipo {
   tipo_residuo_nombre: string;
+  tipo_residuo_icono: string;
   total_kilos: number;
   co2_evitado: number;
 }
@@ -70,21 +71,6 @@ interface Plaza {
   id: string;
   nombre: string;
 }
-
-// ✅ CORREGIDO: Mapeo de emojis con Vidrio y Tetra Pak correctos
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 // Colores para gráficas
 const COLORS_CHART = [
@@ -373,7 +359,7 @@ const DashboardDirector: React.FC = () => {
                 {statsByTipo.slice(0, 11).map((tipo) => (
                   <div key={tipo.tipo_residuo_nombre} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-3xl">{EMOJI_MAP[tipo.tipo_residuo_nombre] || '♻️'}</span>
+                      <span className="text-3xl">{tipo.tipo_residuo_icono || '♻️'}</span>
                       <h3 className="text-sm font-semibold text-gray-700">{tipo.tipo_residuo_nombre}</h3>
                     </div>
                     <p className="text-2xl font-bold text-primary-600">
@@ -662,7 +648,7 @@ const DashboardDirector: React.FC = () => {
                   <div key={tipo.tipo_residuo_nombre} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <span className="text-2xl font-bold text-gray-400">#{index + 1}</span>
-                      <span className="text-3xl">{EMOJI_MAP[tipo.tipo_residuo_nombre] || '♻️'}</span>
+                      <span className="text-3xl">{tipo.tipo_residuo_icono || '♻️'}</span>
                       <span className="font-semibold text-gray-700">{tipo.tipo_residuo_nombre}</span>
                     </div>
                     <div className="text-right">

@@ -6,6 +6,7 @@ interface ResiduosTotalesHTMLData {
   };
   statsByTipo: Array<{
     tipo_residuo_nombre: string;
+    tipo_residuo_icono: string;
     total_kilos: number;
     co2_evitado: number;
   }>;
@@ -13,21 +14,6 @@ interface ResiduosTotalesHTMLData {
   localSeleccionado?: string;
   userName?: string;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 const COLORS_CHART = [
   '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -601,7 +587,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
         <div class="pie-legend">
           ${top8Materiales.map((material, index) => {
             const color = COLORS_CHART[index % COLORS_CHART.length];
-            const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+            const emoji = material.tipo_residuo_icono || '♻️';
             
             return `
               <div class="pie-legend-item">
@@ -617,7 +603,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       <div class="materials-grid">
         ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
           const color = COLORS_CHART[index % COLORS_CHART.length];
-          const emoji = EMOJI_MAP[material.tipo_residuo_nombre] || '♻️';
+          const emoji = material.tipo_residuo_icono || '♻️';
           
           return `
             <div class="material-card" style="--color: ${color};">
@@ -685,7 +671,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
         <div>
           <p style="font-size: 13px; color: #6b7280; margin-bottom: 5px;">Material más reciclado:</p>
           <p style="font-size: 20px; font-weight: bold; color: #047857;">
-            ${EMOJI_MAP[materialesConPorcentaje[0].tipo_residuo_nombre] || '♻️'} ${materialesConPorcentaje[0].tipo_residuo_nombre}
+            ${materialesConPorcentaje[0].tipo_residuo_icono || '♻️'} ${materialesConPorcentaje[0].tipo_residuo_nombre}
           </p>
         </div>
       </div>

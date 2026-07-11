@@ -16,6 +16,7 @@ interface GraficaPorLugarHTMLData {
   };
   materialesComparados: Array<{
     nombre: string;
+    icono: string;
     periodo1_kilos: number;
     periodo2_kilos: number;
     variacion: number;
@@ -28,21 +29,6 @@ interface GraficaPorLugarHTMLData {
   periodo2Hasta: string;
   userName?: string;
 }
-
-// Mapeo de emojis
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🍌',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍾',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
   const fechaGeneracion = new Date().toLocaleDateString('es-MX', {
@@ -650,7 +636,7 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
             <tr>
               <td>
                 <div class="material-name">
-                  <span class="material-emoji">${EMOJI_MAP[material.nombre] || '♻️'}</span>
+                  <span class="material-emoji">${material.icono || '♻️'}</span>
                   <strong>${material.nombre}</strong>
                 </div>
               </td>
@@ -676,7 +662,7 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
     
     ${data.materialesComparados.map(material => {
       const maxKilos = Math.max(material.periodo1_kilos, material.periodo2_kilos);
-      const emoji = EMOJI_MAP[material.nombre] || '♻️';
+      const emoji = material.icono || '♻️';
       
       return `
       <div class="no-break" style="margin-bottom: 25px;">

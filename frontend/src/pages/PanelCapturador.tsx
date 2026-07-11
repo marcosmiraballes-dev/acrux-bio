@@ -35,21 +35,6 @@ interface Recoleccion {
   created_at: string;
 }
 
-// Emojis para cada tipo de residuo
-const EMOJI_MAP: { [key: string]: string } = {
-  'Orgánico': '🌱',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🫙',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
-
 const PanelCapturador: React.FC = () => {
   const { user } = useAuth();
   
@@ -371,7 +356,7 @@ const PanelCapturador: React.FC = () => {
               {par.map((tipo) => {
                 const kilos = parseFloat(materiales[tipo.id] || '0');
                 const co2 = kilos * tipo.factor_co2;
-                const emoji = EMOJI_MAP[tipo.nombre] || '♻️';
+                const emoji = tipo.icono || '♻️';
 
                 return (
                   <div key={tipo.id} className="grid grid-cols-[140px_100px_110px] items-center gap-2">

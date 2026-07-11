@@ -14,6 +14,7 @@ interface Stats {
 
 interface StatsByTipo {
   tipo_residuo_nombre: string;
+  tipo_residuo_icono: string;
   total_kilos: number;
   co2_evitado: number;
 }
@@ -34,21 +35,6 @@ const COLORS_CHART = [
   '#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6',
   '#F97316', '#06B6D4', '#84CC16', '#6366F1', '#EF4444'
 ];
-
-// Emojis por tipo de residuo
-const EMOJI_RESIDUOS: { [key: string]: string } = {
-  'Orgánico': '🍃',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🫙',
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 const ResiduosTotales: React.FC = () => {
   // Estados
@@ -380,7 +366,7 @@ const ResiduosTotales: React.FC = () => {
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-3 py-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-lg">{EMOJI_RESIDUOS[material.tipo_residuo_nombre] || '♻️'}</span>
+                          <span className="text-lg">{material.tipo_residuo_icono || '♻️'}</span>
                           <span className="text-sm font-medium text-gray-800">{material.tipo_residuo_nombre}</span>
                         </div>
                       </td>
@@ -422,7 +408,7 @@ const ResiduosTotales: React.FC = () => {
             return (
               <div key={index} className={`bg-gradient-to-br ${colores[index % 11]} rounded-lg p-3 border-2`}>
                 <div className="text-3xl mb-1 text-center">
-                  {EMOJI_RESIDUOS[material.tipo_residuo_nombre] || '♻️'}
+                  {material.tipo_residuo_icono || '♻️'}
                 </div>
                 <p className="text-xs font-semibold text-gray-700 text-center truncate">
                   {material.tipo_residuo_nombre}

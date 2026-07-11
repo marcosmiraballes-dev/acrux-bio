@@ -9,6 +9,7 @@ import { generateGraficasResiduoClienteHTML } from '../utils/generateGraficasRes
 interface StatsByTipo {
   tipo_residuo_id: string;
   tipo_residuo_nombre: string;
+  tipo_residuo_icono: string;
   total_kilos: number;
   co2_evitado: number;
   total_recolecciones: number;
@@ -30,21 +31,6 @@ interface TopLocal {
   plaza_nombre: string;
   total_kilos: number;
 }
-
-// Emojis por tipo de residuo
-const EMOJI_RESIDUOS: { [key: string]: string } = {
-  'Orgánico': '🍃',
-  'Inorgánico': '🗑️',
-  'Cartón': '📦',
-  'Vidrio': '🍷', // ✅ CORREGIDO
-  'PET': '🧴',
-  'Plástico Duro': '🥤',
-  'Playo': '🛍️',
-  'Tetra Pak': '🧃',
-  'Aluminio': '🥫',
-  'Chatarra': '🔩',
-  'Archivo': '📄'
-};
 
 // Colores por material
 const COLORES_MATERIALES: { [key: string]: string } = {
@@ -274,6 +260,7 @@ const GraficasResiduoCliente: React.FC = () => {
       generateGraficasResiduoClienteHTML({
         materialSeleccionado: {
           nombre: materialSeleccionado.tipo_residuo_nombre,
+          icono: materialSeleccionado.tipo_residuo_icono,
           total_kilos: materialSeleccionado.total_kilos,
           co2_evitado: materialSeleccionado.co2_evitado,
           recolecciones: materialSeleccionado.total_recolecciones || 0
@@ -322,7 +309,7 @@ const GraficasResiduoCliente: React.FC = () => {
 
   // Obtener datos del material seleccionado
   const colorMaterial = COLORES_MATERIALES[materialSeleccionado?.tipo_residuo_nombre || ''] || 'from-gray-50 to-gray-100 border-gray-200';
-  const emojiMaterial = EMOJI_RESIDUOS[materialSeleccionado?.tipo_residuo_nombre || ''] || '♻️';
+  const emojiMaterial = materialSeleccionado?.tipo_residuo_icono || '♻️';
   const tipsMaterial = TIPS_RECICLAJE[materialSeleccionado?.tipo_residuo_nombre || ''] || TIPS_RECICLAJE['Orgánico'];
 
   if (loading && plazas.length === 0) {
@@ -451,7 +438,7 @@ const GraficasResiduoCliente: React.FC = () => {
                 `}
               >
                 <div className="text-5xl mb-2 text-center">
-                  {EMOJI_RESIDUOS[material.tipo_residuo_nombre] || '♻️'}
+                  {material.tipo_residuo_icono || '♻️'}
                 </div>
                 <p className="text-sm font-bold text-gray-800 text-center truncate">
                   {material.tipo_residuo_nombre}
@@ -574,7 +561,7 @@ const GraficasResiduoCliente: React.FC = () => {
                 {index >= 3 && (
                   <div className="text-gray-500 mr-4 font-bold">{index + 1}.</div>
                 )}
-                <div className="text-3xl mr-4">{EMOJI_RESIDUOS[material.tipo_residuo_nombre] || '♻️'}</div>
+                <div className="text-3xl mr-4">{material.tipo_residuo_icono || '♻️'}</div>
                 <div className="flex-1">
                   <p className="font-bold text-lg">{material.tipo_residuo_nombre}</p>
                   {index < 3 && (
