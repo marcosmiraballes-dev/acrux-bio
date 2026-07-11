@@ -113,7 +113,7 @@ export class LocatarioRegistroService {
   async getTiposResiduos(): Promise<any> {
     const { data, error } = await supabase
       .from('tipos_residuos')
-      .select('id, nombre, factor_co2, color_hex')
+      .select('id, nombre, factor_co2, color_hex, icono')
       .eq('activo', true)
       .order('nombre');
 
