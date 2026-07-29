@@ -40,7 +40,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  'https://acrux-bio-frontend.onrender.com',
+  'https://elefantesverdes.com.mx',
+  'https://www.elefantesverdes.com.mx',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+}));
 app.use(express.json());
 
 // Health check
