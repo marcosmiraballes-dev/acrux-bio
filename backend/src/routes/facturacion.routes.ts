@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { FacturacionController } from '../controllers/facturacion.controller';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
+router.use(authenticate, authorize('FINANCIERO', 'ADMIN', 'DIRECTOR'));
 const facturacionController = new FacturacionController();
 
 router.get('/clientes', (req, res) => facturacionController.getClientes(req, res));
