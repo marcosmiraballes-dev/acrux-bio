@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'acrux-bio-secret-key-2024';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET no está definida en las variables de entorno');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '7d'; // Token válido por 7 días
 
 export interface JWTPayload {
