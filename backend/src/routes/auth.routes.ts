@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 import { auditLogin, auditLogout } from '../middleware/audit.middleware';
 
 const router = Router();
@@ -23,7 +23,7 @@ router.post(
  * POST /api/auth/register
  * Registro de nuevo usuario
  */
-router.post('/register', (req, res) => authController.register(req, res));
+router.post('/register', authenticate, authorize('ADMIN'), (req, res) => authController.register(req, res));
 
 /**
  * GET /api/auth/profile
