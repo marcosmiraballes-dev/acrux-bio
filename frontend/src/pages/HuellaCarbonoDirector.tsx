@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { generarReporteHuella } from '../utils/generarReporteHuella';
