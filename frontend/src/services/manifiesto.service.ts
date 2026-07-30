@@ -34,35 +34,11 @@ export const manifiestoService = {
   },
 
   /**
-   * Obtener manifiestos de un local
-   */
-  async getByLocal(localId: string) {
-    const response = await api.get(`/manifiestos/local/${localId}`);
-    return response.data.data;
-  },
-
-  /**
-   * Verificar si una recolección ya tiene manifiesto
-   */
-  async getByRecoleccion(recoleccionId: string) {
-    const response = await api.get(`/manifiestos/recoleccion/${recoleccionId}`);
-    return response.data;
-  },
-
-  /**
    * Contar total de manifiestos
    */
   async count() {
     const response = await api.get('/manifiestos/count');
     return response.data.data.total;
-  },
-
-  /**
-   * Crear un nuevo manifiesto
-   */
-  async create(data: CreateManifiestoInput) {
-    const response = await api.post('/manifiestos', data);
-    return response.data.data;
   },
 
   /**

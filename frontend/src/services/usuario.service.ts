@@ -8,12 +8,6 @@ export const usuarioService = {
     return response.data.data || [];
   },
 
-  // Obtener un usuario por ID
-  getById: async (id: string): Promise<Usuario> => {
-    const response = await api.get<ApiResponse<Usuario>>(`/usuarios/${id}`);
-    return response.data.data!;
-  },
-
   // Crear nuevo usuario
   create: async (data: Partial<Usuario> & { password: string }): Promise<Usuario> => {
     const response = await api.post<ApiResponse<Usuario>>('/usuarios', data);

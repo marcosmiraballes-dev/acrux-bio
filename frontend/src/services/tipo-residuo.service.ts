@@ -8,12 +8,6 @@ export const tipoResiduoService = {
     return response.data.data || [];
   },
 
-  // Obtener un tipo de residuo por ID
-  getById: async (id: string): Promise<TipoResiduo> => {
-    const response = await api.get<ApiResponse<TipoResiduo>>(`/tipos-residuos/${id}`);
-    return response.data.data!;
-  },
-
   // Crear nuevo tipo de residuo
   create: async (data: Partial<TipoResiduo>): Promise<TipoResiduo> => {
     const response = await api.post<ApiResponse<TipoResiduo>>('/tipos-residuos', data);

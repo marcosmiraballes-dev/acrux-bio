@@ -7,11 +7,6 @@ export const facturacionService = {
     return response.data.data || [];
   },
 
-  getClienteById: async (id: string): Promise<any> => {
-    const response = await api.get(`/facturacion/clientes/${id}`);
-    return response.data.data;
-  },
-
   createCliente: async (data: any): Promise<any> => {
     const response = await api.post('/facturacion/clientes', data);
     return response.data.data;
@@ -37,11 +32,6 @@ export const facturacionService = {
     return response.data.data;
   },
 
-  updateServicio: async (id: string, data: any): Promise<any> => {
-    const response = await api.put(`/facturacion/servicios/${id}`, data);
-    return response.data.data;
-  },
-
   deleteServicio: async (id: string): Promise<any> => {
     const response = await api.delete(`/facturacion/servicios/${id}`);
     return response.data.data;
@@ -50,16 +40,6 @@ export const facturacionService = {
   getCobrosMes: async (mes: number, anio: number): Promise<any[]> => {
     const response = await api.get(`/facturacion/cobros/mes/${mes}/${anio}`);
     return response.data.data || [];
-  },
-
-  getCobrosByCliente: async (clienteId: string): Promise<any[]> => {
-    const response = await api.get(`/facturacion/cobros/cliente/${clienteId}`);
-    return response.data.data || [];
-  },
-
-  createCobro: async (data: any): Promise<any> => {
-    const response = await api.post('/facturacion/cobros', data);
-    return response.data.data;
   },
 
   updateCobro: async (id: string, data: any): Promise<any> => {
@@ -90,6 +70,3 @@ export const listarMovimientosPorCliente = async (cliente_id: string): Promise<M
   return response.data;
 };
 
-export const eliminarMovimiento = async (id: string): Promise<void> => {
-  await api.delete(`/facturacion/movimientos/${id}`);
-};

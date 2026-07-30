@@ -9,12 +9,6 @@ export const localService = {
     return response.data.data || [];
   },
 
-  // Obtener un local por ID
-  getById: async (id: string): Promise<Local> => {
-    const response = await api.get<ApiResponse<Local>>(`/locales/${id}`);
-    return response.data.data!;
-  },
-
   // Crear nuevo local
   create: async (data: Partial<Local>): Promise<Local> => {
     const response = await api.post<ApiResponse<Local>>('/locales', data);
