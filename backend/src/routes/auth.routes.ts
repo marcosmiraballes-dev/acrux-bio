@@ -1,12 +1,30 @@
 // backend/src/routes/auth.routes.ts
 
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { AuthController } from '../controllers/auth.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { auditLogin, auditLogout } from '../middleware/audit.middleware';
 
 const router = Router();
 const authController = new AuthController();
+
+const loginPinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 6,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => {
+    return (req.headers['cf-connecting-ip'] as string) || req.ip || 'unknown';
+  },
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      error: 'Demasiados intentos. Intentá de nuevo en unos minutos.'
+    });
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * POST /api/auth/login
@@ -56,7 +74,7 @@ router.post(
  * POST /api/auth/login-pin
  * Login de locatario por PIN
  */
-router.post('/login-pin', async (req, res) => {
+router.post('/login-pin', loginPinLimiter, async (req, res) => {
   try {
     const { pin } = req.body;
     if (!pin) {
