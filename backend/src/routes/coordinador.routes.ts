@@ -1,13 +1,17 @@
 /**
  * RUTAS PARA COORDINADORES - VERSIÓN SIMPLIFICADA
- * Sin middleware de autenticación - Acceso abierto con filtro manual por plaza
+ * Requiere autenticación (COORDINADOR, DIRECTOR, ADMIN). El filtro por
+ * plaza_id sigue siendo un query param opcional elegido por el usuario,
+ * no un scope forzado por rol.
  */
 
 import { Router } from 'express';
 import { CoordinadorController } from '../controllers/coordinador.controller';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
 const coordinadorController = new CoordinadorController();
+router.use(authenticate, authorize('COORDINADOR', 'DIRECTOR', 'ADMIN'));
 
 /**
  * GET /api/coordinador/stats/general
