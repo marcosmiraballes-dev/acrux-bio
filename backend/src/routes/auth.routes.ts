@@ -1,7 +1,7 @@
 // backend/src/routes/auth.routes.ts
 
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { AuthController } from '../controllers/auth.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { auditLogin, auditLogout } from '../middleware/audit.middleware';
@@ -14,7 +14,8 @@ const loginPinLimiter = rateLimit({
   max: 6,
   skipSuccessfulRequests: true,
   keyGenerator: (req) => {
-    return (req.headers['cf-connecting-ip'] as string) || req.ip || 'unknown';
+    const ip = (req.headers['cf-connecting-ip'] as string) || req.ip || 'unknown';
+    return ipKeyGenerator(ip);
   },
   handler: (req, res) => {
     res.status(429).json({
