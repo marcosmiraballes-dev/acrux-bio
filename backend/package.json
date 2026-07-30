@@ -16,7 +16,6 @@
     "@anthropic-ai/sdk": "^0.86.0",
     "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^5.1.1",
-    "chartjs-node-canvas": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
@@ -26,7 +25,6 @@
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "pdfkit": "^0.17.2",
-    "puppeteer": "^24.34.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
