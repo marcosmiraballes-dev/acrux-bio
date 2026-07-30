@@ -26,12 +26,6 @@ interface Local {
   plaza_id: string;
 }
 
-interface TopLocal {
-  local_nombre: string;
-  plaza_nombre: string;
-  total_kilos: number;
-}
-
 // Colores por material
 const COLORES_MATERIALES: { [key: string]: string } = {
   'Orgánico': 'from-green-50 to-green-100 border-green-300',
@@ -80,7 +74,6 @@ const GraficasResiduoCliente: React.FC = () => {
   // Estados
   const [statsByTipo, setStatsByTipo] = useState<StatsByTipo[]>([]);
   const [materialSeleccionado, setMaterialSeleccionado] = useState<StatsByTipo | null>(null);
-  const [topLocales, setTopLocales] = useState<TopLocal[]>([]);
   const [datosGraficaMeses, setDatosGraficaMeses] = useState<any[]>([]); // ✅ NUEVO
   
   const [plazas, setPlazas] = useState<Plaza[]>([]);
