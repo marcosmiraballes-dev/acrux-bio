@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { AlertasController } from '../controllers/alertas.controller';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
 const alertasController = new AlertasController();
+router.use(authenticate, authorize('COORDINADOR', 'DIRECTOR', 'ADMIN'));
 
 // POST /api/alertas/generar — Generar alertas para un mes
 router.post('/generar', (req, res) => alertasController.generarAlertasMes(req, res));
