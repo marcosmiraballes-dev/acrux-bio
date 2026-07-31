@@ -1,3 +1,7 @@
+import { REPORT_STYLES, COLORS_CHART } from './reportTemplate/styles';
+import { buildCoverPage } from './reportTemplate/buildCoverPage';
+import { buildClosing } from './reportTemplate/buildClosing';
+
 interface GraficasResiduosHTMLData {
   stats: {
     total_recolecciones: number;
@@ -13,11 +17,6 @@ interface GraficasResiduosHTMLData {
   plazaSeleccionada?: string;
   userName?: string;
 }
-
-const COLORS_CHART = [
-  '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6',
-  '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#84CC16', '#6366F1'
-];
 
 export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => {
   const fechaGeneracion = new Date().toLocaleDateString('es-MX', {
@@ -80,128 +79,11 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gráficas por Residuo - Elefantes Verdes</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    ${REPORT_STYLES}
 
-    body {
-      font-family: 'Arial', 'Helvetica', sans-serif;
-      background: white;
-      color: #1f2937;
-    }
-
-    @media print {
-      @page {
-        size: A4;
-        margin: 15mm;
-      }
-
-      body {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-
-      .page-break {
-        page-break-before: always;
-      }
-
-      .no-break {
-        page-break-inside: avoid;
-      }
-    }
-
-    /* PORTADA */
-    .cover-page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 40px;
-    }
-
-    .cover-header {
-      background: linear-gradient(135deg, #047857 0%, #059669 100%);
-      color: white;
-      padding: 40px 60px;
-      border-radius: 15px;
-      margin-bottom: 50px;
-      box-shadow: 0 10px 30px rgba(4, 120, 87, 0.3);
-    }
-
-    .cover-header h1 {
-      font-size: 42px;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-
-    .cover-header p {
-      font-size: 20px;
-      opacity: 0.95;
-    }
-
-    .logo-container {
-      width: 120px;
-      height: 120px;
-      background: white;
-      border-radius: 50%;
-      margin: 40px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-
-    .logo-container img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-    }
-
-    .cover-info {
-      color: #6b7280;
-      margin-top: 60px;
-      font-size: 16px;
-    }
-
-    .cover-info p {
-      margin: 12px 0;
-    }
-
-    .cover-info strong {
-      color: #047857;
-    }
-
-    .cover-footer {
-      margin-top: 80px;
-      padding-top: 20px;
-      border-top: 2px solid #047857;
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    /* PÁGINAS DE CONTENIDO */
-    .content-page {
-      padding: 20px 0;
-    }
-
-    .page-title {
-      color: #047857;
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 25px;
-      padding-bottom: 12px;
-      border-bottom: 3px solid #047857;
-    }
-
-    .section-title {
-      color: #059669;
-      font-size: 20px;
-      font-weight: bold;
-      margin: 30px 0 15px;
+    /* Ajuste local: este reporte usa 15px de separación en la grilla de materiales */
+    .materials-grid {
+      gap: 15px;
     }
 
     /* PIE CHART Y TABLA */
@@ -288,70 +170,6 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       font-size: 11px;
     }
 
-    /* KPIs */
-    .kpis-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
-    .kpi-card {
-      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      border: 2px solid #047857;
-    }
-
-    .kpi-card.blue {
-      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-      border-color: #3b82f6;
-    }
-
-    .kpi-card.purple {
-      background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
-      border-color: #8b5cf6;
-    }
-
-    .kpi-label {
-      font-size: 11px;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .kpi-value {
-      font-size: 32px;
-      font-weight: bold;
-      color: #047857;
-      line-height: 1.2;
-    }
-
-    .kpi-card.blue .kpi-value {
-      color: #3b82f6;
-    }
-
-    .kpi-card.purple .kpi-value {
-      color: #8b5cf6;
-    }
-
-    .kpi-unit {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 5px;
-    }
-
-    /* GRID DE MATERIALES */
-    .materials-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
     .material-card {
       background: white;
       border: 2px solid #e5e7eb;
@@ -435,27 +253,12 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
 </head>
 <body>
 
-  <!-- PORTADA -->
-  <div class="cover-page">
-    <div class="cover-header">
-      <h1>Gráficas por Residuo</h1>
-      <p>Elefantes Verdes - ${data.plazaSeleccionada || 'Todas las Plazas'}</p>
-    </div>
-
-    <div class="logo-container">
-      <img src="/logo-blanco.png" alt="Elefantes Verdes" />
-    </div>
-
-    <div class="cover-info">
-      <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-      ${data.userName ? '<p><strong>Generado por:</strong> ' + data.userName + '</p>' : ''}
-    </div>
-
-    <div class="cover-footer">
-      <p>Elefantes Verdes - Estrategias Ambientales</p>
-      <p>Sistema de Trazabilidad de Residuos</p>
-    </div>
-  </div>
+  ${buildCoverPage({
+    titulo: 'Gráficas por Residuo',
+    plaza: data.plazaSeleccionada,
+    fecha: fechaGeneracion,
+    userName: data.userName,
+  })}
 
   <!-- PÁGINA 1: DISTRIBUCIÓN -->
   <div class="content-page page-break">
@@ -499,7 +302,7 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
     </div>
 
     <div class="page-footer">
-      Página 1 de 2
+      Página <span class="page-number"></span> de <span class="page-total"></span>
     </div>
   </div>
 
@@ -544,17 +347,11 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
     </div>
 
     <div class="page-footer">
-      Página 2 de 2
+      Página <span class="page-number"></span> de <span class="page-total"></span>
     </div>
   </div>
 
-  <script>
-    window.onload = function() {
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    };
-  </script>
+  ${buildClosing()}
 
 </body>
 </html>
