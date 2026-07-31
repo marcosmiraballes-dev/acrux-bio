@@ -485,16 +485,6 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
       font-size: 40px;
       margin: 15px 0;
     }
-
-    /* FOOTER */
-    .page-footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 2px solid #d1fae5;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
-    }
   </style>
 </head>
 <body>
@@ -573,7 +563,7 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
     ` : ''}
 
     <!-- Ranking de Locales -->
-    <div class="ranking-section no-break">
+    <div class="ranking-section no-break page-break">
       <h2 class="ranking-title">🏆 Top 10 Locales en ${data.materialSeleccionado.nombre}</h2>
       
       ${data.topLocales.slice(0, 10).map((local, index) => 
@@ -584,10 +574,6 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
         '</div></div><div class="ranking-value">' + 
         local.total_kilos.toLocaleString('es-MX', { maximumFractionDigits: 0 }) + ' kg</div></div>'
       ).join('')}
-    </div>
-
-    <div class="page-footer">
-      Página <span class="page-number"></span> de <span class="page-total"></span>
     </div>
   </div>
 
@@ -638,10 +624,9 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
       <p style="font-size: 18px; font-weight: 700;">
         ¡Sigue haciendo la diferencia!
       </p>
-    </div>
-
-    <div class="page-footer">
-      Página <span class="page-number"></span> de <span class="page-total"></span> | Elefantes Verdes - Estrategias Ambientales
+      <p style="font-size: 12px; font-weight: 400; margin-top: 15px; opacity: 0.8;">
+        Elefantes Verdes - Estrategias Ambientales
+      </p>
     </div>
   </div>
 

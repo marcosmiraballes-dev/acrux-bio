@@ -20,6 +20,12 @@ export const REPORT_STYLES = `
       @page {
         size: letter;
         margin: 15mm;
+        @bottom-right {
+          content: "Página " counter(page) " de " counter(pages);
+          font-size: 10px;
+          color: #6b7280;
+          font-family: 'Arial', 'Helvetica', sans-serif;
+        }
       }
 
       body {

@@ -245,16 +245,6 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       border-radius: 3px;
       margin-right: 6px;
     }
-
-    /* FOOTER */
-    .page-footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 1px solid #e5e7eb;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
-    }
   </style>
 </head>
 <body>
@@ -307,9 +297,6 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       </div>
     </div>
 
-    <div class="page-footer">
-      Página <span class="page-number"></span> de <span class="page-total"></span>
-    </div>
   </div>
 
   <!-- PÁGINA 2: IMPACTO Y DETALLE -->
@@ -352,9 +339,6 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       </div>
     </div>
 
-    <div class="page-footer">
-      Página <span class="page-number"></span> de <span class="page-total"></span>
-    </div>
   </div>
 
   ${buildClosing()}
