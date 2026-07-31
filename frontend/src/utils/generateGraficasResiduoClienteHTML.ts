@@ -1,3 +1,5 @@
+import { buildClosing } from './reportTemplate/buildClosing';
+
 interface GraficasResiduoClienteHTMLData {
   materialSeleccionado: {
     nombre: string;
@@ -85,7 +87,7 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
 
     @media print {
       @page {
-        size: A4;
+        size: letter;
         margin: 15mm;
       }
 
@@ -585,7 +587,7 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
     </div>
 
     <div class="page-footer">
-      Página 1 de 2
+      Página <span class="page-number"></span> de <span class="page-total"></span>
     </div>
   </div>
 
@@ -639,17 +641,11 @@ export const generateGraficasResiduoClienteHTML = (data: GraficasResiduoClienteH
     </div>
 
     <div class="page-footer">
-      Página 2 de 2 | Elefantes Verdes - Estrategias Ambientales
+      Página <span class="page-number"></span> de <span class="page-total"></span> | Elefantes Verdes - Estrategias Ambientales
     </div>
   </div>
 
-  <script>
-    window.onload = function() {
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    };
-  </script>
+  ${buildClosing()}
 
 </body>
 </html>
