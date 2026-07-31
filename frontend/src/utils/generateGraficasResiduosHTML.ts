@@ -108,6 +108,12 @@ export const generateGraficasResiduosHTML = (data: GraficasResiduosHTMLData) => 
       border: 1px solid #e5e7eb;
     }
 
+    @media print {
+      .table-container {
+        overflow: visible;
+      }
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
