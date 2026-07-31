@@ -1,3 +1,6 @@
+import { buildCoverPage } from './reportTemplate/buildCoverPage';
+import { buildClosing } from './reportTemplate/buildClosing';
+
 interface CoordinadorData {
   stats: {
     total_recolecciones: number;
@@ -48,8 +51,14 @@ export const generateCoordinadorHTML = (data: CoordinadorData) => {
   <style>
     @media print {
       @page {
-        size: A4;
+        size: letter;
         margin: 15mm;
+        @bottom-right {
+          content: "Página " counter(page);
+          font-size: 10px;
+          color: #6b7280;
+          font-family: 'Arial', 'Helvetica', sans-serif;
+        }
       }
       body {
         print-color-adjust: exact;
@@ -344,31 +353,16 @@ export const generateCoordinadorHTML = (data: CoordinadorData) => {
   </style>
 </head>
 <body>
-  <!-- PORTADA -->
-  <div class="cover-page">
-    <div class="cover-header">
-      <h1>Dashboard Coordinador</h1>
-      <p>Elefantes Verdes - ${data.plazaSeleccionada || 'Todas las Plazas'}</p>
-    </div>
-
-    <div class="logo-container">
-      <img src="/logo-blanco.png" alt="Elefantes Verdes" style="width: 100px; height: 100px; object-fit: contain;" />
-    </div>
-
-    <div class="cover-info">
-      <p><strong>Fecha de generación:</strong> ${new Date().toLocaleDateString('es-MX', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })}</p>
-      ${data.userName ? `<p><strong>Generado por:</strong> ${data.userName}</p>` : ''}
-    </div>
-
-    <div class="cover-footer">
-      <p>Elefantes Verdes - Estrategias Ambientales</p>
-      <p>Sistema de Trazabilidad de Residuos</p>
-    </div>
-  </div>
+  ${buildCoverPage({
+    titulo: 'Dashboard Coordinador',
+    subtitulo: `Elefantes Verdes - ${data.plazaSeleccionada || 'Todas las Plazas'}`,
+    fecha: new Date().toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }),
+    userName: data.userName,
+  })}
 
   <!-- PÁGINA DE CONTENIDO -->
   <div class="page">
@@ -495,25 +489,10 @@ export const generateCoordinadorHTML = (data: CoordinadorData) => {
 
   <!-- Footer en todas las páginas -->
   <div class="footer">
-    <p>Elefantes Verdes - Estrategias Ambientales | Dashboard Coordinador | Pagina <span class="page-number"></span></p>
+    <p>Elefantes Verdes - Estrategias Ambientales | Dashboard Coordinador</p>
   </div>
 
-  <script>
-    // Auto-print cuando se carga la página
-    window.onload = function() {
-      // Agregar números de página
-      const pages = document.querySelectorAll('.page, .cover-page');
-      const pageNumbers = document.querySelectorAll('.page-number');
-      pageNumbers.forEach((el, i) => {
-        el.textContent = i + 1;
-      });
-      
-      // Abrir diálogo de impresión
-      setTimeout(function() {
-        window.print();
-      }, 500);
-    };
-  </script>
+  ${buildClosing()}
 </body>
 </html>
   `;
