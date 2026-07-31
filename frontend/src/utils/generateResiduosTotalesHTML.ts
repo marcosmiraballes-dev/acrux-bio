@@ -1,3 +1,5 @@
+import { buildClosing } from './reportTemplate/buildClosing';
+
 interface ResiduosTotalesHTMLData {
   stats: {
     total_recolecciones: number;
@@ -99,8 +101,14 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
 
     @media print {
       @page {
-        size: A4;
+        size: letter;
         margin: 15mm;
+        @bottom-right {
+          content: "Página " counter(page) " de " counter(pages);
+          font-size: 10px;
+          color: #6b7280;
+          font-family: 'Arial', 'Helvetica', sans-serif;
+        }
       }
 
       body {
@@ -495,16 +503,6 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       font-size: 40px;
       margin: 15px 0;
     }
-
-    /* FOOTER */
-    .page-footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 2px solid #d1fae5;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
-    }
   </style>
 </head>
 <body>
@@ -527,9 +525,12 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
 
     <div class="motivational-message">
       <p>
-        ¡Gracias por tu compromiso con el medio ambiente! 
-        Este reporte muestra tu impacto positivo. 
+        ¡Gracias por tu compromiso con el medio ambiente!
+        Este reporte muestra tu impacto positivo.
         <strong>Cada kilogramo cuenta.</strong> 🌱
+      </p>
+      <p style="font-size: 12px; font-weight: 400; margin-top: 10px; opacity: 0.8;">
+        Elefantes Verdes - Estrategias Ambientales
       </p>
     </div>
   </div>
@@ -573,13 +574,12 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
       </div>
     </div>
 
-    <!-- Pie Chart + Grid de Materiales -->
+    <!-- Pie Chart con Leyenda -->
     <div class="no-break">
       <h2 style="color: #047857; font-size: 24px; font-weight: bold; margin: 30px 0 20px; text-align: center;">
         ♻️ Distribución por Material
       </h2>
 
-      <!-- Pie Chart con Leyenda -->
       <div class="pie-chart-section">
         <div class="pie-chart-container">
           ${generarPieChart()}
@@ -588,7 +588,7 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
           ${top8Materiales.map((material, index) => {
             const color = COLORS_CHART[index % COLORS_CHART.length];
             const emoji = material.tipo_residuo_icono || '♻️';
-            
+
             return `
               <div class="pie-legend-item">
                 <div class="pie-legend-color" style="background: ${color};"></div>
@@ -599,12 +599,17 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
           }).join('')}
         </div>
       </div>
+    </div>
+  </div>
 
+  <!-- PÁGINA 1B: GRID DE MATERIALES -->
+  <div class="content-page page-break">
+    <div class="no-break">
       <div class="materials-grid">
         ${materialesConPorcentaje.slice(0, 9).map((material, index) => {
           const color = COLORS_CHART[index % COLORS_CHART.length];
           const emoji = material.tipo_residuo_icono || '♻️';
-          
+
           return `
             <div class="material-card" style="--color: ${color};">
               <div class="material-icon">${emoji}</div>
@@ -615,10 +620,6 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
           `;
         }).join('')}
       </div>
-    </div>
-
-    <div class="page-footer">
-      Página 1 de 2
     </div>
   </div>
 
@@ -688,19 +689,9 @@ export const generateResiduosTotalesHTML = (data: ResiduosTotalesHTMLData) => {
         Gracias por hacer la diferencia
       </p>
     </div>
-
-    <div class="page-footer">
-      Página 2 de 2 | Elefantes Verdes - Estrategias Ambientales
-    </div>
   </div>
 
-  <script>
-    window.onload = function() {
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    };
-  </script>
+  ${buildClosing()}
 
 </body>
 </html>
