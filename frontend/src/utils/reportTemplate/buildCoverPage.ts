@@ -10,7 +10,7 @@ interface BuildCoverPageParams {
 }
 
 export function buildCoverPage(params: BuildCoverPageParams): string {
-  const { titulo, subtitulo, plaza, fecha, logoUrl = '/logo-blanco.png', userName } = params;
+  const { titulo, subtitulo, plaza, fecha, logoUrl = window.location.origin + '/logo-blanco.png', userName } = params;
 
   // En el original, la línea del cover-header era siempre
   // "Elefantes Verdes - {plazaSeleccionada || 'Todas las Plazas'}".
