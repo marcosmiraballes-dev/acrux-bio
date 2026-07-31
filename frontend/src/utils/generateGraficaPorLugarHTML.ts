@@ -1,3 +1,7 @@
+import { REPORT_STYLES } from './reportTemplate/styles';
+import { buildCoverPage } from './reportTemplate/buildCoverPage';
+import { buildClosing } from './reportTemplate/buildClosing';
+
 interface GraficaPorLugarHTMLData {
   periodo1: {
     total_recolecciones: number;
@@ -49,129 +53,7 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comparación por Lugar - Elefantes Verdes</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Arial', 'Helvetica', sans-serif;
-      background: white;
-      color: #1f2937;
-    }
-
-    @media print {
-      @page {
-        size: A4;
-        margin: 15mm;
-      }
-
-      body {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-
-      .page-break {
-        page-break-before: always;
-      }
-
-      .no-break {
-        page-break-inside: avoid;
-      }
-    }
-
-    /* PORTADA */
-    .cover-page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 40px;
-    }
-
-    .cover-header {
-      background: linear-gradient(135deg, #047857 0%, #059669 100%);
-      color: white;
-      padding: 40px 60px;
-      border-radius: 15px;
-      margin-bottom: 50px;
-      box-shadow: 0 10px 30px rgba(4, 120, 87, 0.3);
-    }
-
-    .cover-header h1 {
-      font-size: 42px;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-
-    .cover-header p {
-      font-size: 20px;
-      opacity: 0.95;
-    }
-
-    .logo-container {
-      width: 120px;
-      height: 120px;
-      background: white;
-      border-radius: 50%;
-      margin: 40px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-
-    .logo-container img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-    }
-
-    .cover-info {
-      color: #6b7280;
-      margin-top: 60px;
-      font-size: 16px;
-    }
-
-    .cover-info p {
-      margin: 12px 0;
-    }
-
-    .cover-info strong {
-      color: #047857;
-    }
-
-    .cover-footer {
-      margin-top: 80px;
-      padding-top: 20px;
-      border-top: 2px solid #047857;
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    /* PÁGINAS DE CONTENIDO */
-    .content-page {
-      padding: 20px 0;
-    }
-
-    .page-title {
-      color: #047857;
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 25px;
-      padding-bottom: 12px;
-      border-bottom: 3px solid #047857;
-    }
-
-    .section-title {
-      color: #059669;
-      font-size: 20px;
-      font-weight: bold;
-      margin: 30px 0 15px;
-    }
+    ${REPORT_STYLES}
 
     /* PERIODOS GRID */
     .periodos-grid {
@@ -386,6 +268,12 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
       border: 1px solid #e5e7eb;
     }
 
+    @media print {
+      .table-container {
+        overflow: visible;
+      }
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -459,43 +347,20 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
       background: #fee2e2;
       color: #ef4444;
     }
-
-    /* FOOTER */
-    .page-footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 1px solid #e5e7eb;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- PORTADA -->
-  <div class="cover-page">
-    <div class="cover-header">
-      <h1>Comparación por Lugar</h1>
-      <p>Elefantes Verdes - ${lugarTexto}</p>
-    </div>
-
-    <div class="logo-container">
-      <img src="/logo-blanco.png" alt="Elefantes Verdes" />
-    </div>
-
-    <div class="cover-info">
-      <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-      ${data.userName ? `<p><strong>Generado por:</strong> ${data.userName}</p>` : ''}
+  ${buildCoverPage({
+    titulo: 'Comparación por Lugar',
+    subtitulo: `Elefantes Verdes - ${lugarTexto}`,
+    fecha: fechaGeneracion,
+    userName: data.userName,
+    extraInfo: `
       <p style="margin-top: 20px;"><strong>Periodo 1:</strong> ${data.periodo1Desde} - ${data.periodo1Hasta}</p>
       <p><strong>Periodo 2:</strong> ${data.periodo2Desde} - ${data.periodo2Hasta}</p>
-    </div>
-
-    <div class="cover-footer">
-      <p>Elefantes Verdes - Estrategias Ambientales</p>
-      <p>Sistema de Trazabilidad de Residuos</p>
-    </div>
-  </div>
+    `,
+  })}
 
   <!-- PÁGINA 1: COMPARACIÓN DE PERIODOS -->
   <div class="content-page page-break">
@@ -611,10 +476,6 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
       </div>
 
     </div>
-
-    <div class="page-footer">
-      Página 1 de 2
-    </div>
   </div>
 
   <!-- PÁGINA 2: TOP 5 MATERIALES -->
@@ -656,21 +517,24 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
         </tbody>
       </table>
     </div>
+  </div>
 
+  <!-- PÁGINA 2B: COMPARATIVA DETALLADA POR MATERIAL -->
+  <div class="content-page page-break">
     <!-- Comparativa por Material con barras -->
     <h2 class="section-title">📊 Comparativa Detallada por Material</h2>
-    
+
     ${data.materialesComparados.map(material => {
       const maxKilos = Math.max(material.periodo1_kilos, material.periodo2_kilos);
       const emoji = material.icono || '♻️';
-      
+
       return `
       <div class="no-break" style="margin-bottom: 25px;">
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
           <span style="font-size: 24px; margin-right: 10px;">${emoji}</span>
           <span style="font-weight: 600; font-size: 14px;">${material.nombre}</span>
         </div>
-        
+
         <div class="barras-comparativas" style="margin-bottom: 0;">
           <div class="barra-item">
             <div class="barra-header">
@@ -695,19 +559,9 @@ export const generateGraficaPorLugarHTML = (data: GraficaPorLugarHTMLData) => {
       </div>
       `;
     }).join('')}
-
-    <div class="page-footer">
-      Página 2 de 2
-    </div>
   </div>
 
-  <script>
-    window.onload = function() {
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    };
-  </script>
+  ${buildClosing()}
 
 </body>
 </html>

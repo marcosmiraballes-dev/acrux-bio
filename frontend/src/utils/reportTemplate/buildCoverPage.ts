@@ -7,10 +7,11 @@ interface BuildCoverPageParams {
   fecha: string;
   logoUrl?: string;
   userName?: string;
+  extraInfo?: string;
 }
 
 export function buildCoverPage(params: BuildCoverPageParams): string {
-  const { titulo, subtitulo, plaza, fecha, logoUrl = window.location.origin + '/logo-blanco.png', userName } = params;
+  const { titulo, subtitulo, plaza, fecha, logoUrl = window.location.origin + '/logo-blanco.png', userName, extraInfo } = params;
 
   // En el original, la línea del cover-header era siempre
   // "Elefantes Verdes - {plazaSeleccionada || 'Todas las Plazas'}".
@@ -32,6 +33,7 @@ export function buildCoverPage(params: BuildCoverPageParams): string {
     <div class="cover-info">
       <p><strong>Fecha de generación:</strong> ${fecha}</p>
       ${userName ? `<p><strong>Generado por:</strong> ${userName}</p>` : ''}
+      ${extraInfo || ''}
     </div>
 
     <div class="cover-footer">
