@@ -134,6 +134,16 @@ const PanelLocatario = () => {
     setKilos('');
   };
 
+  const volverASectores = () => {
+    if (detalles.length > 0) {
+      if (!window.confirm('Tenés residuos sin guardar. ¿Seguro que querés volver? Se perderán los datos ingresados.')) return;
+    }
+    setSectorSeleccionado(null);
+    setDetalles([]);
+    setSeleccionado(null);
+    setKilos('');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -186,7 +196,7 @@ const PanelLocatario = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-emerald-800 text-white px-4 py-3 flex justify-between items-center">
+      <div className="bg-emerald-800 text-white px-4 py-3 flex justify-between items-center relative">
         <div className="flex items-center gap-3">
           <img src="/logo-blanco.png" alt="Elefantes Verdes" className="h-10 w-auto" />
           <div>
@@ -207,6 +217,15 @@ const PanelLocatario = () => {
             Salir
           </button>
         </div>
+        {aplicaPasoSector && (
+          <button
+            onClick={volverASectores}
+            aria-label="Volver a sectores"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 flex items-center justify-center rounded-2xl text-4xl font-bold leading-none bg-emerald-700 border-2 border-emerald-500 hover:bg-emerald-600 active:scale-90 transition-all shadow-md"
+          >
+            ←
+          </button>
+        )}
       </div>
 
       {/* Mensaje toast */}
