@@ -147,11 +147,12 @@ const ListaInfracciones: React.FC = () => {
 
       console.log('🔍 Filtros enviados:', { plazaId, locatarioId, estatusFilter, tipoAvisoId, fechaDesde, fechaHasta, page, limit });
 
-      // ⭐ MEJORADO: Llamadas secuenciales
-      const infraccionesRes = await api.get(`/infracciones?${params}`);
-      console.log('✅ Infracciones recibidas:', infraccionesRes.data.data?.length || 0);
+      const [infraccionesRes, countRes] = await Promise.all([
+        api.get(`/infracciones?${params}`),
+        api.get(`/infracciones/count?${params}`)
+      ]);
 
-      const countRes = await api.get(`/infracciones/count?${params}`);
+      console.log('✅ Infracciones recibidas:', infraccionesRes.data.data?.length || 0);
       console.log('✅ Total count:', countRes.data.count);
 
       setInfracciones(infraccionesRes.data.data || []);
