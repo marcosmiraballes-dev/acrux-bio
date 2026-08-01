@@ -320,8 +320,8 @@ export function useNuevoManifiestoWizard({ isOpen, onClose, onSuccess }: UseNuev
   };
 
   const localesFiltrados = locales.filter(local =>
-    local.nombre.toLowerCase().includes(busquedaLocal.toLowerCase()) ||
-    local.giro.toLowerCase().includes(busquedaLocal.toLowerCase())
+    (local.nombre || '').toLowerCase().includes(busquedaLocal.toLowerCase()) ||
+    (local.giro || '').toLowerCase().includes(busquedaLocal.toLowerCase())
   );
 
   return {
