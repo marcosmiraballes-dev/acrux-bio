@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -76,13 +78,13 @@ const ResiduosTotales: React.FC = () => {
 
   const loadPlazasYLocales = async () => {
     try {
-      const [plazasRes, localesRes] = await Promise.all([
-        api.get('/plazas'),
-        api.get('/locales')
+      const [plazasData, localesData] = await Promise.all([
+        plazaService.getAll(),
+        localService.getAll()
       ]);
-      
-      setPlazas(plazasRes.data.data || []);
-      setLocales(localesRes.data.data || []);
+
+      setPlazas(plazasData);
+      setLocales(localesData);
     } catch (err) {
       console.error('Error cargando plazas/locales:', err);
     }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 
 // Interfaces
 interface Plaza {
@@ -74,14 +76,14 @@ const PanelCapturador: React.FC = () => {
 
   const loadCatalogos = async () => {
     try {
-      const [plazasRes, localesRes, tiposRes] = await Promise.all([
-        api.get('/plazas'),
-        api.get('/locales'),
+      const [plazasData, localesData, tiposRes] = await Promise.all([
+        plazaService.getAll(),
+        localService.getAll(),
         api.get('/tipos-residuos')
       ]);
-      
-      setPlazas(plazasRes.data.data || []);
-      setLocales(localesRes.data.data || []);
+
+      setPlazas(plazasData);
+      setLocales(localesData);
       setTiposResiduos(tiposRes.data.data || []);
     } catch (err) {
       console.error('Error cargando catálogos:', err);
