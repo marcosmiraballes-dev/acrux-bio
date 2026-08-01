@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 import { generarReporteHuella } from '../utils/generarReporteHuella';
 
 interface Plaza {
@@ -66,8 +68,8 @@ const HuellaCarbonoDirector: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const res = await api.get('/plazas');
-      setPlazas((res.data.data || []).filter((p: Plaza) => p.nombre));
+      const res = await plazaService.getAll();
+      setPlazas(res.filter((p: Plaza) => p.nombre));
     } catch (err) {
       console.error('Error cargando plazas:', err);
     }
@@ -75,9 +77,9 @@ const HuellaCarbonoDirector: React.FC = () => {
 
   const loadLocales = async () => {
     try {
-      const res = await api.get('/locales');
-      setLocales(res.data.data || []);
-      setLocalesFiltrados(res.data.data || []);
+      const res = await localService.getAll();
+      setLocales(res);
+      setLocalesFiltrados(res);
     } catch (err) {
       console.error('Error cargando locales:', err);
     }

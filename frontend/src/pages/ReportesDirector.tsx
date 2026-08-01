@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 
 interface Plaza { id: string; nombre: string; }
 interface Local { id: string; nombre: string; plaza_id: string; }
@@ -44,11 +46,11 @@ const ReportesDirector: React.FC = () => {
   }, [selectedPlazaCert, locales]);
 
   const loadPlazas = async () => {
-    try { const r = await api.get('/plazas'); setPlazas(r.data.data || []); } catch {}
+    try { const r = await plazaService.getAll(); setPlazas(r); } catch {}
   };
 
   const loadLocales = async () => {
-    try { const r = await api.get('/locales'); setLocales(r.data.data || []); setLocalesFiltrados(r.data.data || []); } catch {}
+    try { const r = await localService.getAll(); setLocales(r); setLocalesFiltrados(r); } catch {}
   };
 
   const handleGenerarBitacora = async () => {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 import { generateGraficaPorLugarHTML } from '../utils/generateGraficaPorLugarHTML';
 
 // Interfaces
@@ -78,8 +80,8 @@ const GraficaPorLugar: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (err) {
       console.error('Error cargando plazas:', err);
     }
@@ -87,9 +89,9 @@ const GraficaPorLugar: React.FC = () => {
 
   const loadLocales = async () => {
     try {
-      const response = await api.get('/locales');
-      setLocales(response.data.data || []);
-      setLocalesFiltrados(response.data.data || []);
+      const localesData = await localService.getAll();
+      setLocales(localesData);
+      setLocalesFiltrados(localesData);
     } catch (err) {
       console.error('Error cargando locales:', err);
     }
