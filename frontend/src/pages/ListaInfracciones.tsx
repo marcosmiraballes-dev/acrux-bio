@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 import { generateInfraccionHTML } from '../utils/generateInfraccionHTML';
 import NuevaInfraccionModal from '../components/NuevaInfraccionModal';
 
@@ -104,8 +105,8 @@ const ListaInfracciones: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (error) {
       console.error('Error al cargar plazas:', error);
     }

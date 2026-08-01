@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 
 interface Plaza {
   id: string;
@@ -57,8 +58,8 @@ const LocatariosInfracciones: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (error) {
       console.error('Error al cargar plazas:', error);
     }
@@ -71,9 +72,9 @@ const LocatariosInfracciones: React.FC = () => {
       const locatariosData = response.data.data || [];
       
       // Cargar nombres de plazas
-      const plazasResponse = await api.get('/plazas');
+      const plazasData = await plazaService.getAll();
       const plazasMap = new Map(
-        (plazasResponse.data.data || []).map((p: Plaza) => [p.id, p])
+        plazasData.map((p: Plaza) => [p.id, p])
       );
 
       const locatariosConPlaza = locatariosData.map((loc: Locatario) => ({

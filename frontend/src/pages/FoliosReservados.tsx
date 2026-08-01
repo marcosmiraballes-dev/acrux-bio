@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 
 interface FolioReservado {
   id: string;
@@ -55,9 +56,9 @@ const FoliosReservados: React.FC = () => {
 
   const fetchPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
+      const todasPlazas = await plazaService.getAll();
       // Filtrar solo plazas que tienen código de folio
-      const plazasConCodigo = response.data.data.filter((p: Plaza) => p.codigo_folio);
+      const plazasConCodigo = todasPlazas.filter((p: Plaza) => p.codigo_folio);
       setPlazas(plazasConCodigo);
     } catch (error) {
       console.error('Error al cargar plazas:', error);

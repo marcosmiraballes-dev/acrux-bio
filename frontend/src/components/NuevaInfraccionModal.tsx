@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 
 interface Props {
   isOpen: boolean;
@@ -63,8 +64,8 @@ const NuevaInfraccionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) =
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (error) {
       console.error('Error al cargar plazas:', error);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 import { generateCoordinadorHTML } from '../utils/generateCoordinadorHTML';
 import AsistenteCoordinador from '../components/AsistenteCoordinador';
 
@@ -81,8 +82,8 @@ const DashboardCoordinador: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (err) {
       console.error('Error cargando plazas:', err);
     }

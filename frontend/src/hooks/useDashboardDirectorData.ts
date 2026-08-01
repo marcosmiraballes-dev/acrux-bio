@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 import { generateDirectorHTML } from '../utils/generateDirectorHTML';
 
 export interface Stats {
@@ -92,8 +93,8 @@ export function useDashboardDirectorData() {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (err) {
       console.error('Error cargando plazas:', err);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
@@ -55,8 +56,8 @@ const GraficasPorResiduos: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (err) {
       console.error('Error cargando plazas:', err);
     }

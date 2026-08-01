@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
 
 interface Evento {
   id: string;
@@ -55,8 +56,7 @@ const HistorialLocatario: React.FC = () => {
 
   const loadPlazas = async () => {
     try {
-      const resPlazas = await api.get('/plazas');
-      const todasPlazas: Plaza[] = resPlazas.data?.data || [];
+      const todasPlazas: Plaza[] = await plazaService.getAll();
       setPlazas(todasPlazas);
 
       try {
