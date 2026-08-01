@@ -8,37 +8,43 @@ export class AlertasService {
     if (error) throw new Error(`Error calculando alertas: ${error.message}`);
     if (!data || data.length === 0) return { generadas: 0, alertas: [] };
 
-    const insertadas: any[] = [];
-    for (const alerta of data) {
-      const { data: existing } = await supabase
-        .from('alertas_cumplimiento')
-        .select('id')
-        .eq('local_id', alerta.local_id)
-        .eq('mes_alerta', mes)
-        .single();
+    const localIds = data.map((alerta: any) => alerta.local_id);
 
-      if (existing) continue;
+    const { data: existentes, error: errExistentes } = await supabase
+      .from('alertas_cumplimiento')
+      .select('local_id')
+      .eq('mes_alerta', mes)
+      .in('local_id', localIds);
 
-      const { data: nueva, error: errInsert } = await supabase
-        .from('alertas_cumplimiento')
-        .insert({
-          local_id: alerta.local_id,
-          plaza_id: alerta.plaza_id,
-          coordinador_id: alerta.coordinador_id,
-          mes_alerta: mes,
-          kilos_promedio_historico: alerta.kilos_promedio_historico,
-          kilos_mes_actual: alerta.kilos_mes_actual,
-          porcentaje_desviacion: alerta.porcentaje_desviacion,
-          tipo_alerta: alerta.tipo_alerta,
-        })
-        .select()
-        .single();
+    if (errExistentes) throw new Error(`Error verificando alertas existentes: ${errExistentes.message}`);
 
-      if (errInsert) throw new Error(`Error insertando alerta: ${errInsert.message}`);
-      insertadas.push(nueva);
+    const localesConAlerta = new Set((existentes || []).map((e: any) => e.local_id));
+
+    const nuevasAlertas = data
+      .filter((alerta: any) => !localesConAlerta.has(alerta.local_id))
+      .map((alerta: any) => ({
+        local_id: alerta.local_id,
+        plaza_id: alerta.plaza_id,
+        coordinador_id: alerta.coordinador_id,
+        mes_alerta: mes,
+        kilos_promedio_historico: alerta.kilos_promedio_historico,
+        kilos_mes_actual: alerta.kilos_mes_actual,
+        porcentaje_desviacion: alerta.porcentaje_desviacion,
+        tipo_alerta: alerta.tipo_alerta,
+      }));
+
+    if (nuevasAlertas.length === 0) {
+      return { generadas: 0, alertas: [] };
     }
 
-    return { generadas: insertadas.length, alertas: insertadas };
+    const { data: insertadas, error: errInsert } = await supabase
+      .from('alertas_cumplimiento')
+      .insert(nuevasAlertas)
+      .select();
+
+    if (errInsert) throw new Error(`Error insertando alertas: ${errInsert.message}`);
+
+    return { generadas: insertadas?.length || 0, alertas: insertadas || [] };
   }
 
   async getAlertasByCoordinador(coordinador_id: string, estatus?: string): Promise<any[]> {
