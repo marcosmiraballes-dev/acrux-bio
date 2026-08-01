@@ -396,50 +396,6 @@ export class RecoleccionService {
   }
 
   /**
-   * Validar que existan las referencias (plaza, local, usuario)
-   */
-  async validateReferences(data: RecoleccionInsert | RecoleccionUpdate): Promise<void> {
-    // Validar plaza
-    if (data.plaza_id) {
-      const { data: plaza, error: plazaError } = await supabase
-        .from('plazas')
-        .select('id')
-        .eq('id', data.plaza_id)
-        .single();
-
-      if (plazaError || !plaza) {
-        throw new Error('Plaza no encontrada');
-      }
-    }
-
-    // Validar local
-    if (data.local_id) {
-      const { data: local, error: localError } = await supabase
-        .from('locales')
-        .select('id')
-        .eq('id', data.local_id)
-        .single();
-
-      if (localError || !local) {
-        throw new Error('Local no encontrado');
-      }
-    }
-
-    // Validar usuario
-    if (data.usuario_id) {
-      const { data: usuario, error: usuarioError } = await supabase
-        .from('usuarios')
-        .select('id')
-        .eq('id', data.usuario_id)
-        .single();
-
-      if (usuarioError || !usuario) {
-        throw new Error('Usuario no encontrado');
-      }
-    }
-  }
-
-  /**
    * Obtener recolecciones por rango de fechas
    */
   async getByDateRange(fechaInicio: string, fechaFin: string, filters: any = {}): Promise<Recoleccion[]> {
