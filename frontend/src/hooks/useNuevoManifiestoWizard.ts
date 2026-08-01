@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { plazaService } from '../services/plaza.service';
+import { localService } from '../services/local.service';
 import { generateManifiestoHTML } from '../utils/generateManifiestoHTML';
 import { obtenerFechaEmisionUltimoDia } from '../utils/manifiestoFechas';
 
@@ -91,8 +93,8 @@ export function useNuevoManifiestoWizard({ isOpen, onClose, onSuccess }: UseNuev
 
   const loadPlazas = async () => {
     try {
-      const response = await api.get('/plazas');
-      setPlazas(response.data.data || []);
+      const plazasData = await plazaService.getAll();
+      setPlazas(plazasData);
     } catch (err) {
       console.error('Error al cargar plazas:', err);
     }
@@ -158,13 +160,11 @@ export function useNuevoManifiestoWizard({ isOpen, onClose, onSuccess }: UseNuev
     }
 
     try {
-      const response = await api.get('/locales', {
-        params: { plaza_id: plazaSeleccionada }
-      });
+      const localesData = await localService.getAll(plazaSeleccionada);
 
-      console.log('🏢 LOCALES FILTRADOS POR PLAZA:', response.data.data);
+      console.log('🏢 LOCALES FILTRADOS POR PLAZA:', localesData);
 
-      setLocales(response.data.data || []);
+      setLocales(localesData);
     } catch (err) {
       console.error('Error al cargar locales:', err);
       setLocales([]);
