@@ -270,39 +270,31 @@ export class ManifiestoService {
     }
 
     // ========================================
-    // PASO 1: Obtener datos del LOCAL (generador)
+    // PASOS 1-5 + residuos del periodo: independientes entre sí, en paralelo
     // ========================================
-    const { data: local, error: localError } = await supabase
-      .from('locales')
-      .select('*')
-      .eq('id', input.local_id)
-      .single();
+    const [
+      { data: local, error: localError },
+      { data: recolector, error: recolectorError },
+      { data: vehiculo, error: vehiculoError },
+      { data: destino, error: destinoError },
+      { data: config, error: configError },
+      residuosPeriodo,
+    ] = await Promise.all([
+      supabase.from('locales').select('*').eq('id', input.local_id).single(),
+      supabase.from('recolectores').select('*').eq('id', input.recolector_id).single(),
+      supabase.from('vehiculos').select('*').eq('id', input.vehiculo_id).single(),
+      supabase.from('destinos_finales').select('*').eq('id', input.destino_final_id).single(),
+      supabase.from('configuracion_sistema').select('clave, valor'),
+      this.obtenerResiduosDelPeriodo(input.local_id, input.fecha_desde, input.fecha_hasta),
+    ]);
 
     if (localError || !local) {
       throw new Error('Local no encontrado');
     }
 
-    // ========================================
-    // PASO 2: Obtener datos del RECOLECTOR (chofer)
-    // ========================================
-    const { data: recolector, error: recolectorError } = await supabase
-      .from('recolectores')
-      .select('*')
-      .eq('id', input.recolector_id)
-      .single();
-
     if (recolectorError || !recolector) {
       throw new Error('Recolector no encontrado');
     }
-
-    // ========================================
-    // PASO 3: Obtener datos del VEHÍCULO
-    // ========================================
-    const { data: vehiculo, error: vehiculoError } = await supabase
-      .from('vehiculos')
-      .select('*')
-      .eq('id', input.vehiculo_id)
-      .single();
 
     if (vehiculoError || !vehiculo) {
       throw new Error('Vehículo no encontrado');
@@ -312,15 +304,6 @@ export class ManifiestoService {
       throw new Error('El vehículo seleccionado está inactivo');
     }
 
-    // ========================================
-    // PASO 4: Obtener datos del DESTINO FINAL
-    // ========================================
-    const { data: destino, error: destinoError } = await supabase
-      .from('destinos_finales')
-      .select('*')
-      .eq('id', input.destino_final_id)
-      .single();
-
     if (destinoError || !destino) {
       throw new Error('Destino final no encontrado');
     }
@@ -328,13 +311,6 @@ export class ManifiestoService {
     if (!destino.activo) {
       throw new Error('El destino final seleccionado está inactivo');
     }
-
-    // ========================================
-    // PASO 5: Obtener configuración del sistema (Elefante Verde)
-    // ========================================
-    const { data: config, error: configError } = await supabase
-      .from('configuracion_sistema')
-      .select('clave, valor');
 
     if (configError) {
       throw new Error('Error al obtener configuración del sistema');
@@ -346,7 +322,7 @@ export class ManifiestoService {
     });
 
     // ========================================
-    // PASO 6: Construir domicilio completo del generador
+    // Construir domicilio completo del generador
     // ========================================
     const domicilioPartes = [
       local.direccion,
@@ -358,7 +334,7 @@ export class ManifiestoService {
     const domicilioCompleto = domicilioPartes.join(', ') || 'No especificado';
 
     // ========================================
-    // PASO 7: Generar folio (automático o manual)
+    // Generar folio (automático o manual) — depende de local.plaza_id, ya resuelto arriba
     // ========================================
     let folio = input.folio_manual;
     
@@ -398,18 +374,12 @@ export class ManifiestoService {
     }
 
     // ========================================
-    // PASO 8: Crear el manifiesto con TODOS los snapshots
+    // Crear el manifiesto con TODOS los snapshots
     // ========================================
     const fechaBaseEmision = input.fecha_emision ? parseFechaISO(input.fecha_emision) : new Date();
     const fechaEmision = formatearISOFecha(getUltimoDiaDelMes(fechaBaseEmision));
     console.log('🧪 fecha_emision recibida en payload:', input.fecha_emision);
     console.log('🧪 fecha_emision guardada (último día del mes):', fechaEmision);
-
-    const residuosPeriodo = await this.obtenerResiduosDelPeriodo(
-      input.local_id,
-      input.fecha_desde,
-      input.fecha_hasta
-    );
 
     const residuosSnapshot = (residuosPeriodo || []).map((residuo: any) => ({
       tipo: String(residuo?.tipo || ''),
@@ -484,7 +454,7 @@ export class ManifiestoService {
     }
 
     // ========================================
-    // PASO 9: Si es folio manual, marcarlo como usado
+    // Si es folio manual, marcarlo como usado
     // ========================================
     if (input.folio_manual) {
       const { error: updateError } = await supabase
