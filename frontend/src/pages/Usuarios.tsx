@@ -118,7 +118,7 @@ const Usuarios: React.FC = () => {
       usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       usuario.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRol = !filterRol || usuario.rol === filterRol;
+    const matchesRol = filterRol ? usuario.rol === filterRol : usuario.rol !== 'LOCATARIO';
 
     return matchesSearch && matchesRol;
   });
@@ -212,6 +212,7 @@ const Usuarios: React.FC = () => {
               <option value="DIRECTOR">📊 Director</option>
               <option value="COORDINADOR">📋 Coordinador</option>
               <option value="CAPTURADOR">✍️ Capturador</option>
+              <option value="LOCATARIO">👤 Locatario</option>
             </select>
 
             {/* Botón crear */}
