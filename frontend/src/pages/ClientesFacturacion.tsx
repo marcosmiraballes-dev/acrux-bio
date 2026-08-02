@@ -59,12 +59,14 @@ const ClientesFacturacion: React.FC = () => {
       const created = await facturacionService.createCliente(clienteData);
       const clienteId = created.id;
 
-      for (const servicio of servicios) {
-        await facturacionService.createServicio({
-          ...servicio,
-          cliente_id: clienteId,
-        });
-      }
+      await Promise.all(
+        servicios.map((servicio: any) =>
+          facturacionService.createServicio({
+            ...servicio,
+            cliente_id: clienteId,
+          })
+        )
+      );
 
       setSuccessMessage('Cliente de facturación creado correctamente');
     } else {
@@ -88,6 +90,8 @@ const ClientesFacturacion: React.FC = () => {
         existingMap.set(key, list);
       });
 
+      const serviciosACrear: any[] = [];
+
       for (const servicio of servicios) {
         const key = buildKey(servicio);
         const matched = existingMap.get(key) || [];
@@ -96,18 +100,26 @@ const ClientesFacturacion: React.FC = () => {
           matched.pop();
           existingMap.set(key, matched);
         } else {
-          await facturacionService.createServicio({
-            ...servicio,
-            cliente_id: selectedCliente.id,
-          });
+          serviciosACrear.push(servicio);
         }
       }
 
+      const idsABorrar: string[] = [];
       for (const [, restantes] of existingMap) {
         for (const servicio of restantes) {
-          await facturacionService.deleteServicio(servicio.id);
+          idsABorrar.push(servicio.id);
         }
       }
+
+      await Promise.all([
+        ...serviciosACrear.map((servicio: any) =>
+          facturacionService.createServicio({
+            ...servicio,
+            cliente_id: selectedCliente.id,
+          })
+        ),
+        ...idsABorrar.map((id: string) => facturacionService.deleteServicio(id)),
+      ]);
 
       setSuccessMessage('Cliente de facturación actualizado correctamente');
     }
