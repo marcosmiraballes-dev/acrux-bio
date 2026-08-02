@@ -150,9 +150,63 @@ const tools: Anthropic.Tool[] = [
   },
 ];
 
+import { z } from 'zod';
+
+// ── VALIDACIÓN DE INPUT DE HERRAMIENTAS ────────────────────────────────────────
+const TOOL_SCHEMAS: Record<string, z.ZodTypeAny> = {
+  get_plazas: z.object({}),
+  get_locatarios_plaza: z.object({
+    plaza_id: z.string(),
+    fecha_desde: z.string(),
+    fecha_hasta: z.string(),
+  }),
+  get_huella_locatario: z.object({
+    local_id: z.string(),
+    anio: z.number(),
+    mes: z.number().optional(),
+  }),
+  get_huella_plaza: z.object({
+    plaza_id: z.string(),
+    anio: z.number(),
+    mes: z.number().optional(),
+  }),
+  get_comparacion_periodos: z.object({
+    plaza_id: z.string().optional(),
+    local_id: z.string().optional(),
+    periodo1_desde: z.string(),
+    periodo1_hasta: z.string(),
+    periodo2_desde: z.string(),
+    periodo2_hasta: z.string(),
+  }),
+  get_manifiestos_local: z.object({
+    local_id: z.string(),
+    plaza_id: z.string().optional(),
+  }),
+  generate_bitacora_report: z.object({
+    local_id: z.string(),
+    fecha_desde: z.string(),
+    fecha_hasta: z.string(),
+  }),
+  generate_huella_report: z.object({
+    tipo: z.enum(['locatario', 'plaza']),
+    id: z.string(),
+    anio: z.number(),
+    mes: z.number().optional(),
+  }),
+};
+
 // ── EJECUTOR DE HERRAMIENTAS ──────────────────────────────────────────────────
 async function ejecutarHerramienta(nombre: string, input: any): Promise<string> {
   try {
+    const schema = TOOL_SCHEMAS[nombre];
+    if (schema) {
+      const parsed = schema.safeParse(input);
+      if (!parsed.success) {
+        return JSON.stringify({ error: `Input inválido para ${nombre}: ${parsed.error.message}` });
+      }
+      input = parsed.data;
+    }
+
     switch (nombre) {
 
       case 'get_plazas': {
