@@ -1,5 +1,11 @@
 import { supabase } from '../config/supabase';
 import bcrypt from 'bcrypt';
+import { UpdateUsuarioInput } from '../schemas/usuario.schema';
+
+type UpdateUsuarioData = Omit<UpdateUsuarioInput, 'password'> & {
+  updated_at: string;
+  password_hash?: string;
+};
 
 export class UsuarioService {
   
@@ -101,16 +107,17 @@ export class UsuarioService {
   /**
    * Actualizar un usuario existente
    */
-  async update(id: string, input: any): Promise<any> {
-    const updateData: any = {
-      ...input,
+  async update(id: string, input: UpdateUsuarioInput): Promise<any> {
+    const { password, ...rest } = input;
+
+    const updateData: UpdateUsuarioData = {
+      ...rest,
       updated_at: new Date().toISOString()
     };
 
     // Si se está actualizando el password, hashearlo
-    if (input.password) {
-      updateData.password_hash = await bcrypt.hash(input.password, 10);
-      delete updateData.password; // Eliminar password del objeto
+    if (password) {
+      updateData.password_hash = await bcrypt.hash(password, 10);
     }
 
     const { data, error } = await supabase
@@ -129,7 +136,7 @@ export class UsuarioService {
     }
 
     // Remover password de la respuesta
-    const { password, password_hash, ...userWithoutPassword } = data;
+    const { password: _pw, password_hash: _ph, ...userWithoutPassword } = data;
     return userWithoutPassword;
   }
 
