@@ -3,13 +3,7 @@
 import { Request, Response } from 'express';
 import { VehiculoService } from '../services/vehiculo.service';
 import { createVehiculoSchema, updateVehiculoSchema } from '../schemas/vehiculo.schema';
-import { createClient } from '@supabase/supabase-js';
-
-// Crear instancia de Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+import { supabase } from '../config/supabase';
 
 export class VehiculoController {
   private vehiculoService: VehiculoService;

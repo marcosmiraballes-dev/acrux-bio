@@ -3,13 +3,7 @@
 import { Request, Response } from 'express';
 import { DestinoFinalService } from '../services/destino-final.service';
 import { createDestinoFinalSchema, updateDestinoFinalSchema } from '../schemas/destino-final.schema';
-import { createClient } from '@supabase/supabase-js';
-
-// Crear instancia de Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+import { supabase } from '../config/supabase';
 
 export class DestinoFinalController {
   private destinoFinalService: DestinoFinalService;

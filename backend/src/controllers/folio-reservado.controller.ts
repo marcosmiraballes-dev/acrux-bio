@@ -3,13 +3,7 @@
 import { Request, Response } from 'express';
 import { FolioReservadoService } from '../services/folio-reservado.service';
 import { createFolioReservadoSchema, updateFolioReservadoSchema } from '../schemas/folio-reservado.schema';
-import { createClient } from '@supabase/supabase-js';
-
-// Crear instancia de Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+import { supabase } from '../config/supabase';
 
 export class FolioReservadoController {
   private folioReservadoService: FolioReservadoService;
