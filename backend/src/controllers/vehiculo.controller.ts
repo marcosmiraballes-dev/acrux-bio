@@ -26,6 +26,7 @@ export class VehiculoController {
         data: vehiculos
       });
     } catch (error: any) {
+      console.error('Error en getAll vehiculo:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -43,6 +44,7 @@ export class VehiculoController {
         data: { count }
       });
     } catch (error: any) {
+      console.error('Error en getCount vehiculo:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -61,6 +63,7 @@ export class VehiculoController {
         data: vehiculo
       });
     } catch (error: any) {
+      console.error('Error en getById vehiculo:', error);
       res.status(404).json({
         success: false,
         error: error.message
@@ -79,6 +82,7 @@ export class VehiculoController {
         data: vehiculo
       });
     } catch (error: any) {
+      console.error('Error en create vehiculo:', error);
       if (error.name === 'ZodError') {
         return res.status(400).json({
           success: false,
@@ -106,6 +110,7 @@ export class VehiculoController {
         data: vehiculo
       });
     } catch (error: any) {
+      console.error('Error en update vehiculo:', error);
       if (error.name === 'ZodError') {
         return res.status(400).json({
           success: false,
@@ -132,6 +137,7 @@ export class VehiculoController {
         data: vehiculo
       });
     } catch (error: any) {
+      console.error('Error en toggleActive vehiculo:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -150,6 +156,7 @@ export class VehiculoController {
         message: 'Vehículo eliminado correctamente'
       });
     } catch (error: any) {
+      console.error('Error en delete vehiculo:', error);
       res.status(500).json({
         success: false,
         error: error.message
