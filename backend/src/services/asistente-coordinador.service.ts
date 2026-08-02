@@ -113,9 +113,55 @@ const tools: Anthropic.Tool[] = [
   },
 ];
 
+import { z } from 'zod';
+
+// ── VALIDACIÓN DE INPUT DE HERRAMIENTAS ────────────────────────────────────────
+const TOOL_SCHEMAS: Record<string, z.ZodTypeAny> = {
+  get_mis_plazas: z.object({
+    coordinador_id: z.string(),
+  }),
+  get_alertas_coordinador: z.object({
+    coordinador_id: z.string(),
+    plaza_id: z.string().optional(),
+    mes: z.string().optional(),
+    estatus: z.string().optional(),
+  }),
+  get_locatarios_plaza: z.object({
+    plaza_id: z.string(),
+    fecha_desde: z.string(),
+    fecha_hasta: z.string(),
+  }),
+  get_historial_local: z.object({
+    local_id: z.string(),
+  }),
+  get_infracciones_local: z.object({
+    local_id: z.string().optional(),
+    plaza_id: z.string().optional(),
+    solo_activas: z.boolean().optional(),
+  }),
+  redactar_informe: z.object({
+    local_nombre: z.string(),
+    plaza_nombre: z.string(),
+    situacion: z.string(),
+    acciones_tomadas: z.string().optional(),
+    kilos_promedio: z.number().optional(),
+    kilos_mes: z.number().optional(),
+    porcentaje_desviacion: z.number().optional(),
+  }),
+};
+
 // ── EJECUTOR DE HERRAMIENTAS ──────────────────────────────────────────────────
 async function ejecutarHerramienta(nombre: string, input: any, coordinador_id: string): Promise<string> {
   try {
+    const schema = TOOL_SCHEMAS[nombre];
+    if (schema) {
+      const parsed = schema.safeParse(input);
+      if (!parsed.success) {
+        return JSON.stringify({ error: `Input inválido para ${nombre}: ${parsed.error.message}` });
+      }
+      input = parsed.data;
+    }
+
     switch (nombre) {
 
       case 'get_mis_plazas': {
