@@ -19,22 +19,13 @@ interface Plaza {
   codigo_folio: string;
 }
 
-interface Estadisticas {
-  total: number;
-  usados: number;
-  disponibles: number;
-  limite: number;
-  puede_crear: boolean;
-}
-
 const FoliosReservados: React.FC = () => {
   const [folios, setFolios] = useState<FolioReservado[]>([]);
   const [plazas, setPlazas] = useState<Plaza[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFolio, setEditingFolio] = useState<FolioReservado | null>(null);
-  const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null);
-  
+
   // Filtro de plaza
   const [plazaFiltro, setPlazaFiltro] = useState('');
 
@@ -50,7 +41,6 @@ const FoliosReservados: React.FC = () => {
   useEffect(() => {
     if (plazas.length > 0) {
       fetchFolios();
-      // fetchEstadisticas(); // COMENTADO - endpoint no existe
     }
   }, [plazaFiltro, plazas]);
 
@@ -84,22 +74,6 @@ const FoliosReservados: React.FC = () => {
     }
   };
 
-  const fetchEstadisticas = async () => {
-    // TEMPORALMENTE DESHABILITADO - endpoint no existe
-    // try {
-    //   const response = await api.get('/folios-reservados/count');
-    //   setEstadisticas({
-    //     total: response.data.data,
-    //     disponibles: folios.filter(f => !f.usado).length,
-    //     usados: folios.filter(f => f.usado).length,
-    //     limite: 10,
-    //     puede_crear: response.data.data < 10
-    //   });
-    // } catch (error) {
-    //   console.error('Error al cargar estadísticas:', error);
-    // }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -117,7 +91,6 @@ const FoliosReservados: React.FC = () => {
         await api.post('/folios-reservados', formData);
       }
       fetchFolios();
-      // fetchEstadisticas(); // COMENTADO
       closeModal();
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error al guardar folio');
@@ -129,7 +102,6 @@ const FoliosReservados: React.FC = () => {
     try {
       await api.delete(`/folios-reservados/${id}`);
       fetchFolios();
-      // fetchEstadisticas(); // COMENTADO
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error al eliminar');
     }
@@ -221,27 +193,21 @@ const FoliosReservados: React.FC = () => {
         </select>
       </div>
 
-      {/* Estadísticas - TEMPORALMENTE COMENTADO */}
-      {/* {estadisticas && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Total</p>
-            <p className="text-2xl font-bold text-gray-800">{estadisticas.total}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Disponibles</p>
-            <p className="text-2xl font-bold text-emerald-600">{estadisticas.disponibles}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Usados</p>
-            <p className="text-2xl font-bold text-gray-400">{estadisticas.usados}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Límite Máximo</p>
-            <p className="text-2xl font-bold text-blue-600">{estadisticas.limite}</p>
-          </div>
+      {/* Estadísticas */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <p className="text-gray-600 text-sm">Total</p>
+          <p className="text-2xl font-bold text-gray-800">{folios.length}</p>
         </div>
-      )} */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <p className="text-gray-600 text-sm">Disponibles</p>
+          <p className="text-2xl font-bold text-emerald-600">{folios.filter(f => !f.usado).length}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <p className="text-gray-600 text-sm">Usados</p>
+          <p className="text-2xl font-bold text-gray-400">{folios.filter(f => f.usado).length}</p>
+        </div>
+      </div>
 
       {/* Tabla */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
