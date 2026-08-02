@@ -142,7 +142,7 @@ Los manifiestos son documentos legales. Los kilos se guardan como snapshot fijo 
 ### Backend (`backend/.env`)
 ```
 SUPABASE_URL=
-SUPABASE_SERVICE_KEY=        ← es SUPABASE_SERVICE_KEY, no SUPABASE_KEY ni SUPABASE_ANON_KEY
+SUPABASE_KEY=        ← es SUPABASE_KEY, no SUPABASE_SERVICE_KEY ni SUPABASE_ANON_KEY
 JWT_SECRET=
 ANTHROPIC_API_KEY=           ← NUNCA compartir en chat, NUNCA commitear
 PORT=
