@@ -121,13 +121,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ]
           },
           {
-            title: 'FACTURACIÓN',
-            items: [
-              { path: '/facturacion/clientes', label: 'Clientes', icon: '🧾' },
-              { path: '/facturacion/cobros', label: 'Cobros del mes', icon: '💵' }
-            ]
-          },
-          {
             title: 'REPORTES',
             items: [
               { path: '/reportes', label: 'Reportes y Certificados', icon: '📋' },
