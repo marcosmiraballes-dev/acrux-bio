@@ -112,31 +112,6 @@ export class ManifiestoController {
   }
 
   /**
-   * GET /api/manifiestos/recoleccion/:recoleccionId
-   * Verificar si una recolección ya tiene manifiesto
-   */
-  async getByRecoleccion(req: Request, res: Response) {
-    try {
-      const { recoleccionId } = req.params;
-
-      const manifiesto = await manifiestoService.getByRecoleccion(recoleccionId);
-
-      res.json({
-        success: true,
-        data: manifiesto,
-        existe: !!manifiesto,
-      });
-    } catch (error: any) {
-      console.error('Error al verificar manifiesto:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Error al verificar manifiesto',
-        message: error.message,
-      });
-    }
-  }
-
-  /**
    * POST /api/manifiestos
    * Crear un nuevo manifiesto
    */

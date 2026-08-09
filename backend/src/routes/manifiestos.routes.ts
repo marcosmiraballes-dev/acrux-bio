@@ -50,17 +50,6 @@ router.get(
 );
 
 /**
- * GET /api/manifiestos/recoleccion/:recoleccionId
- * Verificar si una recolección ya tiene manifiesto
- * Acceso: ADMIN, DIRECTOR, COORDINADOR
- */
-router.get(
-  '/recoleccion/:recoleccionId',
-  authorize('ADMIN', 'DIRECTOR', 'COORDINADOR'),
-  manifiestoController.getByRecoleccion.bind(manifiestoController)
-);
-
-/**
  * GET /api/manifiestos/:id
  * Obtener un manifiesto por ID
  * Acceso: ADMIN, DIRECTOR, COORDINADOR
