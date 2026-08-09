@@ -37,7 +37,7 @@ export class AuthService {
     });
 
     // Retornar usuario y token (sin password)
-    const { password_hash, pin, ...usuarioSinPassword } = usuario;
+    const { password_hash, password: _pw, pin: _pin, ...usuarioSinPassword } = usuario;
 
     return {
       token,
@@ -91,7 +91,7 @@ export class AuthService {
     });
 
     // Retornar usuario y token (sin password)
-    const { password_hash: _, ...usuarioSinPassword } = nuevoUsuario;
+    const { password_hash: _, password: _pw, pin: _pin, ...usuarioSinPassword } = nuevoUsuario;
 
     return {
       token,
@@ -139,7 +139,7 @@ export class AuthService {
       nombre: usuario.nombre
     });
 
-    const { password_hash, ...usuarioSinPassword } = usuario;
+    const { password_hash, password: _pw, pin: _pin, ...usuarioSinPassword } = usuario;
 
     return {
       token,
