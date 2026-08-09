@@ -84,7 +84,7 @@ router.post('/login-pin', loginPinLimiter, async (req, res) => {
         error: 'PIN requerido' 
       });
     }
-    const authService = new AuthController().authService || new (require('../services/auth.service').AuthService)();
+    const authService = new (require('../services/auth.service').AuthService)();
     const result = await authService.loginPin(pin);
     res.json({ success: true, ...result });
   } catch (error: any) {

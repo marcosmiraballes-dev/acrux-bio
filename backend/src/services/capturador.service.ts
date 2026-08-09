@@ -40,8 +40,8 @@ export class CapturadorService {
       const recolecciones = (data || []).map(r => ({
         id: r.id,
         fecha_recoleccion: r.fecha_recoleccion,
-        plaza_nombre: r.plazas?.nombre || 'Sin plaza',
-        local_nombre: r.locales?.nombre || 'Sin local',
+        plaza_nombre: (Array.isArray(r.plazas) ? r.plazas[0]?.nombre : (r.plazas as any)?.nombre) || 'Sin plaza',
+        local_nombre: (Array.isArray(r.locales) ? r.locales[0]?.nombre : (r.locales as any)?.nombre) || 'Sin local',
         total_kilos: r.total_kilos,
         co2_evitado: r.co2_evitado,
         created_at: r.created_at

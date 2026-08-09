@@ -123,8 +123,8 @@ export class BitacoraService {
         // Logo original: 1600x907 (proporción 16:9)
         // Posicionado en columnas J-L, filas 2-7
         sheet.addImage(logoId, {
-          tl: { col: 9.1, row: 1.2 },
-          br: { col: 11.9, row: 6.8 },
+          tl: { col: 9.1, row: 1.2 } as ExcelJS.Anchor,
+          br: { col: 11.9, row: 6.8 } as ExcelJS.Anchor,
           editAs: 'oneCell'
         });
       } else {
@@ -177,7 +177,8 @@ export class BitacoraService {
       labelCell = sheet.getCell(`A${currentRow}`);
       labelCell.value = 'Plaza';
       Object.assign(labelCell, estiloLabel);
-      sheet.getCell(`B${currentRow}`).value = local.plaza?.nombre || 'N/A';
+      const plazaNombre = Array.isArray(local.plaza) ? local.plaza[0]?.nombre : (local.plaza as any)?.nombre;
+      sheet.getCell(`B${currentRow}`).value = plazaNombre || 'N/A';
       sheet.getCell(`B${currentRow}`).alignment = { horizontal: 'left', vertical: 'middle' };
       currentRow++;
       
