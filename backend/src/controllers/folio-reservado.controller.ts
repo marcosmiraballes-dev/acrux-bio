@@ -128,7 +128,7 @@ export class FolioReservadoController {
         return res.status(400).json({
           success: false,
           error: 'Datos de entrada inválidos',
-          details: error.errors
+          details: error.issues
         });
       }
 
@@ -155,7 +155,7 @@ export class FolioReservadoController {
         return res.status(400).json({
           success: false,
           error: 'Datos de entrada inválidos',
-          details: error.errors
+          details: error.issues
         });
       }
 

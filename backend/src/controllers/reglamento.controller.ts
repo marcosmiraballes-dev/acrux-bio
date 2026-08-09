@@ -53,7 +53,7 @@ export class ReglamentoController {
         return res.status(400).json({ 
           success: false, 
           error: 'Datos de entrada inválidos',
-          details: error.errors 
+          details: error.issues 
         });
       }
       res.status(500).json({ success: false, error: error.message });
@@ -72,7 +72,7 @@ export class ReglamentoController {
         return res.status(400).json({ 
           success: false, 
           error: 'Datos de entrada inválidos',
-          details: error.errors 
+          details: error.issues 
         });
       }
       res.status(500).json({ success: false, error: error.message });
