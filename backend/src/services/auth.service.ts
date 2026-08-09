@@ -32,6 +32,7 @@ export class AuthService {
       id: usuario.id,
       email: usuario.email,
       rol: usuario.rol,
+      nombre: usuario.nombre,
       local_id: usuario.local_id
     });
 
@@ -85,7 +86,8 @@ export class AuthService {
     const token = generateToken({
       id: nuevoUsuario.id,
       email: nuevoUsuario.email,
-      rol: nuevoUsuario.rol
+      rol: nuevoUsuario.rol,
+      nombre: nuevoUsuario.nombre
     });
 
     // Retornar usuario y token (sin password)
@@ -133,7 +135,8 @@ export class AuthService {
     const token = generateToken({
       id: usuario.id,
       email: usuario.email,
-      rol: usuario.rol
+      rol: usuario.rol,
+      nombre: usuario.nombre
     });
 
     const { password_hash, ...usuarioSinPassword } = usuario;
