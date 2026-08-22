@@ -1,7 +1,7 @@
 // backend/src/routes/logs-auditoria.routes.ts
 
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth.middleware';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 import logAuditoriaController from '../controllers/log-auditoria.controller';
 
 const router = Router();
@@ -16,7 +16,7 @@ const router = Router();
 router.get(
   '/',
   authenticate,
-  // authorize(['ADMIN']), // Descomenta si tienes función authorize
+  authorize('ADMIN'),
   logAuditoriaController.getAll
 );
 
@@ -27,7 +27,7 @@ router.get(
 router.get(
   '/stats',
   authenticate,
-  // authorize(['ADMIN']),
+  authorize('ADMIN'),
   logAuditoriaController.getStats
 );
 
@@ -38,7 +38,7 @@ router.get(
 router.post(
   '/limpiar',
   authenticate,
-  // authorize(['ADMIN']),
+  authorize('ADMIN'),
   logAuditoriaController.limpiar
 );
 
