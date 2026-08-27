@@ -66,8 +66,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {
             title: 'CATÁLOGOS INFRACCIONES',
             items: [
-              { path: '/plazas-infracciones', label: 'Plazas', icon: '🏢' },
-              { path: '/locatarios-infracciones', label: 'Locatarios', icon: '👥' },
               { path: '/reglamentos-infracciones', label: 'Reglamentos', icon: '📋' },
               { path: '/tipos-aviso-infracciones', label: 'Tipos de Aviso', icon: '⚠️' },
               { path: '/faltas-predefinidas', label: 'Faltas Predefinidas', icon: '❌' }
